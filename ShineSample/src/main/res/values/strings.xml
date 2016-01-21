@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ShineSample</string>
+    <string name="action_settings">Settings</string>
+    <string name="scan">Scan</string>
+    <string name="stop_scan">Stop Scan</string>
+    <string name="animate">Animate</string>
+    <string name="stop_animate">Stop\nAnimate</string>
+    <string name="connect">Connect</string>
+    <string name="close">Close</string>
+    <string name="device">Device</string>
+    <string name="no_device"></string>
+    <string name="select_device">Select Device</string>
+    <string name="scanning">Scanning </string>
+    <string name="paired">Paired</string>
+    <string name="cancel">Cancel</string>
+    <string name="start_sync">Sync</string>
+    <string name="stop_sync">Stop Sync</string>
+    <string name="config">Config</string>
+    <string name="start_ota">OTA</string>
+    <string name="stop_ota">Stop OTA</string>
+    <string name="start_change_serial_number">Change SN</string>
+    <string name="stop_change_serial_number">Stop Change SN</string>
+    <string name="connection_parameters">Conn Params</string>
+    <string name="flash_button_mode">Button Mode</string>
+    <string name="start_set_streaming_configuration">Set StrCfg</string>
+    <string name="stop_set_streaming_configuration">Stop StrCfg</string>
+    <string name="start_get_streaming_configuration">Get StrCfg</string>
+    <string name="stop_get_streaming_configuration">Stop StrCfg</string>
+    <string name="map_event_animation">Map Evt</string>
+    <string name="unmap_event_animation">Unmap</string>
+    <string name="event_mapping_system_control">Sys Control</string>
+    <string name="start_button_animation">Button Animation</string>
+    <string name="set_config_hint">point, goal, clock, tripleTap</string>
+    <string name="set_serial_number_hint">serial number</string>
+    <string name="set_connection_parameters_hint">interval, latency, timeout</string>
+    <string name="set_flash_button_mode_hint">flash button mode</string>
+    <string name="set_streaming_configuration_hint">event packets, heartbeat interval</string>
+    <string name="map_event_animation_hint">event, animation, repeat</string>
+    <string name="event_mapping_system_control_hint">mapping system control bits</string>
+    <string name="button_animation_hint">button animation</string>
+    <string name="disable_bluetooth">disable bt</string>
+    <string name="enable_bluetooth">enable bt</string>
+
+    <string name="activate">Activate</string>
+    <string name="stop_activating">Stop activating</string>
+    <string name="act_state">Act.State</string>
+    
+    <string name="stream_events">Stream</string>
+    <string name="stop_stream_events">Stop Stream</string>
+
+    <string name="hid_connect">HID Connect</string>
+    <string name="hid_disconnect">HID Disconnect</string>
+    <string name="input_method">Input Mtd</string>
+
+    <string name="bond">Bond</string>
+    <string name="clear_bond">Clear\nBond</string>
+
+    <string name="firmware_activity_title">Firmware List</string>
+    <string name="add">Firmware List</string>
+
+    <string name="sdk_version">sdk version</string>
+
+    /* strings for NConnect button */
+    <string name="multi_connect">N Connect</string>
+    <string name="last_multi__connect_result">N connect result</string>
+    <string name="total_connect">Total Connect: </string>
+    <string name="timeout_count">Connect Timeout count: </string>
+    <string name="min_connect_time">Minimum Connect Time: </string>
+    <string name="aver_connect_time">Average Connect Time: </string>
+    <string name="ok_button">OK</string>
+    <string name="title_activity_test_sync_and_connect">N*Connect Testing</string>
+    <string name="n_connect">N*Connect</string>
+    <string name="test_connect">test connect</string>
+    <string name="stop">stop</string>
+    <string name="lastConnErrCode">ConnErr</string>
+</resources>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/txtGroupId"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:hint="groupId"
+            android:textSize="14sp"/>
+
+        <Button
+            android:id="@+id/btnGroupId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="GroupID"/>
+
+        <CheckBox
+            android:id="@+id/cbGetSetGroupId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtGroupId"
+            android:text="Tick:set/Rest:get"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/txtPassCode"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:hint="passcode: 16 bytes"
+            android:textSize="14sp"/>
+
+        <Button
+            android:id="@+id/btnPassCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Passcode"/>
+
+        <CheckBox
+            android:id="@+id/cbGetSetPassCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtPassCode"
+            android:text="Tick:set/Rest:get"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnBoltInterrupt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Interrupt"/>
+
+        <Button
+            android:id="@+id/btnBoltToShine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/btnBoltInterrupt"
+            android:text="Shine"/>
+    </RelativeLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/sdk_version"
+            android:fillViewport="true"
+            android:scrollbars="vertical">
+
+            <TextView
+                android:id="@+id/tvBoltNotification"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.9"
+                android:gravity="top"
+                android:paddingEnd="10dp"
+                android:paddingStart="10dp"
+                android:textIsSelectable="true"
+                android:textSize="12sp"
+                android:typeface="monospace"/>
+        </ScrollView>
+
+    </LinearLayout>
+
+
+</LinearLayout>

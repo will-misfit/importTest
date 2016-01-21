@@ -1,0 +1,66 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultPublishConfig "developRelease"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 22
+        versionCode 23
+        versionName "2.2.9"
+    }
+
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+
+    // source: http://ph0b.com/android-studio-gradle-and-ndk-integration/
+    // call regular ndk-build(.cmd) script from app directory
+    task ndkBuild(type: Exec) {
+        def ndkDir = project.plugins.getPlugin('com.android.library').sdkHandler.getNdkFolder().toString()
+        def ndkDirPath = ndkDir + '/ndk-build'
+        commandLine ndkDirPath, '-C', file('src/main').absolutePath
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn ndkBuild
+    }
+
+    buildTypes {
+        def API_SERVER = "API_SERVER"
+
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", API_SERVER, "\"https://data-again.eng.int.misfit.com/v3/events\""
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", API_SERVER, "\"https://data.misfit.com/v3/events\""
+        }
+    }
+    productFlavors {
+        def ACCESS_KEY = "ACCESS_KEY"
+
+        develop {
+            buildConfigField "String", ACCESS_KEY, "\"92837495897234985-giP2z8d5TJ6nO2G9ZdDvzJg5391JHDG1\""
+        }
+        misfit {
+            buildConfigField "String", ACCESS_KEY, "\"23209348793248639-dulJD6O48s6l6K6A605KC0WnNkh05Q8R\""
+        }
+        misfit_link {
+            buildConfigField "String", ACCESS_KEY, "\"70810177010273385-MQL7IAyoowac81lCrixLeshExTZ8nEO\""
+        }
+    }
+}
+
+dependencies {
+    provided fileTree(dir: 'libs_reference', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.2.0'
+}

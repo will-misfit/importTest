@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:layout_width="0dp"
+                      android:layout_height="match_parent"
+                      android:layout_weight="3"
+                      android:orientation="vertical">
+
+            <Switch
+                android:id="@+id/switchEnable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enable?"/>
+
+            <EditText
+                android:id="@+id/editText1"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText2"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText3"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText4"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText5"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText6"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText7"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/editText8"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:layout_width="0dp"
+                      android:layout_height="match_parent"
+                      android:layout_weight="2"
+                      android:orientation="vertical">
+
+            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radioInActNudge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="InActNudge"/>
+
+
+                <RadioButton
+                    android:id="@+id/radioAlarm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="Alarm"/>
+
+                <RadioButton
+                    android:id="@+id/radioClearAlarm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="ClearAlarm"/>
+
+                <RadioButton
+                    android:id="@+id/radioGoalHit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="GoalHit"/>
+
+                <RadioButton
+                    android:id="@+id/radioCallTextNoti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="Call/TextNoti"/>
+
+                <RadioButton
+                    android:id="@+id/radioDisableNoti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="DisableNoti"/>
+
+                <RadioButton
+                    android:id="@+id/radioSendCallNoti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="CallNoti"
+                    android:checked="false"/>
+
+                <RadioButton
+                    android:id="@+id/radioSendTextNoti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="TextNoti"
+                    android:checked="false"/>
+
+                <RadioButton
+                    android:id="@+id/radioStopNoti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="StopNoti"/>
+
+                <RadioButton
+                    android:id="@+id/radioLed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="LED"/>
+
+
+                <RadioButton
+                    android:id="@+id/radioVibe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="Vibration"/>
+
+                <RadioButton
+                    android:id="@+id/radioSound"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRadioButtonClicked"
+                    android:text="Sound"/>
+            </RadioGroup>
+
+            <CheckBox
+                android:id="@+id/cbPlutoGetSet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tick:set/Rest:get"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+        <Button
+            android:id="@+id/btnAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Action"/>
+
+        <Button
+            android:id="@+id/btnPlutoInterrupt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Interrupt"/>
+
+        <Button
+            android:id="@+id/btnPlutoToShine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shine"/>
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtPlutoResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:alpha="0.9"
+            android:gravity="top"
+            android:lines="12"
+            android:scrollHorizontally="true"
+            android:textSize="12sp"
+            android:typeface="monospace"/>
+    </LinearLayout>
+
+</LinearLayout>

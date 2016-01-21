@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+     Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/deviceLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/device" />
+
+            <TextView
+                android:id="@+id/deviceName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_device"
+                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_start_or_stop_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/scan" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:text="Device" />
+
+    <com.misfit.ble.sample.utils.FlexLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnShineToPluto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pluto" />
+
+        <Button
+            android:id="@+id/btnPlutoToBolt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bolt" />
+
+    </com.misfit.ble.sample.utils.FlexLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:text="Auto test" />
+
+    <com.misfit.ble.sample.utils.FlexLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btn_test_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="openTestConnect"
+            android:text="@string/n_connect" />
+
+        <Button
+            android:id="@+id/btn_last_connect_error_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="getLastErrorCode"
+            android:text="@string/lastConnErrCode" />
+
+    </com.misfit.ble.sample.utils.FlexLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:text="Manual test" />
+
+    <ScrollView
+        android:id="@+id/sl_manual_test"
+        android:layout_width="match_parent"
+        android:layout_height="250dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.misfit.ble.sample.utils.FlexLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btn_enable_bt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onTestBluetooth"
+                    android:text="@string/enable_bluetooth" />
+
+                <Button
+                    android:id="@+id/btn_disable_bt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onTestBluetooth"
+                    android:text="@string/disable_bluetooth" />
+
+                <Button
+                    android:id="@+id/btn_connect_or_disconnect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/connect" />
+
+                <Button
+                    android:id="@+id/btn_sync"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/btn_connect_or_disconnect"
+                    android:text="@string/start_sync" />
+
+                <Button
+                    android:id="@+id/btn_ota"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/btn_close"
+                    android:text="@string/start_ota" />
+
+                <Button
+                    android:id="@+id/btn_close"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/close" />
+
+                <Button
+                    android:id="@+id/hidConnectButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/hid_connect" />
+
+                <Button
+                    android:id="@+id/hidDisconnectButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/inputMethodButton"
+                    android:text="@string/hid_disconnect" />
+
+                <Button
+                    android:id="@+id/inputMethodButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/input_method" />
+
+                <Button
+                    android:id="@+id/btn_animate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/animate" />
+
+                <Button
+                    android:id="@+id/btn_stop_animation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/btn_animate"
+                    android:text="@string/stop_animate" />
+
+                <Button
+                    android:id="@+id/btn_create_bond"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/btn_clear_bond"
+                    android:text="@string/bond" />
+
+                <Button
+                    android:id="@+id/btn_clear_bond"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/clear_bond" />
+            </com.misfit.ble.sample.utils.FlexLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp">
+
+                <EditText
+                    android:id="@+id/edit_set_configuration"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/btn_configuration"
+                    android:layout_alignParentStart="true"
+                    android:hint="@string/set_config_hint"
+                    android:inputType="text"
+                    android:textSize="14sp"></EditText>
+
+                <Button
+                    android:id="@+id/btn_configuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/config" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/edit_set_serial_string"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/btn_change_serial_number"
+                    android:layout_alignParentStart="true"
+
+                    android:hint="@string/set_serial_number_hint"
+                    android:inputType="text"
+                    android:textSize="14sp"></EditText>
+
+                <Button
+                    android:id="@+id/btn_change_serial_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/start_change_serial_number" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp">
+
+                <EditText
+                    android:id="@+id/edit_set_connection_parameters"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/btn_set_connection_parameters"
+                    android:layout_alignParentStart="true"
+
+                    android:hint="@string/set_connection_parameters_hint"
+                    android:inputType="text"
+                    android:textSize="14sp"></EditText>
+
+                <Button
+                    android:id="@+id/btn_set_connection_parameters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/connection_parameters" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp">
+
+                <EditText
+                    android:id="@+id/edit_set_flash_button_mode"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/btn_set_flash_button_mode"
+                    android:layout_alignParentStart="true"
+
+                    android:hint="@string/set_flash_button_mode_hint"
+                    android:inputType="text"
+                    android:textSize="14sp"></EditText>
+
+                <Button
+                    android:id="@+id/btn_set_flash_button_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/flash_button_mode" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/edit_set_streaming_configuration"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/btn_set_streaming_configuration"
+                    android:layout_alignParentStart="true"
+
+                    android:hint="@string/set_streaming_configuration_hint"
+                    android:inputType="text"
+                    android:textSize="14sp"></EditText>
+
+                <Button
+                    android:id="@+id/btn_set_streaming_configuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/start_set_streaming_configuration" />
+            </RelativeLayout>
+
+            <com.misfit.ble.sample.utils.FlexLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btn_activation_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/act_state" />
+
+                <Button
+                    android:id="@+id/btn_start_or_stop_activating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/btn_activation_state"
+                    android:text="@string/activate" />
+
+                <Button
+                    android:id="@+id/btn_stream_user_input_events"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/btn_start_or_stop_activating"
+                    android:text="@string/stream_events" />
+
+                <Button
+                    android:id="@+id/btn_get_streaming_config"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/start_get_streaming_configuration" />
+
+                <Button
+                    android:id="@+id/btn_custom_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Custom Mode" />
+
+                <Button
+                    android:id="@+id/btn_unmap_specific_event"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Unmap" />
+
+                <Button
+                    android:id="@+id/btn_unmap_all_events"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Unmap All" />
+
+                <Button
+                    android:id="@+id/btnShineInterrupt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Interrupt" />
+
+                <Button
+                    android:id="@+id/btn_is_streaming"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="isStreaming" />
+            </com.misfit.ble.sample.utils.FlexLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/edit_button_animation"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btn_button_animation"
+            android:layout_alignParentStart="true"
+            android:hint="@string/button_animation_hint"
+            android:inputType="text"
+            android:textSize="14sp"></EditText>
+
+        <Button
+            android:id="@+id/btn_button_animation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/start_button_animation" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/edit_event_animation_mapping"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btn_map_event_animation"
+            android:layout_alignParentStart="true"
+            android:hint="@string/map_event_animation_hint"
+            android:inputType="text"
+            android:textSize="14sp"></EditText>
+
+        <Button
+            android:id="@+id/btn_map_event_animation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/edit_event_animation_mapping"
+            android:text="@string/map_event_animation" />
+
+        <Button
+            android:id="@+id/btn_unmap_event_animation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/unmap_event_animation" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/edit_event_mapping_system_control"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btn_event_mapping_system_control"
+            android:layout_alignParentStart="true"
+            android:hint="@string/event_mapping_system_control_hint"
+            android:inputType="text"
+            android:textSize="14sp"></EditText>
+
+        <Button
+            android:id="@+id/btn_event_mapping_system_control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/event_mapping_system_control" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/txtAdvFlag"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:hint="adState?"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnAdvState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Extra.Ad" />
+
+        <CheckBox
+            android:id="@+id/cbGetSetAdvState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/btnAdvState"
+            android:text="Tick:set/Rest:get" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#999" />
+
+    <RelativeLayout
+        android:id="@+id/rl_msg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="12sp"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/sdk_version"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center"
+            android:text="@string/sdk_version"
+            android:textSize="12sp"
+            android:typeface="monospace" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>
+
