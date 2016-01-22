@@ -18,7 +18,7 @@ import com.misfit.ble.shine.result.SwimSession;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.shine.result.TapEventSummary;
 import com.misfit.ble.shine.result.Event;
-import com.misfit.syncsdk.utils.CollectionUtils;
+import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.model.TagEvent;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class AlgorithmUtils {
 
     public static ActivityShineVect convertSdkActivityToShineActivityForShine(List<Activity> activities, List<TapEventSummary> tapEventSummaries) {
         ActivityShineVect activityShineVect = new ActivityShineVect();
-        if (CollectionUtils.isEmpty(activities)) {
+        if (CheckUtils.isCollectionEmpty(activities)) {
             return activityShineVect;
         }
 
@@ -287,7 +287,7 @@ public class AlgorithmUtils {
 
     public static List<Long> importTripleTapBookmarks(List<TapEventSummary> tapEvents) {
         bookmarkTimestamps = new ArrayList<>();
-        if (CollectionUtils.isEmpty(tapEvents)) {
+        if (CheckUtils.isCollectionEmpty(tapEvents)) {
             return bookmarkTimestamps;
         }
         for (TapEventSummary tapEvent : tapEvents) {
@@ -318,7 +318,7 @@ public class AlgorithmUtils {
      * with latterSyncResult.mActivities[0].mStartTime as tag, remove overlapped sub list from tail of preSyncResult.mActivities
      * */
     public static void handleNotContinuousActivities(SyncResult preSyncResult, SyncResult latterSyncResult) {
-        if (CollectionUtils.isEmpty(latterSyncResult.mActivities) || CollectionUtils.isEmpty(preSyncResult.mActivities)) {
+        if (CheckUtils.isCollectionEmpty(latterSyncResult.mActivities) || CheckUtils.isCollectionEmpty(preSyncResult.mActivities)) {
             return;
         }
         Log.d(TAG, "activity size before filter " + preSyncResult.mActivities.size());

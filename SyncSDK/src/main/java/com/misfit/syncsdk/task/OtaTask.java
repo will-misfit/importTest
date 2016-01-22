@@ -20,13 +20,13 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
 
     FirmwareManager.GetLatestFirmwareListener mGetLatestFirmwareListener = new FirmwareManager.GetLatestFirmwareListener() {
         @Override
-        public void onReceive(String latestFirmware) {
+        public void onSucceed(String latestFirmware) {
             mLatestFirmwareVersion = latestFirmware;
             getSuggestionFromApp();
         }
 
         @Override
-        public void onFailed(String reason) {
+        public void onFailed(int errorReason) {
             //TODO:failed?
         }
     };
@@ -38,7 +38,7 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
         }
 
         @Override
-        public void onFailed(String reason) {
+        public void onFailed(int errorReason) {
             //TODO:force ota failed.
         }
     };
@@ -53,7 +53,7 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
         //TODO:get current firmware version
 
         //get latest firmware version
-        FirmwareManager.getInstance().checkLatestFirmware(mDeviceType, mGetLatestFirmwareListener);
+        FirmwareManager.getInstance().checkLatestFirmware("shine", mCurrFirmwareVersion);
     }
 
     private void getSuggestionFromApp() {

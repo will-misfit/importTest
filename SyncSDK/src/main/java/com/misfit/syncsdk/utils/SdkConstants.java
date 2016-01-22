@@ -6,4 +6,15 @@ package com.misfit.syncsdk.utils;
 public class SdkConstants {
 
 	public final static int OPERATOR_RETRY_TIMES = 3;
+
+	/* timeout values, in MilliSeconds */
+	public final static long DEFAULT_TIMEOUT = 10 * 1000;
+	public final static long READ_DATA_TIMEOUT = 10 * 1000;
+	public final static long ERASE_DATA_TIMEOUT = 30 * 1000;
+	public final static long CONNECT_TIMEOUT = 45 * 1000;
+	public final static long SCAN_TIMEOUT = 20 * 1000;
+
+	/* device model name */
+	public static final String SHINE_MODEL_NUMBER = "shine";
+	public static final String EARLY_SHINE_MODEL_PREFIX = "SH";
 }

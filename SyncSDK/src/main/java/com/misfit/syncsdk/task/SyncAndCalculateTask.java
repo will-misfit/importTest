@@ -14,7 +14,7 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
-import com.misfit.syncsdk.utils.CollectionUtils;
+import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.model.SettingsElement;
 
 import java.util.ArrayList;
@@ -173,7 +173,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
          */
         private void sortRawData() {
             Log.d(TAG, "sortRawData()");
-            if (CollectionUtils.isEmpty(rawSyncDataList)) {
+            if (CheckUtils.isCollectionEmpty(rawSyncDataList)) {
                 return;
             }
             AlgorithmUtils.sortSyncResultList(rawSyncDataList);
@@ -218,19 +218,19 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     private void saveMisfitSyncData(SyncResult syncResult) {
 
-        if (syncResult != null && !CollectionUtils.isEmpty(syncResult.mActivities)) {
+        if (syncResult != null && !CheckUtils.isCollectionEmpty(syncResult.mActivities)) {
             boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
                     SettingsElement.ACTIVITY_TAGGING);
             boolean supportStream = mTaskSharedData.isStreamingSupported();
 
             if (mTaskSharedData.getDeviceType() == DeviceType.FLASH) {
-                if (!CollectionUtils.isEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
+                if (!CheckUtils.isCollectionEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
                     Log.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
                     syncResult.mSessionEvents.clear();
                 }
                 DailyUserDataBuilder.getInstance().buildDailyUserDataForFlash(syncResult, mTaskSharedData.getSerialNumber());
             } else {
-                if (!CollectionUtils.isEmpty(syncResult.mTapEventSummarys)) {
+                if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {
                         // FIXME, previous sync log
                         Log.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));

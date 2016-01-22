@@ -5,9 +5,10 @@ import android.content.Context;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.utils.ContextUtils;
 
 /**
- * Created by Will Hou on 1/11/16.
+ * Class open to app providing static methods
  */
 public class SyncSdkAdapter {
 
@@ -32,6 +33,7 @@ public class SyncSdkAdapter {
     //FIXME: need double check
     public void init(Context context, String userId) {
         mContext = context.getApplicationContext();
+        ContextUtils.getInstance().setContext(mContext);
         SDKSetting.setUp(context, userId);
     }
 

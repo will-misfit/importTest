@@ -18,7 +18,7 @@ import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkProfile;
-import com.misfit.syncsdk.utils.CollectionUtils;
+import com.misfit.syncsdk.utils.CheckUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,6 @@ public class SdkActivitySessionBuilder {
                 buildActivityChangeTagShineVect(sdkChangeTags),
                 buildProfileShine(sdkProfile));
 
-        // FIXME, the params should be resultActivitySessionShineVect and resultGapSessionShineVect
         result = convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
         return result;
     }
@@ -120,7 +119,7 @@ public class SdkActivitySessionBuilder {
 
     public static ActivityChangeTagShineVect buildActivityChangeTagShineVect(List<SdkActivityChangeTag> changeTagList) {
         ActivityChangeTagShineVect result = new ActivityChangeTagShineVect();
-        if (CollectionUtils.isEmpty(changeTagList)) {
+        if (CheckUtils.isCollectionEmpty(changeTagList)) {
             return result;
         }
         for(SdkActivityChangeTag changeTag : changeTagList) {
