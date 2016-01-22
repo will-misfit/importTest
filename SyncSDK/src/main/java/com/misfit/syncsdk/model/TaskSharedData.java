@@ -25,6 +25,8 @@ public class TaskSharedData {
 
     private DeviceBehavior mDeviceBehavior;
 
+    private boolean isTasksRunning;
+
     public TaskSharedData(String serialNumber, int deviceType, DeviceBehavior deviceBehavior) {
         this(serialNumber, deviceType, deviceBehavior, SdkConstants.OPERATOR_RETRY_TIMES);
     }
@@ -34,6 +36,14 @@ public class TaskSharedData {
         mDeviceType = deviceType;
         mDeviceBehavior = deviceBehavior;
         mRemainingRetryCount = retryTimes;
+    }
+
+    public boolean isTasksRunning() {
+        return isTasksRunning;
+    }
+
+    public void setTasksRunning(boolean isTasksRunning) {
+        this.isTasksRunning = isTasksRunning;
     }
 
     public int getDeviceType() {

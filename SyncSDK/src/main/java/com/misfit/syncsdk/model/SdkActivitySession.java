@@ -10,146 +10,139 @@ import com.misfit.cloud.algorithm.models.SessionType;
  */
 public class SdkActivitySession {
 
-    protected long startTime;
+    protected long mStartTime;
 
-    protected int duration;
+    protected int mDuration;
 
-    private int activityTypeShine; // option is defined in SdkActivityType
+    private int mActivityTypeShine; // option is defined in SdkActivityType
 
-    private int sessionType;
+    private int mSessionType;
 
-    private int points;
+    private int mPoints;
 
-    private int rawPoints;
+    private int mRawPoints;
 
-    private double calories;
+    private double mCalories;
 
-    private int steps;
+    private int mSteps;
 
-    private double distance;
+    private double mDistance;
 
-    private boolean isGapSession;
+    private boolean mIsGapSession;
 
-    private int laps; // accumulated in Speedo Shine device
-
-    /* below variables for lap counting which are saved in database of flagship app as Settings*/
-    /*
-    private boolean isLapCounting;
-    private int poolLength;
-    private int poolLengthUnit;
-    */
+    private int mLaps; // accumulated in Speedo Shine device
 
     public SdkActivitySession() {
     }
 
     public void updateFrom(SdkActivitySession it) {
-        this.startTime = it.startTime;
-        this.duration = it.duration;
-        this.activityTypeShine = it.activityTypeShine;
-        this.sessionType = it.sessionType;
-        this.points = it.points;
-        this.rawPoints = it.rawPoints;
-        this.calories = it.calories;
-        this.steps = it.steps;
-        this.distance = it.distance;
-        this.isGapSession = it.isGapSession;
-        this.laps = it.laps;
+        this.mStartTime = it.mStartTime;
+        this.mDuration = it.mDuration;
+        this.mActivityTypeShine = it.mActivityTypeShine;
+        this.mSessionType = it.mSessionType;
+        this.mPoints = it.mPoints;
+        this.mRawPoints = it.mRawPoints;
+        this.mCalories = it.mCalories;
+        this.mSteps = it.mSteps;
+        this.mDistance = it.mDistance;
+        this.mIsGapSession = it.mIsGapSession;
+        this.mLaps = it.mLaps;
     }
 
     public long getStartTime() {
-        return this.startTime;
+        return this.mStartTime;
     }
 
     public void setStartTime(long sTime) {
-        this.startTime = sTime;
+        this.mStartTime = sTime;
     }
 
     public int getDuration() {
-        return this.duration;
+        return this.mDuration;
     }
 
     public void setDuration(int dura) {
-        this.duration = dura;
+        this.mDuration = dura;
     }
 
     public int getActivityType() {
-        return this.activityTypeShine;
+        return this.mActivityTypeShine;
     }
 
     public void setActivityType(int aType) {
-        this.activityTypeShine = aType;
+        this.mActivityTypeShine = aType;
     }
 
     public void setActivityType(ActivityTypeShine actTypeShine) {
-        this.activityTypeShine = SdkActivityType.getActivityTypeShine(actTypeShine);
+        this.mActivityTypeShine = SdkActivityType.getActivityTypeShine(actTypeShine);
     }
 
     public int getSessionType() {
-        return sessionType;
+        return mSessionType;
     }
 
     public void setSessionType(int sType) {
-        this.sessionType = sType;
+        this.mSessionType = sType;
     }
 
     public void setSessionType(SessionType sessType) {
-        this.sessionType = SdkSessionType.getSessionType(sessType);
+        this.mSessionType = SdkSessionType.getSessionType(sessType);
     }
 
     public int getPoint() {
-        return this.points;
+        return this.mPoints;
     }
 
     public void setPoints(int pts) {
-        this.points = pts;
+        this.mPoints = pts;
     }
 
     public int getRawPoints() {
-        return this.rawPoints;
+        return this.mRawPoints;
     }
 
     public void setRawPoints(int rPoints) {
-        this.rawPoints = rPoints;
+        this.mRawPoints = rPoints;
     }
 
     public double getCalories() {
-        return this.calories;
+        return this.mCalories;
     }
 
     public void setCalories(double cals) {
-        this.calories = cals;
+        this.mCalories = cals;
     }
 
     public int getSteps() {
-        return steps;
+        return mSteps;
     }
 
-    public void setSteps(int steps) {
-        this.steps = steps;
+    public void setSteps(int mSteps) {
+        this.mSteps = mSteps;
     }
 
     public double getDistance() {
-        return distance;
+        return mDistance;
     }
 
-    public void setDistance(double distance) {
-        this.distance = distance;
+    public void setDistance(double mDistance) {
+        this.mDistance = mDistance;
     }
 
     public boolean isGapSession() {
-        return isGapSession;
+        return mIsGapSession;
     }
 
     public void setIsGapSession(boolean isGap) {
-        this.isGapSession = isGap;
+        this.mIsGapSession = isGap;
     }
 
     public int getLaps() {
-        return laps;
+        return mLaps;
     }
 
     public void setLaps(int lps) {
-        this.laps = lps;
+        this.mLaps = lps;
     }
 
     public static SdkActivitySession buildEmptyData(long taggedTimeStamp) {

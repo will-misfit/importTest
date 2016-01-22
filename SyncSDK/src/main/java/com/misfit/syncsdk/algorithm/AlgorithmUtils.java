@@ -44,7 +44,8 @@ public class AlgorithmUtils {
     private static SwimSessionComparator sSwimSessionComparator = new SwimSessionComparator();
     private static EventComparator sEventComparator = new EventComparator();
 
-    public static ActivityShineVect convertSdkActivityToShineActivityForShine(List<Activity> activities, List<TapEventSummary> tapEventSummaries) {
+    public static ActivityShineVect convertSdkActivityToShineActivityForShine(@NonNull List<Activity> activities,
+                                                                              @NonNull List<TapEventSummary> tapEventSummaries) {
         ActivityShineVect activityShineVect = new ActivityShineVect();
         if (CheckUtils.isCollectionEmpty(activities)) {
             return activityShineVect;
@@ -225,7 +226,7 @@ public class AlgorithmUtils {
             long startTime = tagEvents.get(i).getTaggedTimestamp();
             long endTime = tagEvents.get(i + 1).getTaggedTimestamp();
             long midNight = 0;
-            // long midNight = DateUtil.getMidNight(startTime);
+            // long midNight = DateUtil.getMidNight(mStartTime);
 
             if (endTime > midNight) {
                 TagEvent tagEventYest = new TagEvent(midNight, TagEvent.TAG_OUT);
@@ -488,7 +489,7 @@ public class AlgorithmUtils {
         @Override
         public SwimSession fakeFrom(Long timestamp) {
             SwimSession res = new SwimSession();
-            res.mStartTime = timestamp;  // only startTime will be used to compare
+            res.mStartTime = timestamp;  // only mStartTime will be used to compare
             return res;
         }
     }

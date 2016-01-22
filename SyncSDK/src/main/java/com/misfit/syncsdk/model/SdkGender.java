@@ -10,6 +10,8 @@ public class SdkGender {
     public final static int MALE = 0;
     public final static int FEMALE = 1;
 
+    private SdkGender(){}
+
     public static GenderShine convert2GenderShine(int sdkGenderValue) {
         if (sdkGenderValue == FEMALE) {
             return GenderShine.FEMALE;

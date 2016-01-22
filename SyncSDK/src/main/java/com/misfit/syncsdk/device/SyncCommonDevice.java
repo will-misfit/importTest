@@ -46,7 +46,7 @@ public class SyncCommonDevice implements DeviceBehavior{
     }
 
     public boolean isRunningOn() {
-        if (mCurrOperator != null && mCurrOperator.isRunningOn()) {
+        if (mCurrOperator != null && mTaskSharedData.isTasksRunning()) {
             return true;
         } else {
             return false;
@@ -56,14 +56,14 @@ public class SyncCommonDevice implements DeviceBehavior{
     public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncOtaCallback otaCallback) {
     }
 
-    protected void updateTaskSharedData(SyncSyncCallback syncCallback) {
+    protected void updateAnimationCallback(SyncSyncCallback syncCallback) {
         if (mTaskSharedData == null) {
             mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType, this);
         }
         mTaskSharedData.setSyncSyncCallback(syncCallback);
     }
 
-    protected void updateTaskSharedData(SyncAnimationCallback animationCallback) {
+    protected void updateAnimationCallback(SyncAnimationCallback animationCallback) {
         if (mTaskSharedData == null) {
             mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType, this);
         }
@@ -96,7 +96,7 @@ public class SyncCommonDevice implements DeviceBehavior{
             Log.d(TAG, "call playAnimation but during operation");
             return;
         }
-        updateTaskSharedData(animationCallback);
+        updateAnimationCallback(animationCallback);
 
         List<Task> tasks = prepareTasks();
         tasks.add(new PlayAnimationTask());

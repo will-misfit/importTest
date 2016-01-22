@@ -12,6 +12,8 @@ public class SdkSessionType {
     public final static int SESSION_TYPE_ACE = 2;   // session created by ACE algorithm
     public final static int SESSION_TYPE_SWL = 3;   // session created by swim lap counting algorithm
 
+    private SdkSessionType(){}
+
     /**
      * convert SessionType in algorithm namespace to the one in local namespace
      * */

@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * to build up SdkActivitySession which can be converted to ActivitySession in flagship app namespace
  * to make use of algorithm library API, some information needs to be queried from flagship app:
- *   ActivityChangeTag among a duration
+ *   ActivityChangeTag among a mDuration
  *   UserProfile
  *   Timezone change
  */

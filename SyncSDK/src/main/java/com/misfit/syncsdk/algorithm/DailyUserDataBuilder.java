@@ -42,6 +42,5 @@ public class DailyUserDataBuilder {
     public void buildDailyUserDataForFlash(SyncResult syncResult, String serialNumber) {
         ActivityShineVect activityShineVect = AlgorithmUtils.convertSdkActivityToShineActivityForFlash(
             syncResult.mActivities, syncResult.mSessionEvents);
-        // buildAndSaveDaysForFlash(activityShineVect, syncStartTime, serialNumber);
     }
 }

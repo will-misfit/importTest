@@ -19,8 +19,6 @@ public class Operator implements Task.TaskResultCallback {
     public List<Task> mTaskQueue;
     private int mCurrIndex;
 
-    private boolean mRunningOn = false;
-
     private TaskSharedData mTaskSharedData;
     protected TimerTask mCurrTimerTask;
     SyncOperationResultCallback mCallback;
@@ -30,13 +28,9 @@ public class Operator implements Task.TaskResultCallback {
         mTaskQueue = taskList;
     }
 
-    public boolean isRunningOn() {
-        return mRunningOn;
-    }
-
     public void start() {
         Log.d(TAG, this.getClass().getSimpleName() + " start");
-        mRunningOn = true;
+        mTaskSharedData.setTasksRunning(true);
         mCurrIndex = -1;
         prepare();
         gotoNext();
@@ -58,7 +52,7 @@ public class Operator implements Task.TaskResultCallback {
 
     public void stop() {
         Log.d(TAG, this.getClass().getSimpleName() + " stop");
-        mRunningOn = false;
+        mTaskSharedData.setTasksRunning(false);
         if (mCurrIndex >= 0 && mCurrIndex < mTaskQueue.size()) {
             mTaskQueue.get(mCurrIndex).stop();
         }
@@ -67,7 +61,7 @@ public class Operator implements Task.TaskResultCallback {
 
     protected void onFlowCompleted() {
         Log.d(TAG, this.getClass().getSimpleName() + " completed");
-        mRunningOn = false;
+        mTaskSharedData.setTasksRunning(false);
         if (mCallback != null) {
             mCallback.onFinished();
         }
@@ -77,7 +71,7 @@ public class Operator implements Task.TaskResultCallback {
     //FIXME: use enum instead of string
     protected void onFlowEnded(String reason) {
         Log.d(TAG, this.getClass().getSimpleName() + " ended by+" + reason);
-        mRunningOn = false;
+        mTaskSharedData.setTasksRunning(false);
         if (mCallback != null) {
             //FIXME:fix here
             mCallback.onFailed(-1);

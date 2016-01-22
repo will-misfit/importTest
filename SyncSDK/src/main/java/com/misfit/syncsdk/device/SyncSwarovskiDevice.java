@@ -30,7 +30,7 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
         if (isRunningOn()) {
             return;
         }
-        updateTaskSharedData(syncCallback);
+        updateAnimationCallback(syncCallback);
 
         SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
 

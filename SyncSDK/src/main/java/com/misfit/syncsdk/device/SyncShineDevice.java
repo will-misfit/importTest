@@ -32,7 +32,7 @@ public class SyncShineDevice extends SyncCommonDevice {
             return;
         }
 
-        updateTaskSharedData(syncCallback);
+        updateAnimationCallback(syncCallback);
 
         SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
         List<Task> syncTasks = prepareTasks();

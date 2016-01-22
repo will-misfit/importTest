@@ -8,60 +8,60 @@ import com.misfit.cloud.algorithm.models.ProfileShine;
  */
 public class SdkProfile {
 
-	private int age;
-	private float height;
-	private float weight;
-	private int sdkGender;
+	private int mAge;
+	private float mHeight;
+	private float mWeight;
+	private int mSdkGender;
 
-	private int sdkUnit;
+	private int mSdkUnit;
 
 	public int getAge() {
-		return age;
+		return mAge;
 	}
 
 	public void setAge(int age) {
-		this.age = age;
+		this.mAge = age;
 	}
 
 	public float getHeight() {
-		return height;
+		return mHeight;
 	}
 
 	public void setHeight(float height) {
-		this.height = height;
+		this.mHeight = height;
 	}
 
 	public float getWeight() {
-		return weight;
+		return mWeight;
 	}
 
 	public void setWeight(float weight) {
-		this.weight = weight;
+		this.mWeight = weight;
 	}
 
-	public int getSdkGender() {
-		return sdkGender;
+	public int getmSdkGender() {
+		return mSdkGender;
 	}
 
-	public void setSdkGender(int sdkGender) {
-		this.sdkGender = sdkGender;
+	public void setmSdkGender(int mSdkGender) {
+		this.mSdkGender = mSdkGender;
 	}
 
 	public int getSdkUnit() {
-		return sdkUnit;
+		return mSdkUnit;
 	}
 
 	public void setSdkUnit(int sdkUnit) {
-		this.sdkUnit = sdkUnit;
+		this.mSdkUnit = sdkUnit;
 	}
 
 	public ProfileShine convert2ProfileShine() {
 		ProfileShine result = new ProfileShine();
-		result.setAge(age);
-		result.setHeight(height);
-		result.setWeight(weight);
-		result.setGender(SdkGender.convert2GenderShine(sdkGender));
-		result.setDisplayUnit(SdkUnit.convert2UnitShine(sdkUnit));
+		result.setAge(mAge);
+		result.setHeight(mHeight);
+		result.setWeight(mWeight);
+		result.setGender(SdkGender.convert2GenderShine(mSdkGender));
+		result.setDisplayUnit(SdkUnit.convert2UnitShine(mSdkUnit));
 		return result;
 	}
 

@@ -20,6 +20,8 @@ public class SdkActivityType {
     public final static int DANCING_TYPE = 9;
     public final static int SLEEP_TYPE = 10;
 
+    private SdkActivityType(){}
+
     /**
      * convert ActivityTypeShine in algorithm namespace to the one in local namespace
      * */

@@ -90,9 +90,7 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
     }
 
     private void startOta() {
-        //get ota file
         byte[] firmwareData = null;
-        //start ota file
         ShineSdkProfileProxy profileProxy = null;
         profileProxy.startOTA(firmwareData, this);
     }
