@@ -22,7 +22,7 @@ import java.net.URLConnection;
 public class FirmwareManager {
 
     public interface GetLatestFirmwareListener {
-        void onSucceed(String firmwareVersion);
+        void onSucceed(boolean shouldOta, String firmwareVersion);
         void onFailed(int errorReason);
     }
 
