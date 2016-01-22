@@ -8,6 +8,7 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.utils.ContextUtils;
 
 import java.util.TimerTask;
 
@@ -51,7 +52,7 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
         //connect
         ShineSdkProfileProxy shineSdkProfileProxy = connectionManager.createShineProfileProxy(mTaskSharedData.getSerialNumber());
         connectionManager.subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
-        shineSdkProfileProxy.connectProfile(device, SyncSdkAdapter.getInstance().getContext());
+        shineSdkProfileProxy.connectProfile(device, ContextUtils.getInstance().getContext());
     }
 
     @Override

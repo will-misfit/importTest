@@ -7,7 +7,9 @@ import com.misfit.ble.shine.ShineAdapter;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.device.SyncShineDevice;
 import com.misfit.syncsdk.device.SyncSwarovskiDevice;
+import com.misfit.syncsdk.utils.ContextUtils;
 
 /**
  * class to scan devices, via ShineSdkAdapterProxy
@@ -28,7 +30,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
 
     public static MisfitScanner getInstance() {
         if (sharedInstance == null) {
-            sharedInstance = new MisfitScanner(SyncSdkAdapter.getInstance().getContext());
+            sharedInstance = new MisfitScanner(ContextUtils.getInstance().getContext());
         }
         return sharedInstance;
     }
@@ -86,7 +88,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
         if (deviceType == DeviceType.SWAROVSKI_SHINE) {
             commonDevice = new SyncSwarovskiDevice(device.getSerialNumber());
         } else {
-            commonDevice = new SyncCommonDevice(device.getSerialNumber());
+            commonDevice = new SyncShineDevice(device.getSerialNumber());
         }
         mCallback.onScanResultFiltered(commonDevice, rssi);
     }

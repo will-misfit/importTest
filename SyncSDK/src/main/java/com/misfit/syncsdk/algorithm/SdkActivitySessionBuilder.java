@@ -95,7 +95,6 @@ public class SdkActivitySessionBuilder {
         result.setIsGapSession(false);
         result.setLaps(activitySessionShine.getLaps());
         result.setActivityType(activitySessionShine.getType());
-        // lapCountingState, poolLength, poolLengthUnit are saved in Settings of flagship app
         return result;
     }
 

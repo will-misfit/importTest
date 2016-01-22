@@ -14,10 +14,6 @@ public class SyncSdkAdapter {
 
     private Context mContext;
 
-    public Context getContext() {
-        return mContext;
-    }
-
     private static SyncSdkAdapter sharedInstance;
 
     private SyncSdkAdapter() {

@@ -1,6 +1,6 @@
 # Add project specific ProGuard rules here.
 # By default, the flags in this file are appended to flags specified
-# in /Users/willhou/Desktop/android-sdk-macosx/tools/proguard/proguard-android.txt
+# in ~/android-sdk-macosx/tools/proguard/proguard-android.txt
 # You can edit the include path and order by changing the proguardFiles
 # directive in build.gradle.
 #
@@ -15,3 +15,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# SyncSDK public API
+-keep class com.misfit.syncsdk.SyncSdkAdapter { public *; }
+
+-keep class com.misfit.syncsdk.device.SyncCommonDevice { public *;}

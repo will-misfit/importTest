@@ -15,6 +15,6 @@ public class SdkConstants {
 	public final static long SCAN_TIMEOUT = 20 * 1000;
 
 	/* device model name */
-	public static final String SHINE_MODEL_NUMBER = "shine";
+	public static final String SHINE_MODEL_NAME = "shine";
 	public static final String EARLY_SHINE_MODEL_PREFIX = "SH";
 }

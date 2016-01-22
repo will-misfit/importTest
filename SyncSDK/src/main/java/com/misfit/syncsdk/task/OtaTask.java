@@ -20,7 +20,7 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
 
     FirmwareManager.GetLatestFirmwareListener mGetLatestFirmwareListener = new FirmwareManager.GetLatestFirmwareListener() {
         @Override
-        public void onSucceed(String latestFirmware) {
+        public void onSucceed(boolean isSuccessful, String latestFirmware) {
             mLatestFirmwareVersion = latestFirmware;
             getSuggestionFromApp();
         }
@@ -74,14 +74,14 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
                 taskSucceed();
                 break;
             case OtaType.NEED_OTA:
-                if (firmwareManager.isFirmwareReady(mLatestFirmwareVersion)) {
+                if (firmwareManager.isNewFirmwareReadyNow(mLatestFirmwareVersion)) {
                     startOta();
                 } else {
                     taskSucceed();  //skip this time
                 }
                 break;
             case OtaType.FORCE_OTA:
-                firmwareManager.subscribeForDownloadEvent(mLatestFirmwareVersion, mDownloadFirmwareListener);
+                // TODO
                 break;
             default:
                 //TODO:Log as unexpected event
@@ -115,7 +115,6 @@ public class OtaTask extends Task implements ShineProfile.OTACallback {
 
     @Override
     protected void cleanup() {
-        FirmwareManager.getInstance().unsubscriveForDownloadEvent(mDownloadFirmwareListener);
     }
 
     @Override

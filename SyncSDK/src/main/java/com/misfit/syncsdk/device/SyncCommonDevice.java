@@ -30,7 +30,7 @@ public class SyncCommonDevice implements DeviceBehavior{
 
     protected TaskSharedData mTaskSharedData;
 
-    public SyncCommonDevice(@NonNull String serialNumber) {
+    protected SyncCommonDevice(@NonNull String serialNumber) {
         mSerialNumber = serialNumber;
     }
 
@@ -105,16 +105,19 @@ public class SyncCommonDevice implements DeviceBehavior{
         startOperator(operator);
     }
 
-    public void startUserInputStreaming(ShineProfile.StreamingCallback callback) {
+    //will not be public until it is completed
+    /* public */ void startUserInputStreaming(ShineProfile.StreamingCallback callback) {
     }
 
-    public void stopUserInputStreaming() {
+    //will not be public until it is completed
+    /* public */ void stopUserInputStreaming() {
     }
 
 //    public void sendNotification(NotificationType notificationType, NotificationCallback callback) {
 //    }
 
-    public void stopNotification() {
+    //will not be public until it is completed
+    /* public */ void stopNotification() {
     }
 
     // opt to override in subclass

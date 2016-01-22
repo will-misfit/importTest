@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.0.2'
     compile project(':ShineSDK')
     compile files('libs/misfit-algorithm-1.8.0.0.jar')
+    compile files('libs/volley.jar')
 }
