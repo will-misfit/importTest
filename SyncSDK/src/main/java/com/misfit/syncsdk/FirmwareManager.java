@@ -102,7 +102,7 @@ public class FirmwareManager {
      * @return if the new firmware is ready, return true
      * if the new firmware download is ongoing, return false now, and notify the invoker by the listener
      * */
-    public boolean isNewFirmwareReady(DownloadLatestFirmwareListener downloadListener) {
+    public boolean isNewFirmwareReady(String firmwareVersion, DownloadLatestFirmwareListener downloadListener) {
         return true;
     }
 
@@ -128,7 +128,7 @@ public class FirmwareManager {
         return false;
     }
 
-    public static boolean isFirmwareReady(String firmwareVersion) {
+    public static boolean isNewFirmwareReadyNow(String firmwareVersion) {
         return LocalFileUtils.isFileExist(getFirmwareFileName(firmwareVersion));
     }
 
@@ -281,12 +281,12 @@ public class FirmwareManager {
                 && !newFirmwareVersion.equals(oldFirmwareVersion)) {
             // If newfirmware and oldfirmware is different, we should download
             // new firmware if it doesn't exist
-            return (!isFirmwareReady(newFirmwareVersion));
+            return (!isNewFirmwareReadyNow(newFirmwareVersion));
         } else {
             // If new firmware is null or is the newest firmware, we should
             // download it again if it isn't ready (maybe md5 checking failed in
             // the last downloading time)
-            return (!isFirmwareReady(oldFirmwareVersion));
+            return (!isNewFirmwareReadyNow(oldFirmwareVersion));
         }
     }
 
@@ -349,7 +349,7 @@ public class FirmwareManager {
     }
 
     public static boolean isFirmwareReady() {
-        boolean isFirmwareReady = isFirmwareReady(latestFirmwareInfo.getVersionNumber());
+        boolean isFirmwareReady = isNewFirmwareReadyNow(latestFirmwareInfo.getVersionNumber());
         Log.d(TAG, "isFirmwareReady " + isFirmwareReady);
         return isFirmwareReady;
     }
