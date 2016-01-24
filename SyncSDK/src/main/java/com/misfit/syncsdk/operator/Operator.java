@@ -107,7 +107,7 @@ public class Operator implements Task.TaskResultCallback {
     }
 
     private void retry() {
-        Log.d(TAG, String.format("%s retry, remaining retry = %d", mTaskSharedData.getRemainingRetryCount()));
+        Log.d(TAG, String.format("remaining retry = %d", mTaskSharedData.getRemainingRetryCount()));
         if (mTaskSharedData.consumeRetryCount() < 0) {
             onFlowEnded("retry out");
         } else {
