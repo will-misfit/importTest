@@ -84,12 +84,12 @@
         android:paddingRight="4dp">
 
         <Switch
-            android:id="@+id/switch_should_ota"
+            android:id="@+id/switch_should_force_ota"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:text="shouldOTA" />
+            android:text="should force OTA" />
 
         <Button
             android:id="@+id/btn_sync"

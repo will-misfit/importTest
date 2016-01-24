@@ -6,7 +6,6 @@ import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
-import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.utils.ContextUtils;
 
@@ -77,10 +76,17 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
         }
         ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
         if (state == ShineProfile.State.CONNECTED) {
+            updateTaskSharedData();
             taskSucceed();
         } else {
             retry();
         }
+    }
+
+    private void updateTaskSharedData() {
+        ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+        mTaskSharedData.setFirmwareVersion(profileProxy.getFirmwareVersion());
+        mTaskSharedData.setModelName(profileProxy.getModelNumber());
     }
 
     /*

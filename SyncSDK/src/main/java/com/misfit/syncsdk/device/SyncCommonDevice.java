@@ -53,6 +53,11 @@ public class SyncCommonDevice implements DeviceBehavior{
         }
     }
 
+    protected TaskSharedData createTaskSharedData(){
+        TaskSharedData sharedData = new TaskSharedData(getSerialNumber(), mDeviceType, this);
+        return sharedData;
+    }
+
     public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncOtaCallback otaCallback) {
     }
 

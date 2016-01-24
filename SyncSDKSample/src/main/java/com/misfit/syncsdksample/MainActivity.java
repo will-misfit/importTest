@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.Switch;
 
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.OtaType;
@@ -15,6 +16,7 @@ import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
+import com.misfit.syncsdk.utils.LocalFileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +31,14 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
     private final static String TAG = "MainActivity";
 
     @Bind(R.id.spinner_device_type)
-    Spinner spinnerDeviceType;
+    Spinner mSpinnerDeviceType;
 
-    SyncSdkAdapter syncSdkAdapter;
+    @Bind(R.id.switch_should_force_ota)
+    Switch mSwitchShouldForceOta;
 
-    int[] deviceTypes = new int[]{
+    SyncSdkAdapter mSyncSdkAdapter;
+
+    int[] mDeviceTypes = new int[]{
             DeviceType.SHINE,
             DeviceType.FLASH,
             DeviceType.PLUTO,
@@ -57,11 +62,11 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
                 holder.getTextView(R.id.text).setText(DeviceType.getDeviceTypeText(item));
             }
         };
-        spinnerDeviceType.setAdapter(adapter);
-        spinnerDeviceType.setSelection(0);
+        mSpinnerDeviceType.setAdapter(adapter);
+        mSpinnerDeviceType.setSelection(0);
 
-        syncSdkAdapter = SyncSdkAdapter.getInstance();
-        syncSdkAdapter.init(this.getApplicationContext(), "will-misfit");
+        mSyncSdkAdapter = SyncSdkAdapter.getInstance();
+        mSyncSdkAdapter.init(this.getApplicationContext(), "will-misfit");
     }
 
     private void initSpinnerData() {
@@ -74,14 +79,14 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
 
     @OnClick(R.id.btn_scan)
     void scan() {
-        int selectedDeviceType = deviceTypes[spinnerDeviceType.getSelectedItemPosition()];
+        int selectedDeviceType = mDeviceTypes[mSpinnerDeviceType.getSelectedItemPosition()];
         Log.i(TAG, "start scan, device type=" + selectedDeviceType);
-        syncSdkAdapter.startScanning(selectedDeviceType, this);
+        mSyncSdkAdapter.startScanning(selectedDeviceType, this);
     }
 
     @OnClick(R.id.btn_stop_scan)
     void stopScan() {
-        syncSdkAdapter.stopScanning();
+        mSyncSdkAdapter.stopScanning();
     }
 
     @OnClick(R.id.btn_sync)
@@ -92,8 +97,8 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
     @Override
     public void onScanResultFiltered(SyncCommonDevice device, int rssi) {
         Log.i(TAG, "SyncSDK found device, serialNumber=" + device.getSerialNumber());
-        if("SC0CC0068M".equals(device.getSerialNumber())) {
-            Log.w(TAG, "update device");
+        if ("SC0CC0068M".equals(device.getSerialNumber())) {
+            Log.d(TAG, "update device");
             mSyncCommonDevice = device;
         }
     }
@@ -105,28 +110,29 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
 
     @Override
     public int getOtaSuggestion(boolean hasNewFirmware) {
-        int type = OtaType.NO_NEED_TO_OTA;
-        Log.i(TAG, "return " + type);
+        int type = OtaType.FORCE_OTA;
+        Log.d(TAG, "OTA suggestion return " + type);
         return type;
     }
 
     @Override
     public void onSyncDataOutput() {
-        Log.i(TAG, "sync data output");
+        Log.d(TAG, "sync data output");
     }
 
     @Override
     public void onFinished() {
-        Log.i(TAG, "operation finished");
+        Log.d(TAG, "operation finished");
     }
 
     @Override
     public void onFailed(int reason) {
-        Log.w(TAG, "operation failed, reason=" + reason);
+        Log.d(TAG, "operation failed, reason=" + reason);
     }
 
     @Override
     public void onOtaCompleted() {
+        Log.d(TAG, "OTA Completed");
     }
 
     @Override

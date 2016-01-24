@@ -2,6 +2,7 @@ package com.misfit.syncsdk.model;
 
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
+import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.DeviceBehavior;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -12,6 +13,8 @@ import com.misfit.syncsdk.utils.SdkConstants;
 public class TaskSharedData {
 
     private String mSerialNumber;
+    private String mModelName;
+    private String mFirmwareVersion;
 
     private int mRemainingRetryCount = 0; // remaining retry count of Operator
 
@@ -20,7 +23,7 @@ public class TaskSharedData {
     private int mDeviceType; // opt to update later
 
     private SyncSyncCallback mSyncSyncCallback;
-
+    private SyncOtaCallback mSyncOtaCallback;
     private SyncAnimationCallback mSyncAnimationCallback;
 
     private DeviceBehavior mDeviceBehavior;
@@ -38,6 +41,22 @@ public class TaskSharedData {
         mRemainingRetryCount = retryTimes;
     }
 
+    public String getModelName() {
+        return mModelName;
+    }
+
+    public void setModelName(String mModelName) {
+        this.mModelName = mModelName;
+    }
+
+    public String getFirmwareVersion() {
+        return mFirmwareVersion;
+    }
+
+    public void setFirmwareVersion(String mFirmwareVersion) {
+        this.mFirmwareVersion = mFirmwareVersion;
+    }
+
     public boolean isTasksRunning() {
         return isTasksRunning;
     }
@@ -52,6 +71,14 @@ public class TaskSharedData {
 
     public String getSerialNumber() {
         return mSerialNumber;
+    }
+
+    public SyncOtaCallback getSyncOtaCallback() {
+        return mSyncOtaCallback;
+    }
+
+    public void setSyncOtaCallback(SyncOtaCallback mSyncOtaCallback) {
+        this.mSyncOtaCallback = mSyncOtaCallback;
     }
 
     public void setSyncSyncCallback(SyncSyncCallback syncSyncCallback) {
