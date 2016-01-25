@@ -19,12 +19,13 @@ import com.misfit.syncsdk.task.Task;
 import java.util.List;
 
 /**
- * Created by Will Hou on 1/13/16.
+ * subclass of SyncCommonDevice for Swarovski Shine
  */
 public class SyncSwarovskiDevice extends SyncCommonDevice {
     public SyncSwarovskiDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.SWAROVSKI_SHINE;
+        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
     }
 
     @Override
@@ -32,14 +33,12 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
         if (isRunningOn()) {
             return;
         }
-        updateAnimationCallback(syncCallback);
+
+        mTaskSharedData.setDeviceBehavior(this);
+        mTaskSharedData.setSyncSyncCallback(syncCallback);
+        mTaskSharedData.setSyncOtaCallback(otaCallback);
 
         SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
-
-        TaskSharedData taskSharedData = createTaskSharedData();
-        taskSharedData.setSyncSyncCallback(syncCallback);
-        taskSharedData.setSyncOtaCallback(otaCallback);
-
         List<Task> tasks = prepareTasks();
         tasks.add(new PlayAnimationTask());
         tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
@@ -48,7 +47,7 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
         tasks.add(new OtaTask());
         tasks.add(new DisconnectTask());
 
-        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks);
+        SyncOperator syncOperator = new SyncOperator(mTaskSharedData, tasks);
         syncAndCalculateTask.setSyncAndCalculationTaskCallback(syncOperator);
 
         startOperator(syncOperator);

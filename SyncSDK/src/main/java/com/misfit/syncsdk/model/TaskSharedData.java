@@ -1,5 +1,7 @@
 package com.misfit.syncsdk.model;
 
+import android.support.annotation.NonNull;
+
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
@@ -30,14 +32,13 @@ public class TaskSharedData {
 
     private boolean isTasksRunning;
 
-    public TaskSharedData(String serialNumber, int deviceType, DeviceBehavior deviceBehavior) {
-        this(serialNumber, deviceType, deviceBehavior, SdkConstants.OPERATOR_RETRY_TIMES);
+    public TaskSharedData(String serialNumber, int deviceType) {
+        this(serialNumber, deviceType, SdkConstants.OPERATOR_RETRY_TIMES);
     }
 
-    public TaskSharedData(String serialNumber, int deviceType, DeviceBehavior deviceBehavior, int retryTimes) {
+    public TaskSharedData(String serialNumber, int deviceType, int retryTimes) {
         mSerialNumber = serialNumber;
         mDeviceType = deviceType;
-        mDeviceBehavior = deviceBehavior;
         mRemainingRetryCount = retryTimes;
     }
 
@@ -75,6 +76,10 @@ public class TaskSharedData {
 
     public SyncOtaCallback getSyncOtaCallback() {
         return mSyncOtaCallback;
+    }
+
+    public void setDeviceBehavior(@NonNull DeviceBehavior deviceBehavior) {
+        this.mDeviceBehavior = deviceBehavior;
     }
 
     public void setSyncOtaCallback(SyncOtaCallback mSyncOtaCallback) {

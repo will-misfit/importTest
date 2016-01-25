@@ -6,6 +6,7 @@ import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
 import com.misfit.syncsdk.task.GetConfigurationTask;
 import com.misfit.syncsdk.task.PlayAnimationTask;
@@ -24,6 +25,7 @@ public class SyncShineDevice extends SyncCommonDevice {
     public SyncShineDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.SHINE;
+        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
     }
 
     @Override
@@ -32,13 +34,14 @@ public class SyncShineDevice extends SyncCommonDevice {
             return;
         }
 
-        updateAnimationCallback(syncCallback);
+        mTaskSharedData.setDeviceBehavior(this);
+        mTaskSharedData.setSyncSyncCallback(syncCallback);
 
-        SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new PlayAnimationTask());
         syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
         syncTasks.add(new GetConfigurationTask());
+        SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
         syncTasks.add(syncAndCalculateTask);
         syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
 

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.misfit.ble.shine.ShineProfile;
+import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
@@ -23,12 +24,11 @@ import java.util.List;
  */
 public class SyncCommonDevice implements DeviceBehavior{
     private final static String TAG = "SyncCommonDevice";
-    private String mSerialNumber;
+
+    protected String mSerialNumber;
     protected int mDeviceType;
-
-    protected Operator mCurrOperator;
-
     protected TaskSharedData mTaskSharedData;
+    protected Operator mCurrOperator;
 
     protected SyncCommonDevice(@NonNull String serialNumber) {
         mSerialNumber = serialNumber;
@@ -53,25 +53,16 @@ public class SyncCommonDevice implements DeviceBehavior{
         }
     }
 
-    protected TaskSharedData createTaskSharedData(){
-        TaskSharedData sharedData = new TaskSharedData(getSerialNumber(), mDeviceType, this);
-        return sharedData;
-    }
-
     public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncOtaCallback otaCallback) {
     }
 
-    protected void updateAnimationCallback(SyncSyncCallback syncCallback) {
-        if (mTaskSharedData == null) {
-            mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType, this);
-        }
+    protected void updateSyncCallback(SyncSyncCallback syncCallback) {
+        mTaskSharedData.setDeviceBehavior(this);
         mTaskSharedData.setSyncSyncCallback(syncCallback);
     }
 
     protected void updateAnimationCallback(SyncAnimationCallback animationCallback) {
-        if (mTaskSharedData == null) {
-            mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType, this);
-        }
+        mTaskSharedData.setDeviceBehavior(this);
         mTaskSharedData.setSyncAnimationCallback(animationCallback);
     }
 
