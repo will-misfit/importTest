@@ -8,29 +8,29 @@ import com.misfit.cloud.algorithm.models.ActivityChangeTagShine;
  */
 public class SdkActivityChangeTag {
 
-	private long mTimeStamp = 0;
+	private long mTimestamp = 0;
 
 	private int mMisfitActivityType = SdkActivityType.UNKNOWN_TYPE;
 
-	public long getTimeStamp() {
-		return mTimeStamp;
+	public long getTimestamp() {
+		return mTimestamp;
 	}
 
-	public void setmTimeStamp(long mTimeStamp) {
-		this.mTimeStamp = mTimeStamp;
+	public void setTimestamp(long timeStamp) {
+		this.mTimestamp = timeStamp;
 	}
 
 	public int getMisfitActivityType() {
 		return mMisfitActivityType;
 	}
 
-	public void setmMisfitActivityType(int mMisfitActivityType) {
-		this.mMisfitActivityType = mMisfitActivityType;
+	public void setMisfitActivityType(int misfitActivityType) {
+		this.mMisfitActivityType = misfitActivityType;
 	}
 
 	public ActivityChangeTagShine convert2ActivityChangeTagShine() {
 		ActivityChangeTagShine activityChangeTagShine = new ActivityChangeTagShine();
-		activityChangeTagShine.setTimestamp((int) mTimeStamp);
+		activityChangeTagShine.setTimestamp((int) mTimestamp);
 		activityChangeTagShine.setType(SdkActivityType.convert2ActivityTypeShine(mMisfitActivityType));
 		return activityChangeTagShine;
 	}

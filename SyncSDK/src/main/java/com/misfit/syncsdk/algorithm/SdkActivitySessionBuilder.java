@@ -34,7 +34,7 @@ public class SdkActivitySessionBuilder {
 
     private final static String TAG = "SDKActSessionBuilder";
 
-    public static List<SdkActivitySession> buildSDKActivitySessionForShine(ActivityShineVect activityShineVect,
+    public static List<SdkActivitySession> buildSdkActivitySessionForShine(ActivityShineVect activityShineVect,
                                                                            ACEEntryVect aceEntryVect,
                                                                            SWLEntryVect swlEntryVect,
                                                                            SyncSyncCallback syncSyncCallback) {
