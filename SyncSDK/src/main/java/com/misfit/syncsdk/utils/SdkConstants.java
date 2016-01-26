@@ -17,4 +17,7 @@ public class SdkConstants {
 	/* device model name */
 	public static final String SHINE_MODEL_NAME = "shine";
 	public static final String EARLY_SHINE_MODEL_PREFIX = "SH";
+
+	/* .prometheus.app.PrometheusConfig.apiKey */
+	public static final String HTTP_REQUEST_API_KEY = "76801581";
 }

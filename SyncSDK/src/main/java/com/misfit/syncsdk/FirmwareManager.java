@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.misfit.syncsdk.model.FirmwareInfo;
+import com.misfit.syncsdk.request.FirmwareRequest;
+import com.misfit.syncsdk.request.RequestListener;
 import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -37,12 +39,12 @@ public class FirmwareManager {
     public static final String SHINE_MODEL_NAME = "shine";
 
     public static final String FIRMWARE_EXTENSION         = "bin";
-    public static final String TEMP_FIRMWARE_EXTENSION     = "bin.temp";
+    public static final String TEMP_FIRMWARE_EXTENSION    = "bin.temp";
 
     public static final String FIRMWARE_KEY         = "firmware_version_key";
     public static final String DOWNLOAD_KEY         = "firmware_download_url_key";
     public static final String CHECKSUM_KEY         = "firmware_checksum_key";
-    public static final String CHANGE_LOG_KEY     = "firmware_change_log_key";
+    public static final String CHANGE_LOG_KEY       = "firmware_change_log_key";
     public static final String MODEL_NUMBER_KEY     = "firmware_model_number_key";
 
     private boolean isCheckingFirmware = false;
@@ -140,53 +142,53 @@ public class FirmwareManager {
      * FirmwareRequest extends PrometheusJsonObjectRequest extending volley.toolbox.JsonRequest
      * RequestListener extends volley.Listener, ErrorListener
      * */
-    /*
     public RequestListener<FirmwareRequest> latestRequestListener = new RequestListener<FirmwareRequest>() {
 
-        public void onErrorRequest(VolleyError error) {
+        @Override
+        public void onErrorResponse(VolleyError error) {
             Log.d(TAG, "Network error when checking firmware version");
             isCheckingFirmware = false;
         }
 
+        @Override
         public void onResponse(FirmwareRequest request) {
             FirmwareInfo newFirmwareInfo = request.exportFirmwareInfo();
             String newFwVersionNumber = newFirmwareInfo.getVersionNumber();
-			String oldFwVersionNumber = latestFirmwareInfo.getVersionNumber();
-			String newFwModelName = newFirmwareInfo.getModelName();
-			String oldFwModelName = latestFirmwareInfo.getModelName();
+            String oldFwVersionNumber = latestFirmwareInfo.getVersionNumber();
+            String newFwModelName = newFirmwareInfo.getModelName();
+            String oldFwModelName = latestFirmwareInfo.getModelName();
 
             if (!CheckUtils.isStringEmpty(newFwModelName)) {
-			    if (newFwModelName.equals(oldFwModelName)
-						|| (CheckUtils.isStringEmpty(newFwModelName) && oldFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))
-						|| (CheckUtils.isStringEmpty(oldFwModelName) && newFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))) {
-					if (newFwVersionNumber != null && !newFwVersionNumber.equals(oldFwVersionNumber)) {
-					    latestFirmwareInfo = newFirmwareInfo;
-						saveLatestFwVersionInfoToPreferences();
-					}
+                if (newFwModelName.equals(oldFwModelName)
+                        || (CheckUtils.isStringEmpty(newFwModelName) && oldFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))
+                        || (CheckUtils.isStringEmpty(oldFwModelName) && newFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))) {
+                    if (newFwVersionNumber != null && !newFwVersionNumber.equals(oldFwVersionNumber)) {
+                        latestFirmwareInfo = newFirmwareInfo;
+                        saveLatestFwVersionInfoToPreferences();
+                    }
 
-					if (shouldDownloadNewFirmware(newFwVersionNumber, oldFwVersionNumber)) {
-					    String params[] = null;
-						new DownloadFirmwareTask(newFirmwareInfo, oldFwVersionNumber).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-					} else {
-					    isCheckingFirmware = false;
-					}
-				} else {
-				    latestFirmwareInfo = newFirmwareInfo;
-					saveLatestFwVersionInfoToPreferences();
+                    if (shouldDownloadNewFirmware(newFwVersionNumber, oldFwVersionNumber)) {
+                        String params[] = null;
+                        new DownloadFirmwareTask(newFirmwareInfo, oldFwVersionNumber).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+                    } else {
+                        isCheckingFirmware = false;
+                    }
+                } else {
+                    latestFirmwareInfo = newFirmwareInfo;
+                    saveLatestFwVersionInfoToPreferences();
 
-					if (!isNewFirmwareReadyNow(newFwVersionNumber)) {
-					    String params[] = null;
-						new DownloadFirmwareTask(newFirmwareInfo, oldFwVersionNumber).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-					} else {
-					    isCheckingFirmware = false;
-					}
-				}
-			} else {
-			    isCheckingFirmware = false;
-			}
+                    if (!isNewFirmwareReadyNow(newFwVersionNumber)) {
+                        String params[] = null;
+                        new DownloadFirmwareTask(newFirmwareInfo, oldFwVersionNumber).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+                    } else {
+                        isCheckingFirmware = false;
+                    }
+                }
+            } else {
+                isCheckingFirmware = false;
+            }
         }
     };
-    */
 
     private class DownloadFirmwareTask extends AsyncTask<String, Integer, Boolean> {
         private String oldVersionNumber;

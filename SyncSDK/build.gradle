@@ -25,4 +25,5 @@ dependencies {
     compile project(':ShineSDK')
     compile files('libs/misfit-algorithm-1.8.0.0.jar')
     compile files('libs/volley.jar')
+    compile 'com.google.code.gson:gson:2.2.2'
 }

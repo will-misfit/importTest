@@ -18,7 +18,7 @@ import com.misfit.cloud.algorithm.models.UserSleepSessionShineVect;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkSleepSession;
-import com.misfit.syncsdk.model.SdkSleepState;
+import com.misfit.syncsdk.enums.SdkSleepState;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 
 import java.util.ArrayList;

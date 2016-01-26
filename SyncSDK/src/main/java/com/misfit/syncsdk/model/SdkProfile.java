@@ -1,6 +1,8 @@
 package com.misfit.syncsdk.model;
 
 import com.misfit.cloud.algorithm.models.ProfileShine;
+import com.misfit.syncsdk.enums.SdkGender;
+import com.misfit.syncsdk.enums.SdkUnit;
 
 /**
  * a data model to reflect ProfileShine in algorithm library namespace

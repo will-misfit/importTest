@@ -1,4 +1,4 @@
-package com.misfit.syncsdk.model;
+package com.misfit.syncsdk.enums;
 
 import com.misfit.cloud.algorithm.models.UnitSystemShine;
 

@@ -1,6 +1,7 @@
 package com.misfit.syncsdk.model;
 
 import com.misfit.cloud.algorithm.models.ActivityChangeTagShine;
+import com.misfit.syncsdk.enums.SdkActivityType;
 
 /**
  * a data model to reflect ActivityChangeTagShine in algorithm library namespace

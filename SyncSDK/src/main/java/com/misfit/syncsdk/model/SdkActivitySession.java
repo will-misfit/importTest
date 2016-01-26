@@ -3,6 +3,8 @@ package com.misfit.syncsdk.model;
 
 import com.misfit.cloud.algorithm.models.ActivityTypeShine;
 import com.misfit.cloud.algorithm.models.SessionType;
+import com.misfit.syncsdk.enums.SdkActivityType;
+import com.misfit.syncsdk.enums.SdkSessionType;
 
 /**
  * data model to reflect SessionShine, ActivitySessionShine, and GapSessionShine in algorithm library namespace
