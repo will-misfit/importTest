@@ -1,36 +1,30 @@
 package com.misfit.syncsdk.task;
 
-import android.os.Environment;
-import android.util.Log;
+import android.text.TextUtils;
 
+import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.LocalFileUtils;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.TimerTask;
 
-
-/**
- * Created by Will Hou on 1/13/16.
- */
 public class OtaTask extends Task {
 
     private final static String TAG = "OtaTask";
 
     String mLatestFirmwareVersion;
     State mCurrState;
-
-    abstract class State {
-        abstract void execute();
-
-        abstract void stop();
-    }
 
     class GetLatestFirmwareState extends State implements FirmwareManager.GetLatestFirmwareListener {
 
@@ -52,7 +46,7 @@ public class OtaTask extends Task {
 
         @Override
         public void onSucceed(boolean shouldOta, String firmwareVersion) {
-            Log.d(TAG, String.format("shouldOta=%s, firmware version=%s", shouldOta, firmwareVersion));
+            MLog.d(TAG, String.format("shouldOta=%s, firmware version=%s", shouldOta, firmwareVersion));
             if (mShouldStop) {
                 return;
             }
@@ -101,7 +95,7 @@ public class OtaTask extends Task {
 
         @Override
         void execute() {
-            Log.d(TAG, "OtaType=" + mOtaType);
+            MLog.d(TAG, "OtaType=" + mOtaType);
             FirmwareManager firmwareManager = FirmwareManager.getInstance();
             switch (mOtaType) {
                 case OtaType.NO_NEED_TO_OTA:
@@ -118,7 +112,7 @@ public class OtaTask extends Task {
                     firmwareManager.isNewFirmwareReady(mLatestFirmwareVersion, this);
                     break;
                 default:
-                    //TODO:Log as unexpected event
+                    //TODO:MLog as unexpected event
                     break;
             }
         }
@@ -130,7 +124,7 @@ public class OtaTask extends Task {
 
         @Override
         public void onFinished(String fileName) {
-            Log.d(TAG, "firmware ready, fileName=" + fileName);
+            MLog.d(TAG, "firmware ready, fileName=" + fileName);
             gotoState(new OtaState(fileName));
         }
 
@@ -141,9 +135,10 @@ public class OtaTask extends Task {
     }
 
     class OtaState extends State implements ShineProfile.OTACallback {
-
-        String mOtaFileName;
-        SyncOtaCallback mSyncOtaCallback;
+        private String mOtaFileName;
+        private SyncOtaCallback mSyncOtaCallback;
+        //TODO:we can not unsubscribe the ota callback. that is why we use this variable.
+        private boolean mIsStateFinished = false;
 
         public OtaState(String otaFileName) {
             this.mOtaFileName = otaFileName;
@@ -152,16 +147,20 @@ public class OtaTask extends Task {
 
         @Override
         void execute() {
-            //TODO: check file name
-            Log.d(TAG, "binary file name=" + mOtaFileName);
-            //FIXME:use local read read method when firmwareManager not completed.
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + mOtaFileName);
-            byte[] firmwareData = read(file);
+            MLog.d(TAG, "binary file name=" + mOtaFileName);
+            if (TextUtils.isEmpty(mOtaFileName)) {
+                taskFailed("firmware file name is empty");
+                return;
+            }
+//            FIXME:use local read read method when firmwareManager not completed.
+//            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + mOtaFileName);
+//            byte[] firmwareData = read(file);
+            byte[] firmwareData = LocalFileUtils.read(mOtaFileName);
             if (firmwareData == null) {
                 taskFailed("file not ready");
                 return;
             }
-            Log.d(TAG, "start ota, name=" + mOtaFileName + ", len=" + firmwareData.length);
+            MLog.d(TAG, "start ota, name=" + mOtaFileName + ", len=" + firmwareData.length);
             ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
             if (profileProxy != null && profileProxy.isConnected()) {
                 profileProxy.startOTA(firmwareData, this);
@@ -195,18 +194,108 @@ public class OtaTask extends Task {
 
         @Override
         public void onOTACompleted(ShineProfile.ActionResult resultCode) {
-            Log.d(TAG, "ota completed");
+            MLog.d(TAG, "ota completed");
+            if (mIsStateFinished) {
+                MLog.d(TAG, "state already finished");
+                return;
+            }
+            mIsStateFinished = true;
             if (mSyncOtaCallback != null) {
                 mSyncOtaCallback.onOtaCompleted();
             }
-            taskSucceed();
+            gotoState(new WaitForConnectState());
         }
 
         @Override
         public void onOTAProgressChanged(float progress) {
-            Log.d(TAG, "ota progress=" + progress);
+            MLog.d(TAG, "ota progress=" + progress);
+            if(mIsStateFinished){
+                MLog.d(TAG, "state already finished");
+                return;
+            }
             if (mSyncOtaCallback != null) {
                 mSyncOtaCallback.onOtaProgress(progress);
+            }
+        }
+    }
+
+    class WaitForConnectState extends State {
+        private final static int DELAY_BEFORE_CONNECT = 5000;
+
+        @Override
+        void execute() {
+            setNewTimeOutTask(new TimerTask() {
+                @Override
+                public void run() {
+                    gotoState(new ReconnectState());
+                }
+            }, DELAY_BEFORE_CONNECT);
+        }
+
+        @Override
+        void stop() {
+            cancelCurrentTimeoutTask();
+        }
+    }
+
+    class ReconnectState extends State implements ConnectionManager.ConnectionStateCallback {
+
+        private int mRemainingRetry = 2;
+        private final static int TIMEOUT_CONNECT = 45000;
+
+        @Override
+        void execute() {
+            final ConnectionManager connectionManager = ConnectionManager.getInstance();
+            ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+            if (proxy == null) {
+                taskFailed("proxy is null for unknown reason");
+                return;
+            }
+            ShineDevice device = connectionManager.getShineDevice(mTaskSharedData.getSerialNumber());
+            if (device == null) {
+                taskFailed("device not ready");
+                return;
+            }
+            if (proxy.isConnected()) {
+                taskSucceed();
+                return;
+            }
+
+            //set timeout
+            setNewTimeOutTask(new TimerTask() {
+                @Override
+                public void run() {
+                    mRemainingRetry--;
+                    if (mRemainingRetry > 0) {
+                        cancelCurrentTimerTask();
+                        execute();
+                    } else {
+                        cleanup();
+                        taskFailed("reconnect failed");
+                    }
+                }
+            }, TIMEOUT_CONNECT);
+
+            //connect
+            connectionManager.subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+            proxy.connectProfile(device, ContextUtils.getInstance().getContext());
+        }
+
+        private void cleanup() {
+            cancelCurrentTimeoutTask();
+            ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+        }
+
+        @Override
+        void stop() {
+            cleanup();
+        }
+
+        @Override
+        public void onConnectionStateChanged(ShineProfile.State newState) {
+            if (newState == ShineProfile.State.CONNECTED) {
+                cleanup();
+                taskSucceed();
             }
         }
     }
@@ -225,7 +314,7 @@ public class OtaTask extends Task {
         if (mIsFinished) {
             return;
         }
-        Log.d(TAG, "go to state=" + state.getClass().getSimpleName());
+        MLog.d(TAG, "go to state=" + state.getClass().getSimpleName());
         mCurrState = state;
         state.execute();
     }
@@ -238,7 +327,7 @@ public class OtaTask extends Task {
         if (profileProxy != null) {
             profileProxy.interruptCurrentAction();
         } else {
-            //TODO:log
+            //TODO:MLog
         }
     }
 
