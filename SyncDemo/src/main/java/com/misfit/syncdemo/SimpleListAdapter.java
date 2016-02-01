@@ -1,4 +1,4 @@
-package com.misfit.syncsdksample;
+package com.misfit.syncdemo;
 
 import android.content.Context;
 import android.util.SparseArray;

@@ -1,4 +1,4 @@
-package com.misfit.syncsdksample;
+package com.misfit.syncdemo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +7,7 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Switch;
 
+import com.google.gson.Gson;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.SyncSdkAdapter;
@@ -14,9 +15,13 @@ import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.model.BaseResponse;
+import com.misfit.syncsdk.model.LogSession;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
+import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
-import com.misfit.syncsdk.utils.LocalFileUtils;
+import com.misfit.syncsdk.model.SdkTimeZoneOffset;
+import com.misfit.syncsdk.network.APIClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,9 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity implements SyncScanCallback, SyncOtaCallback, SyncSyncCallback {
@@ -75,6 +83,25 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
         mSpinnerData.add(DeviceType.FLASH);
         mSpinnerData.add(DeviceType.PLUTO);
         mSpinnerData.add(DeviceType.SWAROVSKI_SHINE);
+    }
+
+    @OnClick(R.id.btn_test)
+    void test() {
+        LogSession session = new LogSession();
+        Gson gson = new Gson();
+        Log.w("will", "json="+ gson.toJson(session));
+        Call<BaseResponse> call = APIClient.getInstance().getLogAPI().uploadSession(session);
+        call.enqueue(new Callback<BaseResponse>() {
+            @Override
+            public void onResponse(Response<BaseResponse> response) {
+                Log.w("will", "rcv=" + response.body().code);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.w("will", "error=", t);
+            }
+        });
     }
 
     @OnClick(R.id.btn_scan)
@@ -138,6 +165,26 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
     @Override
     public List<SdkActivityChangeTag> getSdkActivityChangeTagList(int[] startEndTime) {
         return new ArrayList<SdkActivityChangeTag>();
+    }
+
+    @Override
+    public List<SdkAutoSleepStateChangeTag> getSdkAutoSleepStateChangeTagList(int[] startEndTime) {
+        return null;
+    }
+
+    @Override
+    public SdkTimeZoneOffset getSdkTimeZoneOffsetInCurrentSettings() {
+        return null;
+    }
+
+    @Override
+    public SdkTimeZoneOffset getSdkTimeZoneOffsetBefore(long timestamp) {
+        return null;
+    }
+
+    @Override
+    public List<SdkTimeZoneOffset> getSdkTimeZoneOffsetListAfter(long timestamp) {
+        return null;
     }
 
     @Override

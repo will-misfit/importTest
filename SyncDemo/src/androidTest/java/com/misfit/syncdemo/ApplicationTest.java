@@ -1,4 +1,4 @@
-package com.misfit.syncsdksample;
+package com.misfit.syncdemo;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

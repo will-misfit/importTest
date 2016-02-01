@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.misfit.syncsdksample"
+        applicationId "com.misfit.syncdemo"
         minSdkVersion 17
         targetSdkVersion 22
         versionCode 1

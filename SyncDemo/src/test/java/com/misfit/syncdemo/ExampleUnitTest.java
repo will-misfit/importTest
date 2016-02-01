@@ -1,4 +1,4 @@
-package com.misfit.syncsdksample;
+package com.misfit.syncdemo;
 
 import org.junit.Test;
 
