@@ -16,7 +16,7 @@ import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.model.BaseResponse;
-import com.misfit.syncsdk.model.LogSession;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements SyncScanCallback,
 
     @OnClick(R.id.btn_test)
     void test() {
-        LogSession session = new LogSession();
+        LogSession session = new LogSession("flagship", "2.6.4", "123456789");
         Gson gson = new Gson();
         Log.w("will", "json="+ gson.toJson(session));
         Call<BaseResponse> call = APIClient.getInstance().getLogAPI().uploadSession(session);

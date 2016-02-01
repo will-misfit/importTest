@@ -1,8 +1,10 @@
 package com.misfit.syncsdk.network;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.misfit.syncsdk.model.BaseResponse;
-import com.misfit.syncsdk.model.LogEvent;
-import com.misfit.syncsdk.model.LogSession;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogSession;
 
 import java.util.List;
 
@@ -29,10 +31,13 @@ public class APIClient {
     private APIClient() {
         OkHttpClient client = new OkHttpClient.Builder()
                 .build();
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create();
         retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl("https://cloud-int.misfit.com/v1/")
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
     }
 
