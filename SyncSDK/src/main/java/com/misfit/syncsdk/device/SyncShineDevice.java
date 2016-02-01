@@ -40,9 +40,9 @@ public class SyncShineDevice extends SyncCommonDevice {
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new PlayAnimationTask());
         syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
-        syncTasks.add(new GetConfigurationTask());
         SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
         syncTasks.add(syncAndCalculateTask);
+        syncTasks.add(new GetConfigurationTask());
         syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
 
         SyncOperator syncOperator = new SyncOperator(mTaskSharedData, syncTasks);
