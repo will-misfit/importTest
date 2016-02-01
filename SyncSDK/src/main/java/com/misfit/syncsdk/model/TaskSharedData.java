@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.DeviceBehavior;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -25,6 +26,7 @@ public class TaskSharedData {
     private int mDeviceType; // opt to update later
 
     private SyncSyncCallback mSyncSyncCallback;
+    private SyncCalculationCallback mSyncCalculationCallback;
     private SyncOtaCallback mSyncOtaCallback;
     private SyncAnimationCallback mSyncAnimationCallback;
 
@@ -86,12 +88,20 @@ public class TaskSharedData {
         this.mSyncOtaCallback = mSyncOtaCallback;
     }
 
+    public void setSyncCalculationCallback(SyncCalculationCallback syncCalculationCallback) {
+        this.mSyncCalculationCallback = syncCalculationCallback;
+    }
+
+    public SyncCalculationCallback getSyncCalculationCallback() {
+        return mSyncCalculationCallback;
+    }
+
     public void setSyncSyncCallback(SyncSyncCallback syncSyncCallback) {
         this.mSyncSyncCallback = syncSyncCallback;
     }
 
     public SyncSyncCallback getSyncSyncCallback() {
-        return mSyncSyncCallback;
+        return this.mSyncSyncCallback;
     }
 
     public void setSyncAnimationCallback(SyncAnimationCallback mSyncAnimationCallback) {
@@ -124,7 +134,7 @@ public class TaskSharedData {
     public void cleanUp() {
         mDeviceBehavior = null;
         mConfigurationSession = null;
-        mSyncSyncCallback = null;
+        mSyncCalculationCallback = null;
         mSyncAnimationCallback = null;
     }
 

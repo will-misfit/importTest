@@ -3,7 +3,6 @@ package com.misfit.syncsdk.operator;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.task.Task;
 
@@ -63,7 +62,7 @@ public class Operator implements Task.TaskResultCallback {
         Log.d(TAG, this.getClass().getSimpleName() + " completed");
         mTaskSharedData.setTasksRunning(false);
         if (mCallback != null) {
-            mCallback.onFinished();
+            mCallback.onSucceed();
         }
         cleanUp();
     }

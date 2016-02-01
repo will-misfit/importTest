@@ -8,7 +8,7 @@ import com.misfit.cloud.algorithm.models.ACEEntryVect;
 import com.misfit.cloud.algorithm.models.ActivityShine;
 import com.misfit.cloud.algorithm.models.ActivityShineVect;
 import com.misfit.cloud.algorithm.models.SWLEntryVect;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkDayRange;
@@ -45,7 +45,7 @@ public class DailyUserDataBuilder {
 
     protected DailyUserDataBuilder() {}
 
-    public List<SdkActivitySessionGroup> buildDailyUserDataForShine(SyncResult syncResult, SyncSyncCallback syncSyncCallback) {
+    public List<SdkActivitySessionGroup> buildDailyUserDataForShine(SyncResult syncResult, SyncCalculationCallback syncCalculationCallback) {
         ActivityShineVect activityShineVect = AlgorithmUtils.convertSdkActivityToShineActivityForShine(
             syncResult.mActivities, syncResult.mTapEventSummarys);
         SWLEntryVect swlEntryVec = AlgorithmUtils.convertSwimSessionsToSWLEntry(syncResult.mSwimSessions);
@@ -54,13 +54,13 @@ public class DailyUserDataBuilder {
         if (activityShineVect.size() == 0) {
             return new ArrayList<>();
         }
-        return buildDaysForShine(activityShineVect, aceEntryVect, swlEntryVec, syncSyncCallback);
+        return buildDaysForShine(activityShineVect, aceEntryVect, swlEntryVec, syncCalculationCallback);
     }
 
     /**
      * build up ActivitySessions, SleepSessions, GraphItems
      * */
-    public List<SdkActivitySessionGroup> buildDaysForShine(ActivityShineVect activityShineVect, ACEEntryVect aceEntryVect, SWLEntryVect swlEntryVect, SyncSyncCallback syncCallback) {
+    public List<SdkActivitySessionGroup> buildDaysForShine(ActivityShineVect activityShineVect, ACEEntryVect aceEntryVect, SWLEntryVect swlEntryVect, SyncCalculationCallback syncCallback) {
         Log.d(TAG, "buildDaysForShine");
         List<SdkActivitySessionGroup> groupsResult = new ArrayList<>();
 
@@ -89,7 +89,7 @@ public class DailyUserDataBuilder {
         return groupsResult;
     }
 
-    public void buildDailyUserDataForFlash(SyncResult syncResult, SyncSyncCallback syncSyncCallback) {
+    public void buildDailyUserDataForFlash(SyncResult syncResult, SyncCalculationCallback syncCalculationCallback) {
         ActivityShineVect activityShineVect = AlgorithmUtils.convertSdkActivityToShineActivityForFlash(
             syncResult.mActivities, syncResult.mSessionEvents);
     }

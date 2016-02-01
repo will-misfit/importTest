@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
@@ -29,13 +30,13 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
     }
 
     @Override
-    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncOtaCallback otaCallback) {
+    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback, SyncOtaCallback otaCallback) {
         if (isRunningOn()) {
             return;
         }
 
         mTaskSharedData.setDeviceBehavior(this);
-        mTaskSharedData.setSyncSyncCallback(syncCallback);
+        mTaskSharedData.setSyncCalculationCallback(calculationCallback);
         mTaskSharedData.setSyncOtaCallback(otaCallback);
 
         SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
@@ -48,7 +49,6 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
         tasks.add(new DisconnectTask());
 
         SyncOperator syncOperator = new SyncOperator(mTaskSharedData, tasks);
-        syncAndCalculateTask.setSyncAndCalculationTaskCallback(syncOperator);
 
         startOperator(syncOperator);
     }

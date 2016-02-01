@@ -14,7 +14,7 @@ import com.misfit.cloud.algorithm.models.ProfileShine;
 import com.misfit.cloud.algorithm.models.SWLEntryVect;
 import com.misfit.cloud.algorithm.models.SessionShine;
 import com.misfit.cloud.algorithm.models.SessionShineVect;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkProfile;
@@ -37,7 +37,7 @@ public class SdkActivitySessionBuilder {
     public static List<SdkActivitySession> buildSdkActivitySessionForShine(ActivityShineVect activityShineVect,
                                                                            ACEEntryVect aceEntryVect,
                                                                            SWLEntryVect swlEntryVect,
-                                                                           SyncSyncCallback syncSyncCallback) {
+                                                                           SyncCalculationCallback syncCalculationCallback) {
         List<SdkActivitySession> result = new ArrayList<>();
         ActivitySessionsShineAlgorithm activitySessionsShineAlgorithm = new ActivitySessionsShineAlgorithm();
         ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
@@ -54,8 +54,8 @@ public class SdkActivitySessionBuilder {
         int[] wholeSessionStartEndTime = AlgorithmUtils.getStartEndTimeFromTwoSessions(sessionShineVectStartEndTime, gapSessionShineVectStartEndTime);
 
         // get ActivityTag change list and user profile from App via callback
-        List<SdkActivityChangeTag> sdkChangeTags = syncSyncCallback.getSdkActivityChangeTagList(wholeSessionStartEndTime);
-        SdkProfile sdkProfile = syncSyncCallback.getProfileInDatabase();
+        List<SdkActivityChangeTag> sdkChangeTags = syncCalculationCallback.getSdkActivityChangeTagList(wholeSessionStartEndTime);
+        SdkProfile sdkProfile = syncCalculationCallback.getProfileInDatabase();
 
         ActivitySessionShineVect resultActivitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect resultGapSessionShineVect = new GapSessionShineVect();
@@ -78,13 +78,13 @@ public class SdkActivitySessionBuilder {
             SdkActivitySession sdkActivitySession = convertActivitySessionShine2SdkActivitySession(activitySessionShineVect.get(i));
             result.add(sdkActivitySession);
             Log.d(TAG, String.format("SdkActivitySession: timestamp is %d, points is %d",
-                sdkActivitySession.getStartTime(), sdkActivitySession.getPoint()));
+                sdkActivitySession.getStartTime(), sdkActivitySession.getPoints()));
         }
         for(int i = 0; i < gapSessionShineVect.size(); i++) {
             SdkActivitySession sdkActivitySession = convertGapSessionShine2SdkActivitySession(gapSessionShineVect.get(i));
             result.add(sdkActivitySession);
             Log.d(TAG, String.format("SdkActivitySession of Gap session: timestamp is %d, points is %d",
-                        sdkActivitySession.getStartTime(), sdkActivitySession.getPoint()));
+                        sdkActivitySession.getStartTime(), sdkActivitySession.getPoints()));
         }
         return result;
     }

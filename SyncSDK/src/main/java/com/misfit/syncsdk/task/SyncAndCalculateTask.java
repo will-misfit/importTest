@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.misfit.ble.shine.ShineProfile;
-import com.misfit.ble.shine.ShineProfile.SyncCallback;
 import com.misfit.ble.shine.ShineProfile.ActionResult;
 import com.misfit.ble.util.MutableBoolean;
 import com.misfit.ble.shine.result.SyncResult;
@@ -14,6 +13,7 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
+import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.model.SettingsElement;
 
@@ -22,20 +22,17 @@ import java.util.List;
 
 
 /**
- * Created by Will Hou on 1/12/16.
+ * Task implementation to call sync() of ShineSDK, and complete the calculation with algorithm library
  */
 public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallback {
 
     private final static String TAG = "SyncAndCalculateTask";
 
-    public interface SyncAndCalculationTaskCallback {
-        void onCalculationCompleted(SyncResult syncResult);
-    }
-
     private List<SyncResult> mSyncResultSummary;
 
-    SyncAndCalculationTaskCallback mSyncAndCalculationTaskCallback;
+    //ShineSdkSyncCompleteCallback mShineSdkSyncCompleteCallback;
 
+    /* callback of Task */
     @Override
     protected void prepare() {
     }
@@ -64,83 +61,49 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     protected void cleanup() {
     }
 
+    /* callback of ShineProfile.SyncCallback */
     @Override
     public void onSyncDataRead(Bundle extraInfo, MutableBoolean shouldStop) {
-        float progress = extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY);
+        float progress = extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY, 0.0f);
         Log.d(TAG, "progress=" + progress);
     }
 
     @Override
     public void onSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shouldStop) {
-        Log.d(TAG, "onDataReadCompleted:");
-        for (SyncResult result : syncResults) {
-            Log.d(TAG, "SyncResult: " + result.toString());
-        }
-        if (mSyncAndCalculationTaskCallback != null) {
-            mSyncAndCalculationTaskCallback.onCalculationCompleted(null);
+        Log.d(TAG, "onSyncDataReadCompleted: List<SyncResult> size is " + syncResults.size());
+        mSyncResultSummary = syncResults;
+
+        // if test the ShineSDK ShineProfile SyncCallback result
+        if (mTaskSharedData.getSyncSyncCallback() != null) {
+            mTaskSharedData.getSyncSyncCallback().onShineProfileSyncReadDataCompleted(syncResults);
         }
     }
 
     @Override
     public void onSyncCompleted(ShineProfile.ActionResult resultCode) {
-        Log.d(TAG, "syncCompleted");
-        taskSucceed();
-    }
-
-    public void setSyncAndCalculationTaskCallback(SyncAndCalculationTaskCallback syncAndCalculationTaskCallback) {
-        mSyncAndCalculationTaskCallback = syncAndCalculationTaskCallback;
-    }
-
-    public SyncCallback mSyncCallback = new ShineProfile.SyncCallback () {
-        @Override
-        public void onSyncDataRead(Bundle extraInfo, MutableBoolean shouldStop) {
-            handleOnSyncDataReadCallbackCalled(extraInfo, shouldStop);
-        }
-
-        @Override
-        public void onSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shouldStop) {
-            handleOnSyncDataReadCompleted(syncResults, shouldStop);
-        }
-
-        @Override
-        public void onSyncCompleted(ActionResult resultCode) {
-            handleOnSyncCompleted(resultCode);
-        }
-    };
-
-    private void handleOnSyncDataReadCallbackCalled(Bundle extraInfo, MutableBoolean shouldStop) {
-        float syncProgress = extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY, 0.0f);
-        Log.d(TAG, "onSyncDataRead() is called, sync progress is " + syncProgress);
-
-        // stop existing timer for this onSyncDataRead() callback
-        // start timer for next onSyncDataRead() callback received
-    }
-
-    private void handleOnSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shoudlStop) {
-        // stop existing timer for this onSyncDataRead() callback
-
-        mSyncResultSummary = syncResults;
-        // start timer for following erase action
+        handleOnSyncCompleted(resultCode);
     }
 
     private void handleOnSyncCompleted(ActionResult resultCode) {
-        // stop timer for following erase action
         boolean success = (mSyncResultSummary != null);
         Log.d(TAG, String.format("OnSyncCompleted callback is received, result is %s",Boolean.toString(success)));
 
+        taskSucceed();
+        /*
         if (success) {
-            handleOnSyncSucceed();
+            handleOnShineSdkSyncSucceed();
         } else {
-            handleOnSyncFailed();
+            handleOnShineSdkSyncFailed();
         }
+        */
     }
 
-    private void handleOnSyncSucceed() {
+    private void handleOnShineSdkSyncSucceed() {
         SyncedDataCalculationTask syncCalculateTask = new SyncedDataCalculationTask(mSyncResultSummary);
         syncCalculateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void handleOnSyncFailed() {
+    private void handleOnShineSdkSyncFailed() {
     }
 
     private class SyncedDataCalculationTask extends AsyncTask<Void, Void, Void> {
@@ -201,7 +164,6 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                 return;
             }
 
-            // SharedPreferencesUtils.sharedInstance().saveLong(SharedPrefCategory.DEFAULT, SharedPreferencesUtils.PREF_SYNC_LAST_READ_DATA_TIME, tailActivityStartTime);
             if (lastSyncTime == 0l) {
                 Log.d(TAG, "Last sync time has not been saved before, so that nothing to filter");
                 return;
@@ -228,7 +190,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     Log.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
                     syncResult.mSessionEvents.clear();
                 }
-                DailyUserDataBuilder.getInstance().buildDailyUserDataForFlash(syncResult, mTaskSharedData.getSyncSyncCallback());
+                DailyUserDataBuilder.getInstance().buildDailyUserDataForFlash(syncResult, mTaskSharedData.getSyncCalculationCallback());
             } else {
                 if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {
@@ -238,7 +200,12 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     }
                 }
 
-                DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult, mTaskSharedData.getSyncSyncCallback());
+                List<SdkActivitySessionGroup> sdkActivitySessionGroups =
+                    DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult, mTaskSharedData.getSyncCalculationCallback());
+                if (mTaskSharedData.getSyncSyncCallback() != null) {
+                    mTaskSharedData.getSyncSyncCallback().onSyncAndCalculationCompleted(sdkActivitySessionGroups);
+                }
+                taskSucceed();
             }
         }
     }

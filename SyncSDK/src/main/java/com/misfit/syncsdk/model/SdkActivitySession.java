@@ -91,7 +91,7 @@ public class SdkActivitySession {
         this.mSessionType = SdkSessionType.getSessionType(sessType);
     }
 
-    public int getPoint() {
+    public int getPoints() {
         return this.mPoints;
     }
 

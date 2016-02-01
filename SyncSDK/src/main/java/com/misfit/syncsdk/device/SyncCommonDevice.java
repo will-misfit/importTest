@@ -4,16 +4,16 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.misfit.ble.shine.ShineProfile;
-import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.Operator;
 import com.misfit.syncsdk.task.ConnectTask;
 import com.misfit.syncsdk.task.PlayAnimationTask;
 import com.misfit.syncsdk.task.ScanTask;
+import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.task.Task;
 
 import java.util.ArrayList;
@@ -46,19 +46,15 @@ public class SyncCommonDevice implements DeviceBehavior{
     }
 
     public boolean isRunningOn() {
-        if (mCurrOperator != null && mTaskSharedData.isTasksRunning()) {
-            return true;
-        } else {
-            return false;
-        }
+        return mCurrOperator != null && mTaskSharedData.isTasksRunning();
     }
 
-    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncOtaCallback otaCallback) {
+    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
     }
 
-    protected void updateSyncCallback(SyncSyncCallback syncCallback) {
+    protected void updateCalculationCallback(SyncCalculationCallback syncCallback) {
         mTaskSharedData.setDeviceBehavior(this);
-        mTaskSharedData.setSyncSyncCallback(syncCallback);
+        mTaskSharedData.setSyncCalculationCallback(syncCallback);
     }
 
     protected void updateAnimationCallback(SyncAnimationCallback animationCallback) {
@@ -75,7 +71,7 @@ public class SyncCommonDevice implements DeviceBehavior{
     // TODO: this needs to be called when entire sync/playAnimation operation completes
     protected void cleanUpCallbacks() {
         if (mTaskSharedData == null) {
-            mTaskSharedData.setSyncSyncCallback(null);
+            mTaskSharedData.setSyncCalculationCallback(null);
             mTaskSharedData.setSyncAnimationCallback(null);
             mTaskSharedData.setConfigurationSession(null);
         }
@@ -124,5 +120,14 @@ public class SyncCommonDevice implements DeviceBehavior{
     // opt to override in subclass
     public boolean supportSettingsElement(SettingsElement element) {
         return false;
+    }
+
+    /**
+     * For Test: set ShineSdkSynCompleteCallback to test the ShineSDK ShineProfile sync read data result
+     * */
+    public void setSyncSyncCallback(SyncSyncCallback syncSyncCallback) {
+        if (mTaskSharedData != null) {
+            mTaskSharedData.setSyncSyncCallback(syncSyncCallback);
+        }
     }
 }

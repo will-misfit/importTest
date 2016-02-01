@@ -1,0 +1,81 @@
+package com.misfit.syncdemo;
+
+import com.misfit.ble.shine.result.Activity;
+import com.misfit.ble.shine.result.SessionEvent;
+import com.misfit.ble.shine.result.SwimSession;
+import com.misfit.ble.shine.result.SyncResult;
+import com.misfit.ble.shine.result.TapEventSummary;
+import com.misfit.syncsdk.model.SdkActivitySession;
+import com.misfit.syncsdk.model.SdkActivitySessionGroup;
+import com.misfit.syncsdk.model.SdkSleepSession;
+
+import java.util.List;
+
+/**
+ * support some utility methods for operations on SyncDemo
+ */
+public class OperationUtils {
+
+    public static String buildShineSdkSyncResult(SyncResult syncResult) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (syncResult != null) {
+            if (syncResult.mSwimSessions != null) {
+                for (SwimSession swimSession : syncResult.mSwimSessions) {
+                    stringBuilder.append(String.format("\nSwimSession - %s\n", swimSession.toString()));
+                }
+            }
+
+            if (syncResult.mTapEventSummarys != null) {
+                for (TapEventSummary tapEventSummary : syncResult.mTapEventSummarys) {
+                    stringBuilder.append(String.format("TapEventSummary - timestamp: %d, tapType: %d, tapCount: %d\n",
+                        tapEventSummary.mTimestamp,
+                        tapEventSummary.mTapType,
+                        tapEventSummary.mCount));
+                }
+            }
+
+            if (syncResult.mSessionEvents != null) {
+                for (SessionEvent sessionEvent : syncResult.mSessionEvents) {
+                    stringBuilder.append(String.format("SessionEvent - timestamp: %d, eventType: %d\n",
+                        sessionEvent.mTimestamp,
+                        sessionEvent.mType));
+                }
+            }
+
+            int totalPoint = 0;
+            int totalSteps = 0;
+            if (syncResult.mActivities != null) {
+                for (Activity activity : syncResult.mActivities) {
+                    totalPoint += activity.mPoints;
+                    totalSteps += activity.mBipedalCount;
+                }
+            }
+            stringBuilder.append(String.format("Activity - totalPoint: %d, totalSteps: %d\n", totalPoint, totalSteps));
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * one SdkActivitySessionGroup includes all activity session and all sleep session in one day,
+     * */
+    public static String buildSyncCalculationResult(List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
+        StringBuilder strBuilder = new StringBuilder();
+        if (sdkActivitySessionGroupList == null || sdkActivitySessionGroupList.isEmpty()) {
+            return strBuilder.toString();
+        }
+
+        for (SdkActivitySessionGroup sdkActivitySessionGroup : sdkActivitySessionGroupList) {
+            for (SdkActivitySession sdkActSession: sdkActivitySessionGroup.activitySessionyList) {
+                strBuilder.append(String.format("Activity Session, starts at %d, duration seconds %d, points %d, steps %d\n",
+                    sdkActSession.getStartTime(), sdkActSession.getDuration(), sdkActSession.getPoints(), sdkActSession.getSteps()));
+            }
+
+            for (SdkSleepSession sdkSleepSession: sdkActivitySessionGroup.sleepSessionList) {
+                strBuilder.append(String.format("Sleep Session, real starts at %d, real ends at %d, sleep duration seconds %d, deep sleep seconds %d\n",
+                    sdkSleepSession.getRealStartTime(), sdkSleepSession.getRealEndTime(), sdkSleepSession.getSleepDuration(), sdkSleepSession.getDeepSleepSecs()));
+            }
+            strBuilder.append("==============================\n");
+        }
+        return strBuilder.toString();
+    }
+}

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
@@ -22,6 +23,7 @@ import java.util.List;
  * SyncCommonDevice child class for Shine device
  */
 public class SyncShineDevice extends SyncCommonDevice {
+
     public SyncShineDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.SHINE;
@@ -29,13 +31,13 @@ public class SyncShineDevice extends SyncCommonDevice {
     }
 
     @Override
-    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncOtaCallback otaCallback) {
+    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback, SyncOtaCallback otaCallback) {
         if (isRunningOn()) {
             return;
         }
 
         mTaskSharedData.setDeviceBehavior(this);
-        mTaskSharedData.setSyncSyncCallback(syncCallback);
+        mTaskSharedData.setSyncCalculationCallback(calculationCallback);
 
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new PlayAnimationTask());
@@ -46,7 +48,6 @@ public class SyncShineDevice extends SyncCommonDevice {
         syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
 
         SyncOperator syncOperator = new SyncOperator(mTaskSharedData, syncTasks);
-        syncAndCalculateTask.setSyncAndCalculationTaskCallback(syncOperator);
 
         startOperator(syncOperator);
     }

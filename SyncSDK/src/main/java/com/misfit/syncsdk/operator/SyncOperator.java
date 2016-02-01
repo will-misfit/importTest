@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Will-Hou on 1/12/16.
  */
-public class SyncOperator extends Operator implements SyncAndCalculateTask.SyncAndCalculationTaskCallback{
+public class SyncOperator extends Operator{
 
     //FIXME: add time out timer
 
@@ -23,11 +23,5 @@ public class SyncOperator extends Operator implements SyncAndCalculateTask.SyncA
     @Override
     public void start() {
         super.start();
-
-    }
-
-    @Override
-    public void onCalculationCompleted(SyncResult syncResult) {
-
     }
 }

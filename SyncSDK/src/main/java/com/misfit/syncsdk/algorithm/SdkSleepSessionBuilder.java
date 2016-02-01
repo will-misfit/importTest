@@ -15,7 +15,7 @@ import com.misfit.cloud.algorithm.models.TimezoneChangeShine;
 import com.misfit.cloud.algorithm.models.TimezoneChangeShineVect;
 import com.misfit.cloud.algorithm.models.UserSleepSessionShine;
 import com.misfit.cloud.algorithm.models.UserSleepSessionShineVect;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkSleepSession;
 import com.misfit.syncsdk.enums.SdkSleepState;
@@ -32,13 +32,13 @@ public class SdkSleepSessionBuilder {
     private static final String TAG = "SdkSleepSessionBuilder";
 
     public static List<SdkSleepSession> buildSdkSleepSessions(ActivityShineVect activityShineVect,
-                                                              SyncSyncCallback syncSyncCallback) {
+                                                              SyncCalculationCallback syncCalculationCallback) {
         return convertUserSleepSessionShineVectToList(
-                buildUserSleepSessionShineVect(activityShineVect, syncSyncCallback));
+                buildUserSleepSessionShineVect(activityShineVect, syncCalculationCallback));
     }
 
     private static UserSleepSessionShineVect buildUserSleepSessionShineVect(ActivityShineVect activityShineVect,
-                                                                            SyncSyncCallback syncSyncCallback) {
+                                                                            SyncCalculationCallback syncCalculationCallback) {
         Log.d(TAG, "buildUserSleepSessionShineVect");
         UserSleepSessionShineVect userSleepSessionShineVect = new UserSleepSessionShineVect();
         SleepSessionsShineAlgorithm sleepSessionsShineAlgorithm = new SleepSessionsShineAlgorithm();
@@ -52,8 +52,8 @@ public class SdkSleepSessionBuilder {
         int[] startEndAutoSleepSessions = getSleepSessionsStartEndTime(autoSleepSessions);
         int[] startEndManualSleepSessions = getSleepSessionsStartEndTime(manualSleepSessions);
         int[] startEndTime = AlgorithmUtils.getStartEndTimeFromTwoSessions(startEndAutoSleepSessions, startEndManualSleepSessions);
-        List<SdkAutoSleepStateChangeTag> autoSleepChangeTags = syncSyncCallback.getSdkAutoSleepStateChangeTagList(startEndTime);
-        SdkTimeZoneOffset timezoneOffset = syncSyncCallback.getSdkTimeZoneOffsetInCurrentSettings();
+        List<SdkAutoSleepStateChangeTag> autoSleepChangeTags = syncCalculationCallback.getSdkAutoSleepStateChangeTagList(startEndTime);
+        SdkTimeZoneOffset timezoneOffset = syncCalculationCallback.getSdkTimeZoneOffsetInCurrentSettings();
 
         sleepSessionsShineAlgorithm.buildUserSleepSession(autoSleepSessions,
             manualSleepSessions,

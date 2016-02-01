@@ -1,10 +1,10 @@
 package com.misfit.syncsdk.operator;
 
 /**
- * Created by Will-Hou on 1/12/16.
+ * basic callback for operation e.g. sync
  */
 public interface SyncOperationResultCallback {
-    void onFinished();
+    void onSucceed();
 
     void onFailed(int reason);
 }
