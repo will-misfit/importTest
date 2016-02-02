@@ -12,6 +12,7 @@ import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
 import com.misfit.syncsdk.task.ActivateTask;
 import com.misfit.syncsdk.task.CheckFirmwareTask;
+import com.misfit.syncsdk.task.CheckTaggingStatusTask;
 import com.misfit.syncsdk.task.DisconnectTask;
 import com.misfit.syncsdk.task.GetConfigurationTask;
 import com.misfit.syncsdk.task.OtaTask;
@@ -50,7 +51,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
             tasks.add(new ActivateTask());
         }
         tasks.add(new GetConfigurationTask());
-        //TODO:CheckTaggingStatusTask
+        tasks.add(new CheckTaggingStatusTask());
         tasks.add(syncAndCalculateTask);
         tasks.add(new OtaTask());
         tasks.add(new SetConfigurationTask());
