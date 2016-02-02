@@ -11,6 +11,7 @@ import com.misfit.syncsdk.utils.ContextUtils;
 import java.util.UUID;
 
 
+//FIXME: how to know the int field was modified or not?
 public class LogSession {
     private final static int NO_SYNC_MODE = Integer.MIN_VALUE;
 
@@ -20,7 +21,7 @@ public class LogSession {
 
     @Expose
     @SerializedName("uid")
-    private String mUid;
+    private final String mUid;
 
     @Expose
     @SerializedName("serialNumber")
@@ -28,7 +29,7 @@ public class LogSession {
 
     @Expose
     @SerializedName("firmware")
-    private String mFirmware;
+    private String mFirmwareVersion;    //FIXME:what should it be in OTA procedure?
 
     @Expose
     @SerializedName("os")
@@ -52,53 +53,53 @@ public class LogSession {
 
     @Expose
     @SerializedName("appVersion")
-    private String mClientVersion;
+    private final String mClientVersion;
 
-    private String mClientName;
+    private final String mClientName;
 
     @Expose
     @SerializedName("syncMode")
-    private int mSyncMode;
+    private int mSyncMode = -1;
 
     @Expose
     @SerializedName("activityPoint")
-    private long mPreActivityPoint;
+    private long mPreActivityPoint = -1;
 
     @Expose
     @SerializedName("postSyncActivityPoint")
-    private long mPostSyncActivityPoint;
+    private long mPostSyncActivityPoint = -1;
 
     @Expose
     @SerializedName("timezone")
-    private long mPreTimezone;
+    private long mPreTimezone = -1;
 
     @Expose
     @SerializedName("postSyncTimezone")
-    private long mPostSyncTimezone;
+    private long mPostSyncTimezone = -1;
 
     @Expose
     @SerializedName("goal")
-    private long mPreGoal;
+    private long mPreGoal = -1;
 
     @Expose
     @SerializedName("postSyncGoal")
-    private long mPostSyncGoal;
+    private long mPostSyncGoal = -1;
 
     @Expose
     @SerializedName("clockState")
-    private int mPreClockState;
+    private int mPreClockState = -1;
 
     @Expose
     @SerializedName("postClockState")
-    private int mPostClockState;
+    private int mPostClockState = -1;
 
     @Expose
     @SerializedName("retries")
-    private int mRetries;
+    private int mRetries = -1;
 
     @Expose
     @SerializedName("failureReason")
-    private int mFailureReason = 13;
+    private int mFailureReason = -1;
 
     @Expose
     @SerializedName("deviceIdentifier")
@@ -106,15 +107,15 @@ public class LogSession {
 
     @Expose
     @SerializedName("battery")
-    private int mBattery;
+    private int mBattery = -1;
 
     @Expose
     @SerializedName("activityTaggingState")
-    private int mActivityTaggingState;
+    private int mActivityTaggingState = -1;
 
     @Expose
     @SerializedName("alarm")
-    private String mAlarm;
+    private String mAlarmParmeters = "";
 
     @Expose
     @SerializedName("inactiveNotificationState")
@@ -122,11 +123,7 @@ public class LogSession {
 
     @Expose
     @SerializedName("callNotificationState")
-    private boolean callNotificationState = true;
-
-    @Expose
-    @SerializedName("userInfo")
-    private String userInfo = "";
+    private boolean callNotificationState = false;
 
     @Expose
     @SerializedName("isDataloss")
@@ -142,7 +139,7 @@ public class LogSession {
         this(NO_SYNC_MODE, clientName, clientVersion, uid);
     }
 
-    public LogSession(int syncMode,String clientName, String clientVersion, String uid) {
+    public LogSession(int syncMode, String clientName, String clientVersion, String uid) {
         mDeviceIdentifier = Settings.Secure.getString(ContextUtils.getInstance().getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         mSyncMode = syncMode;
         mClientName = clientName;
@@ -155,20 +152,12 @@ public class LogSession {
         return id;
     }
 
-    public void setUid(String uid) {
-        mUid = uid;
-    }
-
     public void setSerialNumber(String serialNumber) {
         mSerialNumber = serialNumber;
     }
 
-    public void setFirmware(String firmware) {
-        mFirmware = firmware;
-    }
-
-    public void setAppVersion(String appVersion) {
-        mClientVersion = appVersion;
+    public void setFirmwareVersion(String firmwareVersion) {
+        mFirmwareVersion = firmwareVersion;
     }
 
     public void setSyncMode(int syncMode) {
@@ -224,7 +213,7 @@ public class LogSession {
     }
 
     public void setAlarm(String alarm) {
-        mAlarm = alarm;
+        mAlarmParmeters = alarm;
     }
 
     public void setInactiveNotificationState(boolean inactiveNotificationState) {
@@ -235,10 +224,6 @@ public class LogSession {
         this.callNotificationState = callNotificationState;
     }
 
-    public void setUserInfo(String userInfo) {
-        this.userInfo = userInfo;
-    }
-
     public void setDataloss(boolean dataloss) {
         isDataloss = dataloss;
     }
@@ -247,12 +232,15 @@ public class LogSession {
         isSuccess = success;
     }
 
+    public void save() {
+        LogManager.getInstance().saveSession(this);
+    }
 
     public void appendEvent(LogEvent event) {
         currSeq++;
         event.sequence = currSeq;
         event.sessionId = id;
-        LogManager.getInstance().appendEvent(id, event);
+        LogManager.getInstance().appendEvent(event);
     }
 
     public void upload() {

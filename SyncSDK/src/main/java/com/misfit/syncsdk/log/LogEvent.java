@@ -7,6 +7,12 @@ import com.google.gson.annotations.SerializedName;
  * Created by Will Hou on 1/29/16.
  */
 public class LogEvent {
+
+    public final static int RESULT_SUCCESS = 1;
+    public final static int RESULT_FAILURE = 2;
+    public final static int RESULT_TIMEOUT = 3;
+    public final static int RESULT_OTHER = 4;
+
     @Expose
     @SerializedName("sessionId")
     String sessionId;
@@ -59,5 +65,9 @@ public class LogEvent {
         mResultCode = resultCode;
         mResultMsg = resultMsg;
         return this;
+    }
+
+    public long getDuration() {
+        return mDuration;
     }
 }
