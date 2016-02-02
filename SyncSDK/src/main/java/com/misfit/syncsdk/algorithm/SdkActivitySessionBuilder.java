@@ -38,6 +38,7 @@ public class SdkActivitySessionBuilder {
                                                                            ACEEntryVect aceEntryVect,
                                                                            SWLEntryVect swlEntryVect,
                                                                            SyncCalculationCallback syncCalculationCallback) {
+        Log.d(TAG, "buildSdkActivitySessionForShine()");
         List<SdkActivitySession> result = new ArrayList<>();
         ActivitySessionsShineAlgorithm activitySessionsShineAlgorithm = new ActivitySessionsShineAlgorithm();
         ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
@@ -45,7 +46,7 @@ public class SdkActivitySessionBuilder {
         activitySessionsShineAlgorithm.buildActivitySession(activityShineVect, aceEntryVect, swlEntryVect,
                 activitySessionShineVect, gapSessionShineVect);
         if (activitySessionShineVect.isEmpty() && gapSessionShineVect.isEmpty()) {
-            Log.d(TAG, "no session to build");
+            Log.d(TAG, "buildSdkActivitySessionForShine(), no session to build");
             return result;
         }
 
@@ -54,8 +55,9 @@ public class SdkActivitySessionBuilder {
         int[] wholeSessionStartEndTime = AlgorithmUtils.getStartEndTimeFromTwoSessions(sessionShineVectStartEndTime, gapSessionShineVectStartEndTime);
 
         // get ActivityTag change list and user profile from App via callback
-        List<SdkActivityChangeTag> sdkChangeTags = syncCalculationCallback.getSdkActivityChangeTagList(wholeSessionStartEndTime);
-        SdkProfile sdkProfile = syncCalculationCallback.getProfileInDatabase();
+        List<SdkActivityChangeTag> sdkChangeTags = syncCalculationCallback.getSdkActivityChangeTagList(
+            wholeSessionStartEndTime[0], wholeSessionStartEndTime[1]);
+        SdkProfile sdkProfile = syncCalculationCallback.getUserProfile();
 
         ActivitySessionShineVect resultActivitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect resultGapSessionShineVect = new GapSessionShineVect();
@@ -68,23 +70,27 @@ public class SdkActivitySessionBuilder {
         return result;
     }
 
+    /**
+     * as GapSession should stay inside ActivitySession list, does the output SdkActivitySession List need to be sorted in order?
+     * */
     private static List<SdkActivitySession> convertSessionShineVect2SdkActivitySessionList(
         ActivitySessionShineVect activitySessionShineVect, GapSessionShineVect gapSessionShineVect) {
-        Log.d(TAG, String.format("convertXXXSessionShineVect2SDKActivitySessionList: activity sessions size: %d, gap sessions size: %d",
+
+        Log.d(TAG, String.format("convertSessionShineVect2SdkActivitySessionList: activity sessions size: %d, gap sessions size: %d",
             activitySessionShineVect.size(), gapSessionShineVect.size()));
         
         List<SdkActivitySession> result = new ArrayList<>();
         for (int i = 0; i < activitySessionShineVect.size(); i++) {
             SdkActivitySession sdkActivitySession = convertActivitySessionShine2SdkActivitySession(activitySessionShineVect.get(i));
             result.add(sdkActivitySession);
-            Log.d(TAG, String.format("SdkActivitySession: timestamp is %d, points is %d",
-                sdkActivitySession.getStartTime(), sdkActivitySession.getPoints()));
+            Log.d(TAG, String.format("SdkActivitySession: timestamp is %d, points is %d", sdkActivitySession.getStartTime(),
+                sdkActivitySession.getPoints()));
         }
         for(int i = 0; i < gapSessionShineVect.size(); i++) {
             SdkActivitySession sdkActivitySession = convertGapSessionShine2SdkActivitySession(gapSessionShineVect.get(i));
             result.add(sdkActivitySession);
-            Log.d(TAG, String.format("SdkActivitySession of Gap session: timestamp is %d, points is %d",
-                        sdkActivitySession.getStartTime(), sdkActivitySession.getPoints()));
+            Log.d(TAG, String.format("SdkActivitySession of Gap session: timestamp is %d, points is %d", sdkActivitySession.getStartTime(),
+                sdkActivitySession.getPoints()));
         }
         return result;
     }

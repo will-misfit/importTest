@@ -46,6 +46,7 @@ public class AlgorithmUtils {
 
     public static ActivityShineVect convertSdkActivityToShineActivityForShine(@NonNull List<Activity> activities,
                                                                               @NonNull List<TapEventSummary> tapEventSummaries) {
+        Log.d(TAG, "convertSdkActivityToShineActivityForShine()");
         ActivityShineVect activityShineVect = new ActivityShineVect();
         if (CheckUtils.isCollectionEmpty(activities)) {
             return activityShineVect;
@@ -272,8 +273,8 @@ public class AlgorithmUtils {
         swlEntry.setStartTime((int) swimSession.mStartTime);
         swlEntry.setEndTime((int) swimSession.mEndTime);
         swlEntry.setNbOflaps((int) swimSession.mNumberOfLaps);
-        SWLLapInfoEntryVect swlLapsVect = new SWLLapInfoEntryVect();
 
+        SWLLapInfoEntryVect swlLapsVect = new SWLLapInfoEntryVect();
         for(SwimLap lapSession : swimSession.mSwimLaps){
             SWLLapInfoEntry swlLapEntry = new SWLLapInfoEntry();
             swlLapEntry.setDuration(lapSession.mDuration);

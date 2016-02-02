@@ -36,6 +36,7 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
         }
 
         mTaskSharedData.setDeviceBehavior(this);
+        mTaskSharedData.setSyncSyncCallback(syncCallback);
         mTaskSharedData.setSyncCalculationCallback(calculationCallback);
         mTaskSharedData.setSyncOtaCallback(otaCallback);
 

@@ -37,13 +37,14 @@ public class SyncShineDevice extends SyncCommonDevice {
         }
 
         mTaskSharedData.setDeviceBehavior(this);
+        mTaskSharedData.setSyncSyncCallback(syncCallback);
         mTaskSharedData.setSyncCalculationCallback(calculationCallback);
+        mTaskSharedData.setSyncOtaCallback(otaCallback);
 
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new PlayAnimationTask());
         syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
-        SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
-        syncTasks.add(syncAndCalculateTask);
+        syncTasks.add(new SyncAndCalculateTask());
         syncTasks.add(new GetConfigurationTask());
         syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
 

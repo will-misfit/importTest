@@ -8,11 +8,11 @@ import java.util.List;
  */
 public class SdkActivitySessionGroup {
 
-    public List<SdkActivitySession> activitySessionyList;
+    public List<SdkActivitySession> activitySessionList;
     public List<SdkSleepSession> sleepSessionList;
 
     public SdkActivitySessionGroup() {
-        activitySessionyList = new ArrayList<>();
+        activitySessionList = new ArrayList<>();
         sleepSessionList = new ArrayList<>();
     }
 }

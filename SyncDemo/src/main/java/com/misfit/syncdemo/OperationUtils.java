@@ -5,6 +5,7 @@ import com.misfit.ble.shine.result.SessionEvent;
 import com.misfit.ble.shine.result.SwimSession;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.shine.result.TapEventSummary;
+import com.misfit.syncsdk.enums.SdkActivityType;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkSleepSession;
@@ -65,14 +66,23 @@ public class OperationUtils {
         }
 
         for (SdkActivitySessionGroup sdkActivitySessionGroup : sdkActivitySessionGroupList) {
-            for (SdkActivitySession sdkActSession: sdkActivitySessionGroup.activitySessionyList) {
-                strBuilder.append(String.format("Activity Session, starts at %d, duration seconds %d, points %d, steps %d\n",
-                    sdkActSession.getStartTime(), sdkActSession.getDuration(), sdkActSession.getPoints(), sdkActSession.getSteps()));
+            for (SdkActivitySession sdkActSession: sdkActivitySessionGroup.activitySessionList) {
+                strBuilder.append(String.format("Activity Session, activity type %s, Is Gap Session: %s, starts at %d, duration seconds %d, points %d, steps %d, calories %.2f\n",
+                    SdkActivityType.getActivityTypeString(sdkActSession.getActivityType()),
+                    Boolean.toString(sdkActSession.isGapSession()),
+                    sdkActSession.getStartTime(),
+                    sdkActSession.getDuration(),
+                    sdkActSession.getPoints(),
+                    sdkActSession.getSteps(),
+                    sdkActSession.getCalories()));
             }
 
             for (SdkSleepSession sdkSleepSession: sdkActivitySessionGroup.sleepSessionList) {
                 strBuilder.append(String.format("Sleep Session, real starts at %d, real ends at %d, sleep duration seconds %d, deep sleep seconds %d\n",
-                    sdkSleepSession.getRealStartTime(), sdkSleepSession.getRealEndTime(), sdkSleepSession.getSleepDuration(), sdkSleepSession.getDeepSleepSecs()));
+                    sdkSleepSession.getRealStartTime(),
+                    sdkSleepSession.getRealEndTime(),
+                    sdkSleepSession.getSleepDuration(),
+                    sdkSleepSession.getDeepSleepSecs()));
             }
             strBuilder.append("==============================\n");
         }

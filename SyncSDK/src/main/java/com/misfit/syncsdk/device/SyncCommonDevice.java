@@ -52,11 +52,6 @@ public class SyncCommonDevice implements DeviceBehavior{
     public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
     }
 
-    protected void updateCalculationCallback(SyncCalculationCallback syncCallback) {
-        mTaskSharedData.setDeviceBehavior(this);
-        mTaskSharedData.setSyncCalculationCallback(syncCallback);
-    }
-
     protected void updateAnimationCallback(SyncAnimationCallback animationCallback) {
         mTaskSharedData.setDeviceBehavior(this);
         mTaskSharedData.setSyncAnimationCallback(animationCallback);

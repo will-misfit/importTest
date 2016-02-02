@@ -26,7 +26,7 @@ public class DateUtils {
     };
 
     /*
-     * create a TimeZone from an integer time zone offset
+     * create a TimeZone from time zone offset seconds
      * */
     public static TimeZone getTimeZoneByOffset(int offset) {
         int intervalHour = offset / 3600;
@@ -34,10 +34,11 @@ public class DateUtils {
         StringBuilder timeZoneId = new StringBuilder("GMT");
         if (offset < 0) {
             intervalMin = Math.abs(intervalMin);
-            timeZoneId.append(intervalHour).append(":").append(intervalMin == 0 ? "00" : intervalMin);
+            timeZoneId.append("-");
         } else {
-            timeZoneId.append("+").append(intervalHour).append(":").append(intervalMin == 0 ? "00" : intervalMin);
+            timeZoneId.append("+");
         }
+        timeZoneId.append(intervalHour).append(":").append(intervalMin == 0 ? "00" : intervalMin);
         return TimeZone.getTimeZone(timeZoneId.toString());
     }
 
@@ -51,16 +52,22 @@ public class DateUtils {
         return getTimeIntervalSince1970(day, day.getTimeZone());
     }
 
+    /**
+     * create a day range between 00:00:00 and 23:59:59 on the date of Calendar with the time zone
+     * */
     public static SdkDayRange getTimeIntervalSince1970(final Calendar day, final TimeZone tz) {
         final SdkDayRange goalDate = new SdkDayRange();
-        final Calendar calendar = Calendar.getInstance(tz);
+        Calendar calendar = Calendar.getInstance();
         calendar.clear();
+
         calendar.set(day.get(Calendar.YEAR), day.get(Calendar.MONTH), day.get(Calendar.DAY_OF_MONTH));
         goalDate.startTime = calendar.getTimeInMillis() / 1000L;
         goalDate.day = dateFormat(calendar);
+
         calendar.set(day.get(Calendar.YEAR), day.get(Calendar.MONTH), day.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         goalDate.endTime = calendar.getTimeInMillis() / 1000L;
-        goalDate.timezoneOffset = tz.getOffset(calendar.getTimeInMillis()) / 1000;
+
+        goalDate.timeZoneOffsetSeconds = tz.getOffset(calendar.getTimeInMillis()) / 1000;
         return goalDate;
     }
 

@@ -9,6 +9,13 @@ public class SdkAutoSleepStateChangeTag {
 
     private boolean mIsAutoSleepState = true;
 
+    public SdkAutoSleepStateChangeTag(){}
+
+    public SdkAutoSleepStateChangeTag(long timestamp, boolean isAutoSleep) {
+        mTimestamp = timestamp;
+        mIsAutoSleepState = isAutoSleep;
+    }
+
     public long getTimestamp() {
         return mTimestamp;
     }

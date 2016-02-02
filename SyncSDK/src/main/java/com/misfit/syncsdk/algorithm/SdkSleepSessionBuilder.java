@@ -52,7 +52,7 @@ public class SdkSleepSessionBuilder {
         int[] startEndAutoSleepSessions = getSleepSessionsStartEndTime(autoSleepSessions);
         int[] startEndManualSleepSessions = getSleepSessionsStartEndTime(manualSleepSessions);
         int[] startEndTime = AlgorithmUtils.getStartEndTimeFromTwoSessions(startEndAutoSleepSessions, startEndManualSleepSessions);
-        List<SdkAutoSleepStateChangeTag> autoSleepChangeTags = syncCalculationCallback.getSdkAutoSleepStateChangeTagList(startEndTime);
+        List<SdkAutoSleepStateChangeTag> autoSleepChangeTags = syncCalculationCallback.getSdkAutoSleepStateChangeTagList(startEndTime[0], startEndTime[1]);
         SdkTimeZoneOffset timezoneOffset = syncCalculationCallback.getSdkTimeZoneOffsetInCurrentSettings();
 
         sleepSessionsShineAlgorithm.buildUserSleepSession(autoSleepSessions,

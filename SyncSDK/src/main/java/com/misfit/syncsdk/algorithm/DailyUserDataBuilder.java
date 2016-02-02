@@ -81,7 +81,7 @@ public class DailyUserDataBuilder {
 
             List<SdkActivitySession> sdkActivitySessions = SdkActivitySessionBuilder.buildSdkActivitySessionForShine(
                 group.activities, aceEntryVect, swlEntryVect, syncCallback);
-            res.activitySessionyList.addAll(sdkActivitySessions);
+            res.activitySessionList.addAll(sdkActivitySessions);
             // List<GraphItem> graphItems = GraphItemBuilder.buildGraphItems(group.activities, graphDayQueryManager, group.dayRange);
 
             groupsResult.add(res);
@@ -95,11 +95,12 @@ public class DailyUserDataBuilder {
     }
 
     /**
-     * group per minute ActivityShine list by timezone changes
+     * group per minute ActivityShine to day by day list with consideration of timezone changes
      * */
     private Map<Long, DailyActivityGroup> groupDailyActivities(ActivityShineVect activities,
                                                                SdkTimeZoneOffset timeZoneBefore,
                                                                List<SdkTimeZoneOffset> timeZoneListAfter) {
+        Log.d(TAG, String.format("groupDailyActivities(), @param ActivityShineVect size %d", activities.size()));
         Map<Long, DailyActivityGroup> result = new HashMap<>();
         if (activities == null || activities.size() <= 0) {
             return result;
@@ -108,16 +109,18 @@ public class DailyUserDataBuilder {
         SdkDayRange dayRange = null;
         long goalStartTime = 0L;
         long goalEndTime = 0L;
+        // TODO: SparseArray is not necessary, List is OK
         SparseArray<TimeZone> getTimezoneChanges = TimeZoneUtils.getTimezoneChanges(timeZoneBefore, timeZoneListAfter);
 
         int timezoneChoseIndex = 0;
         int nextTimezoneIndex = 1;
-        TimeZone currentTz = null;
+        TimeZone currentTz;
         // TODO: below 2 layers loop can be refactored
-        for (int i = 0; i < activities.size(); i ++) {
+        for (int i = 0; i < activities.size(); ++i) {
             ActivityShine activity = activities.get(i);
             long activityStartTime = activity.getStartTime();
             if (activityStartTime < goalStartTime || activityStartTime > goalEndTime) {
+                // ActivityShine start/end time exceed the duration of the one day range
                 while (nextTimezoneIndex < getTimezoneChanges.size() && activityStartTime > getTimezoneChanges.keyAt(nextTimezoneIndex)) {
                     timezoneChoseIndex++;
                     nextTimezoneIndex++;
@@ -126,21 +129,25 @@ public class DailyUserDataBuilder {
                 dayRange = DateUtils.getSpecificDayRange(activityStartTime, currentTz);
                 goalStartTime = dayRange.startTime;
                 goalEndTime = dayRange.endTime;
+                Log.d(TAG, String.format("groupDailyActivities(), day range between %d and %d", goalStartTime, goalEndTime));
             }
 
             if (dayRange != null) {
                 Long key = dayRange.startTime;
                 if (!result.containsKey(key)) {
-                    Log.d(TAG, "Result map for key " + key + " is not existing, create new DailyActivityGroup");
+                    Log.d(TAG, "groupDailyActivities(), Result map for key " + key + " is not existing, create new DailyActivityGroup");
                     result.put(key, new DailyActivityGroup(dayRange));
                 }
-                Log.d(TAG, "Put activity " + activity.getStartTime() + " to group " + key);
+                Log.d(TAG, "groupDailyActivities(), Put activity " + activity.getStartTime() + " to group " + key);
                 result.get(key).activities.add(activity);
             }
         }
         return result;
     }
 
+    /**
+     * model class for per minute activity data and sleep sessions within one day range
+     * */
     public static class DailyActivityGroup {
         public List<SdkSleepSession> sleepSessions = new ArrayList<>();
         public ActivityShineVect activities = new ActivityShineVect();

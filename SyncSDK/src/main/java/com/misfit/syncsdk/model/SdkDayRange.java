@@ -9,10 +9,10 @@ public class SdkDayRange {
     public long startTime;
     public long endTime;
     public String day;
-    public int timezoneOffset;
+    public int timeZoneOffsetSeconds;
 
     @Override
     public String toString() {
-        return String.format(Locale.getDefault(), "%s, %d, %d, %d", day, startTime, endTime, timezoneOffset);
+        return String.format(Locale.getDefault(), "%s, %d, %d, %d", day, startTime, endTime, timeZoneOffsetSeconds);
     }
 }

@@ -14,8 +14,18 @@ public class SdkProfile {
 	private float mHeight;
 	private float mWeight;
 	private int mSdkGender;
-
 	private int mSdkUnit;
+
+	public SdkProfile() {
+	}
+
+	public SdkProfile(int genderInt, int age, float height, float weight, int unitInt) {
+		mSdkGender = genderInt;
+		mAge = age;
+		mHeight = height;
+		mWeight = weight;
+		mSdkUnit = unitInt;
+	}
 
 	public int getAge() {
 		return mAge;

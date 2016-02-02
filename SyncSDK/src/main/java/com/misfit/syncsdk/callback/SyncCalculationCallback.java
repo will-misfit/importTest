@@ -4,7 +4,6 @@ import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
-import com.misfit.syncsdk.operator.SyncOperationResultCallback;
 
 import java.util.List;
 
@@ -13,30 +12,30 @@ import java.util.List;
  */
 public interface SyncCalculationCallback {
     /**
-     * query the Profile table in database of App
+     * query the Profile table in database
      *
      * @return: SdkProfile instance which holds user's age, gender, height, weight, and weight unit
      * */
-    SdkProfile getProfileInDatabase();
+    SdkProfile getUserProfile();
 
     /**
-     * query the SdkActivityChangeTag list from Settings change history of App
+     * query the SdkActivityChangeTag list from Settings change history
      *
      * @parameter: int[2] of session start time and end time
      * @return: the ActivityTag before the session start time, and the ActivityTag change list between the time period
      * */
-    List<SdkActivityChangeTag> getSdkActivityChangeTagList(int[] startEndTime);
+    List<SdkActivityChangeTag> getSdkActivityChangeTagList(long startTime, long endTime);
 
     /**
-     * query the SdkAutoSleepStateChangeTag list from Settings change history of App
+     * query the SdkAutoSleepStateChangeTag list from Settings change history
      *
      * @parameter: int[2] of session start time and end time
      * @return: the AutoSleepState change list between the time period
      * */
-    List<SdkAutoSleepStateChangeTag> getSdkAutoSleepStateChangeTagList(int[] startEndTime);
+    List<SdkAutoSleepStateChangeTag> getSdkAutoSleepStateChangeTagList(long startTime, long endTime);
 
     /**
-     * query the SdkTimeZoneOffset from current Settings of App
+     * query the SdkTimeZoneOffset from current Settings
      * */
     SdkTimeZoneOffset getSdkTimeZoneOffsetInCurrentSettings();
 
@@ -46,7 +45,7 @@ public interface SyncCalculationCallback {
     SdkTimeZoneOffset getSdkTimeZoneOffsetBefore(long timestamp);
 
     /**
-     * query the SdkTimeZoneOffset changes since given moment from App
+     * query the SdkTimeZoneOffset changes since given moment
      * */
     List<SdkTimeZoneOffset> getSdkTimeZoneOffsetListAfter(long timestamp);
 }

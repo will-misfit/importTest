@@ -22,6 +22,34 @@ public class SdkActivityType {
 
     private SdkActivityType(){}
 
+    public static String getActivityTypeString(int sdkActivityTypeInt) {
+        switch (sdkActivityTypeInt) {
+            case RUNNING_TYPE:
+                return "Running";
+            case CYCLING_TYPE:
+                return "Cycling";
+            case SWIMMING_TYPE:
+                return "Swimming";
+            case WALKING_TYPE:
+                return "Walking";
+            case TENNIS_TYPE:
+                return "Tennis";
+            case BASKETBALL_TYPE:
+                return "Basketball";
+            case FOOTBALL_TYPE:
+                return "Football";
+            case YOGA_TYPE:
+                return "Yoga";
+            case DANCING_TYPE:
+                return "Dancing";
+            case SLEEP_TYPE:
+                return "Sleeping";
+            case UNKNOWN_TYPE:
+            default:
+                return "Unknown";
+        }
+    }
+
     /**
      * convert ActivityTypeShine in algorithm namespace to the one in local namespace
      * */
@@ -51,26 +79,29 @@ public class SdkActivityType {
         return result;
     }
 
-    public static ActivityTypeShine convert2ActivityTypeShine(int misfitActivityTypeValue) {
-        if (misfitActivityTypeValue == SdkActivityType.WALKING_TYPE) {
+    /**
+     * convert to ActivityTypeShine in algorithm namespace
+     * */
+    public static ActivityTypeShine convert2ActivityTypeShine(int sdkActivityTypeInt) {
+        if (sdkActivityTypeInt == SdkActivityType.WALKING_TYPE) {
             return ActivityTypeShine.WALKING_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.RUNNING_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.RUNNING_TYPE) {
             return ActivityTypeShine.RUNNING_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.CYCLING_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.CYCLING_TYPE) {
             return ActivityTypeShine.CYCLING_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.SLEEP_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.SLEEP_TYPE) {
             return ActivityTypeShine.SLEEP_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.SWIMMING_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.SWIMMING_TYPE) {
             return ActivityTypeShine.SWIMMING_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.BASKETBALL_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.BASKETBALL_TYPE) {
             return ActivityTypeShine.BASKETBALL_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.FOOTBALL_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.FOOTBALL_TYPE) {
             return ActivityTypeShine.FOOTBALL_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.TENNIS_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.TENNIS_TYPE) {
             return ActivityTypeShine.TENNIS_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.DANCING_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.DANCING_TYPE) {
             return ActivityTypeShine.DANCING_TYPE;
-        } else if (misfitActivityTypeValue == SdkActivityType.YOGA_TYPE) {
+        } else if (sdkActivityTypeInt == SdkActivityType.YOGA_TYPE) {
             return ActivityTypeShine.YOGA_TYPE;
         } else {
             return ActivityTypeShine.UNKNOWN_TYPE;

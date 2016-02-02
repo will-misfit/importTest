@@ -88,14 +88,11 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         boolean success = (mSyncResultSummary != null);
         Log.d(TAG, String.format("OnSyncCompleted callback is received, result is %s",Boolean.toString(success)));
 
-        taskSucceed();
-        /*
         if (success) {
             handleOnShineSdkSyncSucceed();
         } else {
             handleOnShineSdkSyncFailed();
         }
-        */
     }
 
     private void handleOnShineSdkSyncSucceed() {
@@ -104,6 +101,8 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     private void handleOnShineSdkSyncFailed() {
+        Log.d(TAG, "handleOnShineSdkSyncFailed()");
+        taskFailed("ShineSDK sync failed");
     }
 
     private class SyncedDataCalculationTask extends AsyncTask<Void, Void, Void> {
@@ -179,7 +178,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     private void saveMisfitSyncData(SyncResult syncResult) {
-
+        Log.d(TAG, "saveMisfitSyncData()");
         if (syncResult != null && !CheckUtils.isCollectionEmpty(syncResult.mActivities)) {
             boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
                     SettingsElement.ACTIVITY_TAGGING);

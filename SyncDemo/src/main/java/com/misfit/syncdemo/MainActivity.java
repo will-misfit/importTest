@@ -1,6 +1,8 @@
 package com.misfit.syncdemo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
@@ -19,6 +21,7 @@ import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.model.BaseResponse;
 import com.misfit.syncsdk.model.LogSession;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
@@ -30,6 +33,7 @@ import com.misfit.syncsdk.network.APIClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.Bind;
@@ -53,6 +57,8 @@ public class MainActivity extends AppCompatActivity
 
     SyncSdkAdapter mSyncSdkAdapter;
 
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+
     Integer[] mDeviceTypes = new Integer[]{
             DeviceType.SHINE,
             DeviceType.FLASH,
@@ -67,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
     Button mScanButton;
     Button mStopScanButton;
+    Button mSyncButton;
     TextView mTextSerialNumber;
     TextView mSyncOutputTextView;
 
@@ -83,6 +90,8 @@ public class MainActivity extends AppCompatActivity
         mScanButton.setEnabled(true);
         mStopScanButton = (Button)findViewById(R.id.btn_stop_scan);
         mStopScanButton.setEnabled(false);
+        mSyncButton = (Button)findViewById(R.id.btn_sync);
+        mSyncButton.setEnabled(false);
 
         mSyncOutputTextView = (TextView)findViewById(R.id.sync_output_msg);
         mTextSerialNumber = (TextView)findViewById(R.id.text_serial_number);
@@ -107,21 +116,6 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.btn_test)
     void test() {
-        LogSession session = new LogSession();
-        Gson gson = new Gson();
-        Log.w("will", "json="+ gson.toJson(session));
-        Call<BaseResponse> call = APIClient.getInstance().getLogAPI().uploadSession(session);
-        call.enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Response<BaseResponse> response) {
-                Log.w("will", "rcv=" + response.body().code);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.w("will", "error=", t);
-            }
-        });
     }
 
     @OnClick(R.id.btn_scan)
@@ -131,6 +125,7 @@ public class MainActivity extends AppCompatActivity
         mSyncSdkAdapter.startScanning(selectedDeviceType, this);
         mScanButton.setEnabled(false);
         mStopScanButton.setEnabled(true);
+        mSyncButton.setEnabled(false);
         mSyncOutputTextView.setText("");
     }
 
@@ -139,13 +134,22 @@ public class MainActivity extends AppCompatActivity
         mSyncSdkAdapter.stopScanning();
         mScanButton.setEnabled(true);
         mStopScanButton.setEnabled(false);
+        if (mSyncCommonDevice != null) {
+            mSyncButton.setEnabled(true);
+        }
     }
 
     @OnClick(R.id.btn_sync)
     void sync() {
         mSyncCommonDevice.setSyncSyncCallback(this);
-        mSyncCommonDevice.startSync(false, this, this, this);
         mSyncOutputTextView.setText(new String());
+        mSyncCommonDevice.startSync(false, this, this, this);
+        mSyncButton.setEnabled(false);
+    }
+
+    @OnClick(R.id.btn_close)
+    void close() {
+
     }
 
     @Override
@@ -190,38 +194,65 @@ public class MainActivity extends AppCompatActivity
 
     /* interface methods of SyncCalculationCallback */
     @Override
-    public List<SdkActivityChangeTag> getSdkActivityChangeTagList(int[] startEndTime) {
-        return new ArrayList<SdkActivityChangeTag>();
+    public SdkProfile getUserProfile() {
+        return DataSourceManager.getSdkProfile(SdkGender.MALE);
     }
 
     @Override
-    public List<SdkAutoSleepStateChangeTag> getSdkAutoSleepStateChangeTagList(int[] startEndTime) {
-        return null;
+    public List<SdkActivityChangeTag> getSdkActivityChangeTagList(long startTime, long endTime) {
+        return DataSourceManager.getSdkActivityChangeTagList(startTime, endTime);
+    }
+
+    @Override
+    public List<SdkAutoSleepStateChangeTag> getSdkAutoSleepStateChangeTagList(long startTime, long endTime) {
+        List<SdkAutoSleepStateChangeTag> result = new ArrayList<>();
+        result.add(new SdkAutoSleepStateChangeTag(startTime, true));
+        result.add(new SdkAutoSleepStateChangeTag(endTime, true));
+        return result;
     }
 
     @Override
     public SdkTimeZoneOffset getSdkTimeZoneOffsetInCurrentSettings() {
-        return null;
+        return new SdkTimeZoneOffset(Calendar.getInstance().getTimeInMillis() / 1000, DataSourceManager.Timezone_Offset_East_Eight);
     }
 
     @Override
     public SdkTimeZoneOffset getSdkTimeZoneOffsetBefore(long timestamp) {
-        return null;
+        return new SdkTimeZoneOffset(timestamp - 100, DataSourceManager.Timezone_Offset_East_Eight);
     }
 
     @Override
     public List<SdkTimeZoneOffset> getSdkTimeZoneOffsetListAfter(long timestamp) {
-        return null;
-    }
-
-    @Override
-    public SdkProfile getProfileInDatabase() {
-        return new SdkProfile();
+        List<SdkTimeZoneOffset> result = new ArrayList<>();
+        result.add(new SdkTimeZoneOffset(timestamp + 10, DataSourceManager.Timezone_Offset_East_Eight));
+        return result;
     }
 
     /* interface methods of SyncSyncCallback */
+    /**
+     * separate the thread where SyncSDK callback comes from and the main UI thread
+     * */
     @Override
-    public void onShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
+    public void onShineProfileSyncReadDataCompleted(final List<SyncResult> syncResultList) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleOnShineProfileSyncReadDataCompleted(syncResultList);
+            }
+        });
+    }
+
+    @Override
+    public void onSyncAndCalculationCompleted(final List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleOnSyncAndCalculationCompleted(sdkActivitySessionGroupList);
+            }
+        });
+    }
+
+    private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
         if (syncResultList == null || syncResultList.isEmpty()) {
             mSyncOutputTextView.setText("ShineSDK sync data is null");
             return;
@@ -237,9 +268,9 @@ public class MainActivity extends AppCompatActivity
         mSyncOutputTextView.setText(shineSdkSyncResultStr);
     }
 
-    @Override
-    public void onSyncAndCalculationCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
+    private void handleOnSyncAndCalculationCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
         String syncAndCalculationResult = OperationUtils.buildSyncCalculationResult(sdkActivitySessionGroupList);
         mSyncOutputTextView.setText(syncAndCalculationResult);
+        mSyncButton.setEnabled(true);
     }
 }

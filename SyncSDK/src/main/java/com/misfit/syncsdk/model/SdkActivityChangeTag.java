@@ -13,6 +13,13 @@ public class SdkActivityChangeTag {
 
 	private int mMisfitActivityType = SdkActivityType.UNKNOWN_TYPE;
 
+	public SdkActivityChangeTag() {}
+
+	public SdkActivityChangeTag(long timestamp, int activityTypeInt){
+		mTimestamp = timestamp;
+		mMisfitActivityType = activityTypeInt;
+	}
+
 	public long getTimestamp() {
 		return mTimestamp;
 	}

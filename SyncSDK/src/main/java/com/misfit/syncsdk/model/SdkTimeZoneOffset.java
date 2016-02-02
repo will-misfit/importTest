@@ -9,6 +9,13 @@ public class SdkTimeZoneOffset {
 
     private int mTimezoneOffsetInSecond;
 
+    public SdkTimeZoneOffset() {}
+
+    public SdkTimeZoneOffset(long timestamp, int timezoneOffsetSeconds) {
+        mTimestamp = timestamp;
+        mTimezoneOffsetInSecond = timezoneOffsetSeconds;
+    }
+
     public long getTimestamp() {
         return mTimestamp;
     }
