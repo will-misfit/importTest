@@ -1,8 +1,9 @@
 package com.misfit.syncsdk.task;
 
-/**
- * Created by Will Hou on 1/13/16.
- */
+import android.text.TextUtils;
+
+import com.misfit.syncsdk.FirmwareManager;
+
 public class CheckFirmwareTask extends Task {
 
     @Override
@@ -11,13 +12,23 @@ public class CheckFirmwareTask extends Task {
     }
 
     @Override
+    public boolean couldIgnoreResult() {
+        return true;
+    }
+
+    @Override
     protected void execute() {
-        taskSucceed();
+        String modelName = mTaskSharedData.getModelName();
+        if (TextUtils.isDigitsOnly(modelName)) {
+            taskFailed("modelName is empty");
+            return;
+        }
+        FirmwareManager firmwareManager = FirmwareManager.getInstance();
+        firmwareManager.checkLatestFirmware(modelName, mTaskSharedData.getFirmwareVersion());
     }
 
     @Override
     protected void onStop() {
-
     }
 
     @Override

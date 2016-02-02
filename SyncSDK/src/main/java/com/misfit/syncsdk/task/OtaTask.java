@@ -194,6 +194,7 @@ public class OtaTask extends Task {
 
         @Override
         public void onOTACompleted(ShineProfile.ActionResult resultCode) {
+            //TODO: handle ota failed
             MLog.d(TAG, "ota completed");
             if (mIsStateFinished) {
                 MLog.d(TAG, "state already finished");

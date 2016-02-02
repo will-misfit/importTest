@@ -2,6 +2,7 @@ package com.misfit.syncsdk.device;
 
 import android.support.annotation.NonNull;
 
+import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
@@ -17,8 +18,10 @@ import com.misfit.syncsdk.task.OtaTask;
 import com.misfit.syncsdk.task.PlayAnimationTask;
 import com.misfit.syncsdk.task.SetAlarmTask;
 import com.misfit.syncsdk.task.SetConfigurationTask;
+import com.misfit.syncsdk.task.SetConnectionParameterTask;
 import com.misfit.syncsdk.task.SetInactivityNudgeTask;
 import com.misfit.syncsdk.task.SetNotificationTask;
+import com.misfit.syncsdk.task.StopAnimationTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
 
@@ -48,6 +51,8 @@ public class SyncShine2Device extends SyncCommonDevice {
         List<Task> tasks = prepareTasks();
         tasks.add(new CheckFirmwareTask());
         tasks.add(new PlayAnimationTask());
+        tasks.add(new StopAnimationTask());
+        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultShine2Params()));
         tasks.add(syncAndCalculateTask);
         tasks.add(new OtaTask());
         tasks.add(new GetConfigurationTask());
