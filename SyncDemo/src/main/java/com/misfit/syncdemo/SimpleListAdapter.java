@@ -1,43 +1,30 @@
 package com.misfit.syncdemo;
 
 import android.content.Context;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.util.List;
 
 /**
  * Created by Will Hou on 1/20/16.
  */
-public abstract class SimpleListAdapter<T> extends BaseAdapter {
+public abstract class SimpleListAdapter<T,VH extends SimpleListAdapter.ViewHolder> extends BaseAdapter {
     protected List<T> mData;
     private LayoutInflater mInflater;
     private int mLayoutId; // item's layout id
-    /**
-     * View ids in the layout file, which you want to bind data to it.
-     */
-    private int[] mChildViewIds; //
 
-    public SimpleListAdapter(Context context, List<T> data, int layoutID, int[] viewIds) {
+    public SimpleListAdapter(Context context, List<T> data, int layoutID) {
         super();
         mData = data;
         mLayoutId = layoutID;
-        mChildViewIds = viewIds;
         mInflater = LayoutInflater.from(context);
     }
 
     public LayoutInflater getmInflater() {
         return mInflater;
-    }
-
-    public int[] getmChildViewIds() {
-        return mChildViewIds;
     }
 
     public int getmLayoutId() {
@@ -50,12 +37,14 @@ public abstract class SimpleListAdapter<T> extends BaseAdapter {
      * @param parent
      * @return
      */
-    protected View genView(ViewGroup parent, int type) {
+    protected View createView(ViewGroup parent, int type) {
         View view = mInflater.inflate(mLayoutId, parent, false);
-        ViewHolder holder = new ViewHolder(view, mChildViewIds);
+        VH holder = createViewHolder(view, type);
         view.setTag(holder);
         return view;
     }
+
+    protected abstract VH createViewHolder(View itemView, int type);
 
     /**
      * bind data to the View
@@ -64,7 +53,7 @@ public abstract class SimpleListAdapter<T> extends BaseAdapter {
      * @param item
      * @param position
      */
-    abstract protected void bindData(ViewHolder holder, T item, int position);
+    abstract protected void bindData(VH holder, T item, int position);
 
     /**
      * if you need, it only run when convertView is null
@@ -72,17 +61,17 @@ public abstract class SimpleListAdapter<T> extends BaseAdapter {
      * @param holder
      * @param position
      */
-    protected void onGenView(ViewHolder holder, int position) {
+    protected void onCreateView(ViewHolder holder, int position) {
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder = null;
+        VH holder = null;
         if (convertView == null) {
-            convertView = genView(parent, getItemViewType(position));
-            onGenView((ViewHolder) convertView.getTag(), position);
+            convertView = createView(parent, getItemViewType(position));
+            onCreateView((ViewHolder) convertView.getTag(), position);
         }
-        holder = (ViewHolder) convertView.getTag();
+        holder = (VH) convertView.getTag();
         bindData(holder, getItem(position), position);
         return convertView;
     }
@@ -112,32 +101,9 @@ public abstract class SimpleListAdapter<T> extends BaseAdapter {
     }
 
     public static class ViewHolder {
-        protected SparseArray<View> arrayViews;
-
-        public ViewHolder(View convertView, int[] viewIds) {
-            arrayViews = new SparseArray<View>();
-            if (viewIds != null) {
-                for (int id : viewIds) {
-                    View view = convertView.findViewById(id);
-                    arrayViews.put(id, view);
-                }
-            }
-        }
-
-        public View getView(int id) {
-            return arrayViews.get(id);
-        }
-
-        public TextView getTextView(int id) {
-            return (TextView) arrayViews.get(id);
-        }
-
-        public ImageView getImageView(int id) {
-            return (ImageView) arrayViews.get(id);
-        }
-
-        public Button getButton(int id) {
-            return (Button) arrayViews.get(id);
+        protected View itemView;
+        public ViewHolder(View itemView) {
+            this.itemView = itemView;
         }
     }
 }

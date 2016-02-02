@@ -28,7 +28,9 @@ public class DeviceType {
             return DeviceType.UNKNOWN;
         } else if (serialNumber.startsWith("SH")) {
             return DeviceType.SHINE;
-        } else if (serialNumber.startsWith("SC")) {
+        } else if (serialNumber.startsWith("F0")) {
+            return DeviceType.FLASH;
+        }else if (serialNumber.startsWith("SC")) {
             return DeviceType.SWAROVSKI_SHINE;
         } else if (serialNumber.startsWith("B0")) {
             return DeviceType.BMW;
@@ -71,5 +73,10 @@ public class DeviceType {
             default:
                 return "unknown";
         }
+    }
+
+    public static String getDeviceTypeText(String serialNumber) {
+        int deviceType = getDeviceType(serialNumber);
+        return getDeviceTypeText(deviceType);
     }
 }

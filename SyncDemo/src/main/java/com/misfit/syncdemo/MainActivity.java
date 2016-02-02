@@ -1,13 +1,16 @@
 package com.misfit.syncdemo;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -17,7 +20,6 @@ import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.callback.SyncTaggingInputCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
@@ -37,18 +39,29 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnTouch;
 
 
 public class MainActivity extends AppCompatActivity
-        implements SyncScanCallback, SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
+        implements SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
 
     private final static String TAG = "MainActivity";
 
+    private final static int REQ_SCAN = 1;
+
     @Bind(R.id.spinner_device_type)
     Spinner mSpinnerDeviceType;
+    @Bind(R.id.text_serial_number)
+    TextView mTextSerialNumber;
+    @Bind(R.id.text_device_name)
+    TextView mTextDeviceName;
 
-    @Bind(R.id.switch_should_force_ota)
-    Switch mSwitchShouldForceOta;
+    @Bind(R.id.btn_show_scan_panel)
+    Button mShowScanPanelButton;
+    @Bind(R.id.ll_scan)
+    View mScanPanel;
+
+    private long mLastTimeTapScanPanel;
 
     SyncSdkAdapter mSyncSdkAdapter;
 
@@ -66,11 +79,22 @@ public class MainActivity extends AppCompatActivity
 
     SyncCommonDevice mSyncCommonDevice;
 
-    Button mScanButton;
-    Button mStopScanButton;
+    @Bind(R.id.btn_sync)
     Button mSyncButton;
-    TextView mTextSerialNumber;
+    @Bind(R.id.switch_should_force_ota)
+    Switch mSwitchShouldForceOta;
+    @Bind(R.id.switch_first_sync)
+    Switch mSwitchFirstSync;
+    @Bind(R.id.switch_tagging_response)
+    Switch mSwitchTaggingResponse;
+    @Bind(R.id.sync_output_msg)
     TextView mSyncOutputTextView;
+
+    @Bind({R.id.btn_sync,
+            R.id.switch_first_sync,
+            R.id.switch_tagging_response,
+            R.id.switch_should_force_ota})
+    List<View> syncPanel;
 
     private SyncResult mShineSdkSyncResult = new SyncResult();
 
@@ -81,22 +105,10 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         initSpinnerData();
 
-        mScanButton = (Button) findViewById(R.id.btn_scan);
-        mScanButton.setEnabled(true);
-        mStopScanButton = (Button) findViewById(R.id.btn_stop_scan);
-        mStopScanButton.setEnabled(false);
-        mSyncButton = (Button) findViewById(R.id.btn_sync);
-        mSyncButton.setEnabled(false);
+        setShouldShowScanPanel(true);
+        setOperationPanelEnabled(false);
 
-        mSyncOutputTextView = (TextView) findViewById(R.id.sync_output_msg);
-        mTextSerialNumber = (TextView) findViewById(R.id.text_serial_number);
-
-        SpinnerAdapter adapter = new SimpleListAdapter<Integer>(this, mSpinnerData, R.layout.row_simple_text, new int[]{R.id.text}) {
-            @Override
-            protected void bindData(ViewHolder holder, Integer item, int position) {
-                holder.getTextView(R.id.text).setText(DeviceType.getDeviceTypeText(item));
-            }
-        };
+        SpinnerAdapter adapter = new SpinnerAdapter(this, mSpinnerData);
         mSpinnerDeviceType.setAdapter(adapter);
         mSpinnerDeviceType.setSelection(0);
 
@@ -109,53 +121,81 @@ public class MainActivity extends AppCompatActivity
         mSpinnerData.addAll(Arrays.asList(mDeviceTypes));
     }
 
+    @OnTouch(R.id.ll_scan)
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (System.currentTimeMillis() - mLastTimeTapScanPanel < 1000) {
+                setShouldShowScanPanel(false);
+                return true;
+            }
+            mLastTimeTapScanPanel = System.currentTimeMillis();
+        }
+        return false;
+    }
+
+    @OnClick(R.id.btn_show_scan_panel)
+    void showScanPanel() {
+        setShouldShowScanPanel(true);
+    }
+
     @OnClick(R.id.btn_test)
     void test() {
     }
 
     @OnClick(R.id.btn_scan)
     void scan() {
+        Intent intent = new Intent(this, ScanListActivity.class);
         int selectedDeviceType = mDeviceTypes[mSpinnerDeviceType.getSelectedItemPosition()];
+        intent.putExtra(Const.EXT_DEVICE_TYPE, selectedDeviceType);
         Log.i(TAG, String.format("start scan, device type is %s ", DeviceType.getDeviceTypeText(selectedDeviceType)));
-        mSyncSdkAdapter.startScanning(selectedDeviceType, this);
-        mScanButton.setEnabled(false);
-        mStopScanButton.setEnabled(true);
-        mSyncButton.setEnabled(false);
-        mSyncOutputTextView.setText("");
-    }
-
-    @OnClick(R.id.btn_stop_scan)
-    void stopScan() {
-        mSyncSdkAdapter.stopScanning();
-        mScanButton.setEnabled(true);
-        mStopScanButton.setEnabled(false);
-        if (mSyncCommonDevice != null) {
-            mSyncButton.setEnabled(true);
-        }
+        startActivityForResult(intent, REQ_SCAN);
     }
 
     @OnClick(R.id.btn_sync)
     void sync() {
         SyncSyncParams syncParams = new SyncSyncParams();
-        syncParams.firstSync = false;
+        syncParams.firstSync = mSwitchFirstSync.isChecked();
         mSyncCommonDevice.startSync(syncParams, this, this, this);
-        mSyncOutputTextView.setText(new String());
-        mSyncButton.setEnabled(false);
-    }
-
-    @OnClick(R.id.btn_close)
-    void close() {
-
+        mSyncOutputTextView.setText("");
+        setOperationPanelEnabled(false);
     }
 
     @Override
-    public void onScanResultFiltered(SyncCommonDevice device, int rssi) {
-        String serialNumber = device.getSerialNumber();
-        Log.d(TAG, "SyncSDK found device, serialNumber = " + serialNumber);
-        if ("SV0EZZZZ3D".equals(serialNumber)) {
-            Log.d(TAG, "find my device!");
-            mSyncCommonDevice = device;
-            mTextSerialNumber.setText(serialNumber);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK) {
+            Log.d(TAG, String.format("result not ok, req=%d, result=%d", requestCode, resultCode));
+            return;
+        }
+        switch (requestCode) {
+            case REQ_SCAN:
+                updateDevice(data.getStringExtra(Const.EXT_SERIAL_NUNBER));
+                setShouldShowScanPanel(false);
+                setOperationPanelEnabled(true);
+                break;
+        }
+    }
+
+    private void setShouldShowScanPanel(boolean shouldShow) {
+        if (shouldShow) {
+            mShowScanPanelButton.setVisibility(View.GONE);
+            mScanPanel.setVisibility(View.VISIBLE);
+        } else {
+            mShowScanPanelButton.setVisibility(View.VISIBLE);
+            mScanPanel.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateDevice(String serialNumber) {
+        Log.d(TAG, "updated device, serialNumber=" + serialNumber);
+        mSyncCommonDevice = SyncSdkAdapter.getInstance().getDevice(serialNumber);
+        mTextSerialNumber.setText(serialNumber);
+        mTextDeviceName.setText(DeviceType.getDeviceTypeText(serialNumber));
+    }
+
+    private void setOperationPanelEnabled(boolean enabled) {
+        for (View view : syncPanel) {
+            view.setEnabled(enabled);
         }
     }
 
@@ -172,8 +212,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public int getOtaSuggestion(boolean hasNewFirmware) {
-        int type = OtaType.FORCE_OTA;
-        Log.d(TAG, "OTA suggestion return " + type);
+        int type = mSwitchShouldForceOta.isChecked() ? OtaType.FORCE_OTA : OtaType.NEED_OTA;
         return type;
     }
 
@@ -251,7 +290,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDeviceTaggingIn(int deviceType, SyncTaggingInputCallback inputCallback) {
-        inputCallback.onUserInputForTaggingIn(true);
+        inputCallback.onUserInputForTaggingIn(mSwitchTaggingResponse.isChecked());
     }
 
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
@@ -274,5 +313,32 @@ public class MainActivity extends AppCompatActivity
         String syncAndCalculationResult = OperationUtils.buildSyncCalculationResult(sdkActivitySessionGroupList);
         mSyncOutputTextView.setText(syncAndCalculationResult);
         mSyncButton.setEnabled(true);
+    }
+
+    static class SpinnerAdapter extends SimpleListAdapter<Integer, SpinnerAdapter.ViewHolder> {
+
+        public SpinnerAdapter(Context context, List<Integer> data) {
+            super(context, data, R.layout.row_simple_text);
+        }
+
+        @Override
+        protected ViewHolder createViewHolder(View itemView, int type) {
+            return new ViewHolder(itemView);
+        }
+
+        @Override
+        protected void bindData(ViewHolder holder, Integer item, int position) {
+            holder.text.setText(DeviceType.getDeviceTypeText(item));
+        }
+
+        static class ViewHolder extends SimpleListAdapter.ViewHolder {
+            @Bind(R.id.text)
+            TextView text;
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
+            }
+        }
     }
 }
