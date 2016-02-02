@@ -35,8 +35,12 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
         return sharedInstance;
     }
 
-    public boolean isBluetoothEnabled(){
+    public boolean isBluetoothEnabled() {
         return mShineSDKAdapter.mShineAdapter.isEnabled();
+    }
+
+    public void enableBluetooth() {
+        mShineSDKAdapter.mShineAdapter.enableBluetooth();
     }
 
     /**
@@ -46,7 +50,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
      * @param callback
      */
     public void startScan(int expectedDeviceType, SyncScanCallback callback) {
-        Log.d(TAG, "startScan");
+        Log.d(TAG, String.format("startScan, expected device type of %s", DeviceType.getDeviceTypeText(expectedDeviceType)));
         mCallback = callback;
         mExpectedDeviceType = expectedDeviceType;
         mShineSDKAdapter.startScanning(this);
@@ -59,7 +63,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
      */
     public void startScan(ShineAdapter.ShineScanCallback scanCallback) {
         //TODO:check if scanning
-        Log.d(TAG, "startScan");
+        Log.d(TAG, "startScan without specified device type");
         mShineSDKAdapter.startScanning(scanCallback);
     }
 
@@ -75,12 +79,12 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
         }
 
         int deviceType = DeviceType.getDeviceType(device.getSerialNumber());
-        Log.d(TAG, String.format("%s, serialNumber=%s, mac=%s", deviceType, device.getSerialNumber(), device.getAddress()));
+        Log.d(TAG, String.format("onScanResult, serialNumber %s, MAC Addr %s, device type %s",
+            device.getSerialNumber(), device.getAddress(), DeviceType.getDeviceTypeText(deviceType)));
         if (deviceType != mExpectedDeviceType) {
             return;
         }
 
-        Log.d(TAG, "found " + deviceType + ", serialNumber=" + device.getSerialNumber());
         ConnectionManager.getInstance().saveShineDevice(device.getSerialNumber(), device);
 
         //TODO:wait to implement-different device

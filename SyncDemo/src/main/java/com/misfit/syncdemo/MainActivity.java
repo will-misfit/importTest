@@ -29,6 +29,7 @@ import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.network.APIClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.Bind;
@@ -52,11 +53,12 @@ public class MainActivity extends AppCompatActivity
 
     SyncSdkAdapter mSyncSdkAdapter;
 
-    int[] mDeviceTypes = new int[]{
+    Integer[] mDeviceTypes = new Integer[]{
             DeviceType.SHINE,
             DeviceType.FLASH,
             DeviceType.PLUTO,
-            DeviceType.SWAROVSKI_SHINE
+            DeviceType.SWAROVSKI_SHINE,
+            DeviceType.SPEEDO_SHINE
     };
 
     List<Integer> mSpinnerData;
@@ -82,7 +84,6 @@ public class MainActivity extends AppCompatActivity
         mStopScanButton = (Button)findViewById(R.id.btn_stop_scan);
         mStopScanButton.setEnabled(false);
 
-        mStopScanButton = (Button)findViewById(R.id.btn_stop_scan);
         mSyncOutputTextView = (TextView)findViewById(R.id.sync_output_msg);
         mTextSerialNumber = (TextView)findViewById(R.id.text_serial_number);
 
@@ -101,10 +102,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initSpinnerData() {
         mSpinnerData = new ArrayList<>();
-        mSpinnerData.add(DeviceType.SHINE);
-        mSpinnerData.add(DeviceType.FLASH);
-        mSpinnerData.add(DeviceType.PLUTO);
-        mSpinnerData.add(DeviceType.SWAROVSKI_SHINE);
+        mSpinnerData.addAll(Arrays.asList(mDeviceTypes));
     }
 
     @OnClick(R.id.btn_test)
@@ -129,11 +127,11 @@ public class MainActivity extends AppCompatActivity
     @OnClick(R.id.btn_scan)
     void scan() {
         int selectedDeviceType = mDeviceTypes[mSpinnerDeviceType.getSelectedItemPosition()];
-        Log.i(TAG, "start scan, device type=" + selectedDeviceType);
+        Log.i(TAG, String.format("start scan, device type is %s ", DeviceType.getDeviceTypeText(selectedDeviceType)));
         mSyncSdkAdapter.startScanning(selectedDeviceType, this);
         mScanButton.setEnabled(false);
         mStopScanButton.setEnabled(true);
-        mSyncOutputTextView.setText(new String());
+        mSyncOutputTextView.setText("");
     }
 
     @OnClick(R.id.btn_stop_scan)
@@ -153,9 +151,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onScanResultFiltered(SyncCommonDevice device, int rssi) {
         String serialNumber = device.getSerialNumber();
-        Log.i(TAG, "SyncSDK found device, serialNumber = " + serialNumber);
+        Log.d(TAG, "SyncSDK found device, serialNumber = " + serialNumber);
         if ("SV0EZZZZ3D".equals(serialNumber)) {
-            Log.d(TAG, "find my device");
+            Log.d(TAG, "find my device!");
             mSyncCommonDevice = device;
             mTextSerialNumber.setText(serialNumber);
         }
@@ -164,7 +162,7 @@ public class MainActivity extends AppCompatActivity
     /* interface methods of SyncOtaCallback */
     @Override
     public void onOtaProgress(float progress) {
-        Log.i(TAG, "OTA progress=" + progress);
+        Log.d(TAG, "OTA progress = " + progress);
     }
 
     @Override
@@ -244,5 +242,4 @@ public class MainActivity extends AppCompatActivity
         String syncAndCalculationResult = OperationUtils.buildSyncCalculationResult(sdkActivitySessionGroupList);
         mSyncOutputTextView.setText(syncAndCalculationResult);
     }
-
 }

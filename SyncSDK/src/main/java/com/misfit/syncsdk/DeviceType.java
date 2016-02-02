@@ -28,8 +28,6 @@ public class DeviceType {
             return DeviceType.UNKNOWN;
         } else if (serialNumber.startsWith("SH")) {
             return DeviceType.SHINE;
-        } else if (serialNumber.startsWith("SV")) {
-            return DeviceType.SHINE_MK_II;
         } else if (serialNumber.startsWith("SC")) {
             return DeviceType.SWAROVSKI_SHINE;
         } else if (serialNumber.startsWith("B0")) {
@@ -38,8 +36,10 @@ public class DeviceType {
             return DeviceType.PLUTO;
         } else if (serialNumber.startsWith("C1")) {
             return DeviceType.SILVERATTA;
-        } else if (serialNumber.contains("SV0EZ")) {
+        } else if (serialNumber.startsWith("SV0EZ")) {
             return DeviceType.SPEEDO_SHINE;
+        } else if (serialNumber.startsWith("SV")) {
+            return DeviceType.SHINE_MK_II;
         } else {
             return DeviceType.UNKNOWN;
         }

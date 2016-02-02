@@ -25,6 +25,16 @@ public class OperationUtils {
                 }
             }
 
+            int totalPoint = 0;
+            int totalSteps = 0;
+            if (syncResult.mActivities != null) {
+                for (Activity activity : syncResult.mActivities) {
+                    totalPoint += activity.mPoints;
+                    totalSteps += activity.mBipedalCount;
+                }
+            }
+            stringBuilder.append(String.format("Activity - totalPoint: %d, totalSteps: %d\n", totalPoint, totalSteps));
+
             if (syncResult.mTapEventSummarys != null) {
                 for (TapEventSummary tapEventSummary : syncResult.mTapEventSummarys) {
                     stringBuilder.append(String.format("TapEventSummary - timestamp: %d, tapType: %d, tapCount: %d\n",
@@ -41,16 +51,6 @@ public class OperationUtils {
                         sessionEvent.mType));
                 }
             }
-
-            int totalPoint = 0;
-            int totalSteps = 0;
-            if (syncResult.mActivities != null) {
-                for (Activity activity : syncResult.mActivities) {
-                    totalPoint += activity.mPoints;
-                    totalSteps += activity.mBipedalCount;
-                }
-            }
-            stringBuilder.append(String.format("Activity - totalPoint: %d, totalSteps: %d\n", totalPoint, totalSteps));
         }
         return stringBuilder.toString();
     }

@@ -59,7 +59,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:text="SH1098378912"
         android:textSize="24sp" />
 
     <TextView
@@ -112,7 +111,7 @@
         android:layout_marginTop="4dp"
         android:background="#999" />
 
-    <RelativeLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -122,6 +121,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textSize="12sp"/>
-    </RelativeLayout>
+    </ScrollView>
 
 </LinearLayout>
