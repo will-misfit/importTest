@@ -26,31 +26,5 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
     public SyncSwarovskiDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.SWAROVSKI_SHINE;
-        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
-    }
-
-    @Override
-    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback, SyncOtaCallback otaCallback) {
-        if (isRunningOn()) {
-            return;
-        }
-
-        mTaskSharedData.setDeviceBehavior(this);
-        mTaskSharedData.setSyncSyncCallback(syncCallback);
-        mTaskSharedData.setSyncCalculationCallback(calculationCallback);
-        mTaskSharedData.setSyncOtaCallback(otaCallback);
-
-        SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
-        List<Task> tasks = prepareTasks();
-        tasks.add(new PlayAnimationTask());
-        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
-        tasks.add(new GetConfigurationTask());
-        tasks.add(syncAndCalculateTask);
-        tasks.add(new OtaTask());
-        tasks.add(new DisconnectTask());
-
-        SyncOperator syncOperator = new SyncOperator(mTaskSharedData, tasks);
-
-        startOperator(syncOperator);
     }
 }

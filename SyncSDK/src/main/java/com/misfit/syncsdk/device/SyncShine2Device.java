@@ -3,8 +3,26 @@ package com.misfit.syncsdk.device;
 import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.DeviceType;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.SettingsElement;
+import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
+import com.misfit.syncsdk.operator.SyncOperator;
+import com.misfit.syncsdk.task.CheckFirmwareTask;
+import com.misfit.syncsdk.task.DisconnectTask;
+import com.misfit.syncsdk.task.GetConfigurationTask;
+import com.misfit.syncsdk.task.OtaTask;
+import com.misfit.syncsdk.task.PlayAnimationTask;
+import com.misfit.syncsdk.task.SetAlarmTask;
+import com.misfit.syncsdk.task.SetConfigurationTask;
+import com.misfit.syncsdk.task.SetInactivityNudgeTask;
+import com.misfit.syncsdk.task.SetNotificationTask;
+import com.misfit.syncsdk.task.SyncAndCalculateTask;
+import com.misfit.syncsdk.task.Task;
+
+import java.util.List;
 
 /**
  * Created by Will Hou on 1/13/16.
@@ -13,7 +31,35 @@ public class SyncShine2Device extends SyncCommonDevice {
     public SyncShine2Device(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.PLUTO;
-        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
+    }
+
+    @Override
+    public void startSync(@NonNull SyncSyncParams syncParams, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
+        if (isRunningOn()) {
+            return;
+        }
+
+        TaskSharedData taskSharedData = createTaskSharedData();
+        taskSharedData.setSyncCalculationCallback(calcuCallback);
+        taskSharedData.setSyncOtaCallback(otaCallback);
+        taskSharedData.setSyncParams(syncParams);
+
+        SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
+        List<Task> tasks = prepareTasks();
+        tasks.add(new CheckFirmwareTask());
+        tasks.add(new PlayAnimationTask());
+        tasks.add(syncAndCalculateTask);
+        tasks.add(new OtaTask());
+        tasks.add(new GetConfigurationTask());
+        tasks.add(new SetConfigurationTask());
+        tasks.add(new SetAlarmTask());
+        tasks.add(new SetNotificationTask());
+        tasks.add(new SetInactivityNudgeTask());
+        tasks.add(new DisconnectTask());
+
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks);
+
+        startOperator(syncOperator);
     }
 
     @Override

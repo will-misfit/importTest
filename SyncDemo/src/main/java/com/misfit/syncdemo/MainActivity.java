@@ -11,25 +11,22 @@ import android.widget.SpinnerAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.SyncSdkAdapter;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncScanCallback;
-import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.SdkGender;
-import com.misfit.syncsdk.model.BaseResponse;
-import com.misfit.syncsdk.model.LogSession;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
-import com.misfit.syncsdk.network.APIClient;
+import com.misfit.syncsdk.model.SyncSyncParams;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,13 +36,10 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity
-    implements SyncScanCallback, SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
+        implements SyncScanCallback, SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
 
     private final static String TAG = "MainActivity";
 
@@ -86,15 +80,15 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         initSpinnerData();
 
-        mScanButton = (Button)findViewById(R.id.btn_scan);
+        mScanButton = (Button) findViewById(R.id.btn_scan);
         mScanButton.setEnabled(true);
-        mStopScanButton = (Button)findViewById(R.id.btn_stop_scan);
+        mStopScanButton = (Button) findViewById(R.id.btn_stop_scan);
         mStopScanButton.setEnabled(false);
-        mSyncButton = (Button)findViewById(R.id.btn_sync);
+        mSyncButton = (Button) findViewById(R.id.btn_sync);
         mSyncButton.setEnabled(false);
 
-        mSyncOutputTextView = (TextView)findViewById(R.id.sync_output_msg);
-        mTextSerialNumber = (TextView)findViewById(R.id.text_serial_number);
+        mSyncOutputTextView = (TextView) findViewById(R.id.sync_output_msg);
+        mTextSerialNumber = (TextView) findViewById(R.id.text_serial_number);
 
         SpinnerAdapter adapter = new SimpleListAdapter<Integer>(this, mSpinnerData, R.layout.row_simple_text, new int[]{R.id.text}) {
             @Override
@@ -141,9 +135,10 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.btn_sync)
     void sync() {
-        mSyncCommonDevice.setSyncSyncCallback(this);
+        SyncSyncParams syncParams = new SyncSyncParams();
+        syncParams.firstSync = false;
+        mSyncCommonDevice.startSync(syncParams, this, this, this);
         mSyncOutputTextView.setText(new String());
-        mSyncCommonDevice.startSync(false, this, this, this);
         mSyncButton.setEnabled(false);
     }
 
@@ -229,9 +224,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     /* interface methods of SyncSyncCallback */
+
     /**
      * separate the thread where SyncSDK callback comes from and the main UI thread
-     * */
+     */
     @Override
     public void onShineProfileSyncReadDataCompleted(final List<SyncResult> syncResultList) {
         mainHandler.post(new Runnable() {

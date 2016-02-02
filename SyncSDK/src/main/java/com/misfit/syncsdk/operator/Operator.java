@@ -27,6 +27,10 @@ public class Operator implements Task.TaskResultCallback {
         mTaskQueue = taskList;
     }
 
+    public TaskSharedData getTaskSharedData() {
+        return mTaskSharedData;
+    }
+
     public void start() {
         Log.d(TAG, this.getClass().getSimpleName() + " start");
         mTaskSharedData.setTasksRunning(true);

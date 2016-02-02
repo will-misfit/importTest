@@ -4,9 +4,11 @@ import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
-import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.model.SettingsElement;
+import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
 import com.misfit.syncsdk.task.GetConfigurationTask;
@@ -15,7 +17,6 @@ import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SetConnectionParameterTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
-import com.misfit.syncsdk.model.SettingsElement;
 
 import java.util.List;
 
@@ -27,19 +28,18 @@ public class SyncShineDevice extends SyncCommonDevice {
     public SyncShineDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.SHINE;
-        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
     }
 
     @Override
-    public void startSync(boolean firstSync, SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback, SyncOtaCallback otaCallback) {
+    public void startSync(@NonNull SyncSyncParams syncParams, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
         if (isRunningOn()) {
             return;
         }
 
-        mTaskSharedData.setDeviceBehavior(this);
-        mTaskSharedData.setSyncSyncCallback(syncCallback);
-        mTaskSharedData.setSyncCalculationCallback(calculationCallback);
-        mTaskSharedData.setSyncOtaCallback(otaCallback);
+        TaskSharedData taskSharedData = createTaskSharedData();
+        taskSharedData.setSyncCalculationCallback(calcuCallback);
+        taskSharedData.setSyncOtaCallback(otaCallback);
+        taskSharedData.setSyncParams(syncParams);
 
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new PlayAnimationTask());
@@ -48,7 +48,7 @@ public class SyncShineDevice extends SyncCommonDevice {
         syncTasks.add(new GetConfigurationTask());
         syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
 
-        SyncOperator syncOperator = new SyncOperator(mTaskSharedData, syncTasks);
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, syncTasks);
 
         startOperator(syncOperator);
     }

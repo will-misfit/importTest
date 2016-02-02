@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
-import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.DeviceBehavior;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -34,6 +34,8 @@ public class TaskSharedData {
 
     private boolean isTasksRunning;
 
+    private SyncSyncParams mSyncParams;
+
     public TaskSharedData(String serialNumber, int deviceType) {
         this(serialNumber, deviceType, SdkConstants.OPERATOR_RETRY_TIMES);
     }
@@ -42,6 +44,14 @@ public class TaskSharedData {
         mSerialNumber = serialNumber;
         mDeviceType = deviceType;
         mRemainingRetryCount = retryTimes;
+    }
+
+    public SyncSyncParams getSyncParams() {
+        return mSyncParams;
+    }
+
+    public void setSyncParams(SyncSyncParams syncParams) {
+        mSyncParams = syncParams;
     }
 
     public String getModelName() {
