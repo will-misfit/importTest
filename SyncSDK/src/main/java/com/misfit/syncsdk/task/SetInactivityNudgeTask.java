@@ -1,12 +1,11 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
@@ -57,7 +56,7 @@ public class SetInactivityNudgeTask extends Task implements ConnectionManager.Co
                 retry();
             }
         } else {
-            Log.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);
+            MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);
         }
     }
 }

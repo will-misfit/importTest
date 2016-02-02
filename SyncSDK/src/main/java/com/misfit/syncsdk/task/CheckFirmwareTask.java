@@ -12,7 +12,7 @@ public class CheckFirmwareTask extends Task {
 
     @Override
     protected void execute() {
-
+        taskSucceed();
     }
 
     @Override

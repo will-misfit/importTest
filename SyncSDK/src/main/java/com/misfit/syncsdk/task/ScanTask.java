@@ -1,12 +1,11 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ShineAdapter;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.MisfitScanner;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
@@ -25,7 +24,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
         mCurrTimerTask = new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "time out, will do retry");
+                MLog.d(TAG, "time out, will do retry");
                 onStop();
                 retry();
             }
@@ -42,7 +41,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
     protected void execute() {
         //check if should not scan
         if (ConnectionManager.getInstance().getShineDevice(mTaskSharedData.getSerialNumber()) != null) {
-            Log.d(TAG, "ConnectionManager already has the device, no need to scan");
+            MLog.d(TAG, "ConnectionManager already has the device, no need to scan");
             taskSucceed();
             return;
         }

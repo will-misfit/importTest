@@ -1,13 +1,12 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
@@ -96,7 +95,7 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
         return new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "connect time out");
+                MLog.d(TAG, "connect time out");
                 retry();
             }
         };

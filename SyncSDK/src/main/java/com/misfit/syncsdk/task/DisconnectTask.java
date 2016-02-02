@@ -1,11 +1,10 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
@@ -52,7 +51,7 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
         mCurrTimerTask = new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "time out");
+                MLog.d(TAG, "time out");
                 ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), DisconnectTask.this);
                 retry();
             }
@@ -63,7 +62,7 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
 
     @Override
     public void onConnectionStateChanged(ShineProfile.State newState) {
-        Log.d(TAG, "connectionStateChanged() newState=" + newState);
+        MLog.d(TAG, "connectionStateChanged() newState=" + newState);
         if (mIsFinished) {
             return;
         }
