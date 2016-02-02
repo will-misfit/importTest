@@ -11,7 +11,8 @@ public class SetConfigurationTask extends Task {
 
     @Override
     protected void execute() {
-
+        //TODO:wait to finished
+        taskSucceed();
     }
 
     @Override
