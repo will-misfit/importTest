@@ -12,6 +12,5 @@ public class SyncRayDevice extends SyncCommonDevice {
     public SyncRayDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.BMW;
-        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
     }
 }

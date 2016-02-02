@@ -12,6 +12,5 @@ public class SyncIwcDevice extends SyncCommonDevice {
     public SyncIwcDevice(@NonNull String serialNumber) {
         super(serialNumber);
         mDeviceType = DeviceType.SILVERATTA;
-        mTaskSharedData = new TaskSharedData(mSerialNumber, mDeviceType);
     }
 }

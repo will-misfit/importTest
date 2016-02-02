@@ -19,6 +19,7 @@ import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncTaggingInputCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
@@ -246,6 +247,11 @@ public class MainActivity extends AppCompatActivity
                 handleOnSyncAndCalculationCompleted(sdkActivitySessionGroupList);
             }
         });
+    }
+
+    @Override
+    public void onDeviceTaggingIn(int deviceType, SyncTaggingInputCallback inputCallback) {
+        inputCallback.onUserInputForTaggingIn(true);
     }
 
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
