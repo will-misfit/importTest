@@ -24,9 +24,6 @@ import java.util.List;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Created by Will Hou on 1/29/16.
- */
 public class LogManager {
 
     private final static String TAG = "LogManager";
@@ -106,20 +103,20 @@ public class LogManager {
             String sessionId;
             switch (msg.what) {
                 case REQ_SAVE_SESSION:
-                    writeSession((LogSession) msg.obj);
+                    writeSessionToFile((LogSession) msg.obj);
                     break;
                 case REQ_SAVE_EVENT:
-                    writeEvent((LogEvent) msg.obj);
+                    writeEventToFile((LogEvent) msg.obj);
                     break;
                 case REQ_UPLOAD_SESSION:
                     sessionId = (String) msg.obj;
-                    if (uploadSessionImp(sessionId) == false) {
+                    if (uploadSessionToServer(sessionId) == false) {
                         LocalFileUtils.delete(SESSION_PREFIX + sessionId);
                     }
                     break;
                 case REQ_UPLOAD_EVENTS:
                     sessionId = (String) msg.obj;
-                    if (uploadEventsImp(sessionId) == false) {
+                    if (uploadEventsToServer(sessionId) == false) {
                         LocalFileUtils.delete(EVENTS_PREFIX + sessionId);
                     }
                     break;
@@ -152,7 +149,7 @@ public class LogManager {
          * @param sessionId the target's sessionId
          * @return true if upload started, false for else
          */
-        private boolean uploadSessionImp(String sessionId) {
+        private boolean uploadSessionToServer(String sessionId) {
             String fileName = SESSION_PREFIX + sessionId;
             byte[] sessionBytes = LocalFileUtils.read(fileName);
             if (sessionBytes == null || sessionBytes.length == 0) {
@@ -174,7 +171,7 @@ public class LogManager {
          * @param sessionId the target's sessionId
          * @return true if upload started, false for else
          */
-        private boolean uploadEventsImp(String sessionId) {
+        private boolean uploadEventsToServer(String sessionId) {
             String fileName = EVENTS_PREFIX + sessionId;
             byte[] eventBytes = LocalFileUtils.read(fileName);
             if (eventBytes == null || eventBytes.length == 0) {
@@ -207,7 +204,7 @@ public class LogManager {
             return true;
         }
 
-        private void writeEvent(LogEvent event) {
+        private void writeEventToFile(LogEvent event) {
             try {
                 MLog.d(TAG, String.format("writing event to file, eventId=%s, sessionId=%s", event.id, event.sessionId));
                 FileOutputStream stream = ContextUtils.getInstance().getContext().openFileOutput(EVENTS_PREFIX + event.sessionId, Context.MODE_APPEND);
@@ -222,7 +219,7 @@ public class LogManager {
             }
         }
 
-        private void writeSession(LogSession session) {
+        private void writeSessionToFile(LogSession session) {
             try {
                 MLog.d(TAG, String.format("writing session to file, sessionId=%s", session.getId()));
                 FileOutputStream stream = ContextUtils.getInstance().getContext().openFileOutput(SESSION_PREFIX + session.getId(), Context.MODE_PRIVATE);
