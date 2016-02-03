@@ -13,10 +13,6 @@ import com.misfit.syncsdk.utils.ContextUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
 import com.misfit.syncsdk.utils.MLog;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.TimerTask;
 
 public class OtaTask extends Task {
@@ -136,6 +132,7 @@ public class OtaTask extends Task {
     }
 
     class OtaState extends State implements ShineProfile.OTACallback {
+        private final static long TIMEOUT_OTA = 10000;
         private String mOtaFileName;
         private SyncOtaCallback mSyncOtaCallback;
         //TODO:we can not unsubscribe the ota callback. that is why we use this variable.
@@ -171,6 +168,12 @@ public class OtaTask extends Task {
                 taskFailed("proxy not ready");
                 return;
             }
+            setNewTimeOutTask(new TimerTask() {
+                @Override
+                public void run() {
+                    handleOtaCompleted(false);
+                }
+            }, TIMEOUT_OTA);
             profileProxy.startOTA(firmwareData, this);
         }
 
@@ -202,17 +205,18 @@ public class OtaTask extends Task {
         @Override
         public void onOTACompleted(ShineProfile.ActionResult resultCode) {
             MLog.d(TAG, "ota completed");
+            handleOtaCompleted(resultCode == ShineProfile.ActionResult.SUCCEEDED);
+        }
+
+        synchronized private void handleOtaCompleted(boolean isSucceed) {
             if (mIsStateFinished) {
                 MLog.d(TAG, "state already finished");
                 return;
             }
             mIsStateFinished = true;
-            if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                if (mSyncOtaCallback != null) {
-                    mSyncOtaCallback.onOtaCompleted();
-                }
-            } else {
-                mIsRetryingOta = true;
+            mIsRetryingOta = !isSucceed;
+            if (isSucceed && mSyncOtaCallback != null) {
+                mSyncOtaCallback.onOtaCompleted();
             }
             gotoState(new WaitForConnectState());
         }
@@ -305,7 +309,7 @@ public class OtaTask extends Task {
             if (newState == ShineProfile.State.CONNECTED) {
                 cleanup();
                 if (mIsRetryingOta) {
-                    gotoState(new PrepareOtaState());
+                    retry();
                 } else {
                     taskSucceed();
                 }
@@ -320,7 +324,11 @@ public class OtaTask extends Task {
 
     @Override
     protected void execute() {
-        gotoState(new GetLatestFirmwareState());
+        if (mIsRetryingOta) {
+            gotoState(new PrepareOtaState());
+        } else {
+            gotoState(new GetLatestFirmwareState());
+        }
     }
 
     private void gotoState(State state) {
