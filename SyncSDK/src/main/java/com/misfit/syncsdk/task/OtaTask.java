@@ -199,12 +199,13 @@ public class OtaTask extends Task {
 
         @Override
         void stop() {
-
+            cancelCurrentTimeoutTask();
         }
 
         @Override
         public void onOTACompleted(ShineProfile.ActionResult resultCode) {
             MLog.d(TAG, "ota completed");
+            cancelCurrentTimeoutTask();
             handleOtaCompleted(resultCode == ShineProfile.ActionResult.SUCCEEDED);
         }
 
