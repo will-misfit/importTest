@@ -23,8 +23,11 @@ public class OtaTask extends Task {
 
     private final static String TAG = "OtaTask";
 
-    String mLatestFirmwareVersion;
-    State mCurrState;
+    private State mCurrState;
+
+    private String mLatestFirmwareVersion;
+    private boolean mIsRetryingOta = false;
+    private int mOtaType;
 
     class GetLatestFirmwareState extends State implements FirmwareManager.GetLatestFirmwareListener {
 
@@ -36,6 +39,7 @@ public class OtaTask extends Task {
             String modelName = mTaskSharedData.getModelName();
             String firmwareVersion = mTaskSharedData.getFirmwareVersion();
             //TODO:check modelName & firmwareVersion ready
+            //TODO:handle check latest firmware failed
             FirmwareManager.getInstance().shouldOta(modelName, firmwareVersion, this);
         }
 
@@ -72,8 +76,8 @@ public class OtaTask extends Task {
         @Override
         void execute() {
             if (mTaskSharedData.getSyncOtaCallback() != null) {
-                int otaType = mTaskSharedData.getSyncOtaCallback().getOtaSuggestion(true);
-                gotoState(new PrepareOtaState(otaType));
+                mOtaType = mTaskSharedData.getSyncOtaCallback().getOtaSuggestion(true);
+                gotoState(new PrepareOtaState());
             } else {
                 taskSucceed();
             }
@@ -87,10 +91,7 @@ public class OtaTask extends Task {
 
     class PrepareOtaState extends State implements FirmwareManager.DownloadLatestFirmwareListener {
 
-        int mOtaType;
-
-        public PrepareOtaState(int otaType) {
-            this.mOtaType = otaType;
+        public PrepareOtaState() {
         }
 
         @Override
@@ -147,6 +148,10 @@ public class OtaTask extends Task {
 
         @Override
         void execute() {
+            if (mIsRetryingOta) {
+                mIsRetryingOta = false;
+                MLog.d(TAG, "retry ota");
+            }
             MLog.d(TAG, "binary file name=" + mOtaFileName);
             if (TextUtils.isEmpty(mOtaFileName)) {
                 taskFailed("firmware file name is empty");
@@ -162,30 +167,32 @@ public class OtaTask extends Task {
             }
             MLog.d(TAG, "start ota, name=" + mOtaFileName + ", len=" + firmwareData.length);
             ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-            if (profileProxy != null && profileProxy.isConnected()) {
-                profileProxy.startOTA(firmwareData, this);
+            if (profileProxy == null || !profileProxy.isConnected()) {
+                taskFailed("proxy not ready");
+                return;
             }
+            profileProxy.startOTA(firmwareData, this);
         }
 
         //TODO: delete while firmwareManager completed.
-        private byte[] read(File file) {
-            try {
-                if (file == null || !file.isFile()) {
-                    return null;
-                }
-                long fileSize = file.length();
-                FileInputStream fis = new FileInputStream(file);
-                byte[] data = new byte[(int) fileSize];
-                fis.read(data);
-                fis.close();
-                return data;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
+//        private byte[] read(File file) {
+//            try {
+//                if (file == null || !file.isFile()) {
+//                    return null;
+//                }
+//                long fileSize = file.length();
+//                FileInputStream fis = new FileInputStream(file);
+//                byte[] data = new byte[(int) fileSize];
+//                fis.read(data);
+//                fis.close();
+//                return data;
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
 
         @Override
         void stop() {
@@ -194,15 +201,18 @@ public class OtaTask extends Task {
 
         @Override
         public void onOTACompleted(ShineProfile.ActionResult resultCode) {
-            //TODO: handle ota failed
             MLog.d(TAG, "ota completed");
             if (mIsStateFinished) {
                 MLog.d(TAG, "state already finished");
                 return;
             }
             mIsStateFinished = true;
-            if (mSyncOtaCallback != null) {
-                mSyncOtaCallback.onOtaCompleted();
+            if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                if (mSyncOtaCallback != null) {
+                    mSyncOtaCallback.onOtaCompleted();
+                }
+            } else {
+                mIsRetryingOta = true;
             }
             gotoState(new WaitForConnectState());
         }
@@ -210,7 +220,7 @@ public class OtaTask extends Task {
         @Override
         public void onOTAProgressChanged(float progress) {
             MLog.d(TAG, "ota progress=" + progress);
-            if(mIsStateFinished){
+            if (mIsStateFinished) {
                 MLog.d(TAG, "state already finished");
                 return;
             }
@@ -262,7 +272,6 @@ public class OtaTask extends Task {
                 return;
             }
 
-            //set timeout
             setNewTimeOutTask(new TimerTask() {
                 @Override
                 public void run() {
@@ -277,7 +286,6 @@ public class OtaTask extends Task {
                 }
             }, TIMEOUT_CONNECT);
 
-            //connect
             connectionManager.subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
             proxy.connectProfile(device, ContextUtils.getInstance().getContext());
         }
@@ -296,7 +304,11 @@ public class OtaTask extends Task {
         public void onConnectionStateChanged(ShineProfile.State newState) {
             if (newState == ShineProfile.State.CONNECTED) {
                 cleanup();
-                taskSucceed();
+                if (mIsRetryingOta) {
+                    gotoState(new PrepareOtaState());
+                } else {
+                    taskSucceed();
+                }
             }
         }
     }
