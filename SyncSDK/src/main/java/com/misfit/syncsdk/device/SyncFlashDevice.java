@@ -35,7 +35,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
     @Override
     public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback,
                           SyncOtaCallback otaCallback, SyncSyncParams syncParams) {
-        if (isRunningOn()) {
+        if (isRunning()) {
             return;
         }
 

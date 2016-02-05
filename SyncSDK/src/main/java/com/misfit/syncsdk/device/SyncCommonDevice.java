@@ -51,7 +51,7 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
     }
 
 
-    public boolean isRunningOn() {
+    public boolean isRunning() {
         return mCurrOperator != null;
     }
 

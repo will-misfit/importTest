@@ -36,7 +36,7 @@ public class SyncShineDevice extends SyncCommonDevice {
     @Override
     public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
-        if (isRunningOn()) {
+        if (isRunning()) {
             return;
         }
 
