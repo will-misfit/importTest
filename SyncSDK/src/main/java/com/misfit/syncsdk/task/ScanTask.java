@@ -25,8 +25,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             @Override
             public void run() {
                 MLog.d(TAG, "time out, will do retry");
-                onStop();
-                retry();
+                taskFailed("scan timeout");
             }
         };
         return mCurrTimerTask;
@@ -65,7 +64,6 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             return;
         }
         if (mTaskSharedData.getSerialNumber().equals(device.getSerialNumber())) {
-            //TODO:should add task phase to avoid callback was invoked again.
             cancelCurrentTimerTask();
             ConnectionManager.getInstance().saveShineDevice(device.getSerialNumber(), device);
             MisfitScanner.getInstance().stopScan();
