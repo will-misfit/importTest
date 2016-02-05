@@ -32,8 +32,6 @@ public class TaskSharedData {
 
     private DeviceBehavior mDeviceBehavior;
 
-    private boolean isTasksRunning;
-
     private SyncSyncParams mSyncParams;
 
     public TaskSharedData(String serialNumber, int deviceType) {
@@ -68,14 +66,6 @@ public class TaskSharedData {
 
     public void setFirmwareVersion(String mFirmwareVersion) {
         this.mFirmwareVersion = mFirmwareVersion;
-    }
-
-    public boolean isTasksRunning() {
-        return isTasksRunning;
-    }
-
-    public void setTasksRunning(boolean isTasksRunning) {
-        this.isTasksRunning = isTasksRunning;
     }
 
     public int getDeviceType() {

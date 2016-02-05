@@ -33,12 +33,14 @@ public class SyncFlashDevice extends SyncCommonDevice {
     }
 
     @Override
-    public void startSync(@NonNull SyncSyncParams syncParams, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
+    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback,
+                          SyncOtaCallback otaCallback, SyncSyncParams syncParams) {
         if (isRunningOn()) {
             return;
         }
 
         TaskSharedData taskSharedData = createTaskSharedData();
+        taskSharedData.setSyncSyncCallback(syncCallback);
         taskSharedData.setSyncCalculationCallback(calcuCallback);
         taskSharedData.setSyncOtaCallback(otaCallback);
         taskSharedData.setSyncParams(syncParams);
@@ -57,7 +59,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
         tasks.add(new SetConfigurationTask());
         tasks.add(new DisconnectTask());
 
-        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks);
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks, this);
 
         startOperator(syncOperator);
     }

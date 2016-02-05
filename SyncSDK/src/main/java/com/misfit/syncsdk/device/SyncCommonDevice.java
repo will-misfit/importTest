@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * class type to send to Misfit flagship app
  */
-public class SyncCommonDevice implements DeviceBehavior {
+public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleaseCallback{
     private final static String TAG = "SyncCommonDevice";
 
     protected String mSerialNumber;
@@ -52,10 +52,11 @@ public class SyncCommonDevice implements DeviceBehavior {
 
 
     public boolean isRunningOn() {
-        return mCurrOperator != null && mCurrOperator.getTaskSharedData().isTasksRunning();
+        return mCurrOperator != null;
     }
 
-    public void startSync(@NonNull SyncSyncParams syncParams, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
+    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
+                          SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
     }
 
     protected void startOperator(Operator operator) {
@@ -99,12 +100,7 @@ public class SyncCommonDevice implements DeviceBehavior {
         return false;
     }
 
-    /**
-     * For Test: set ShineSdkSynCompleteCallback to test the ShineSDK ShineProfile sync read data result
-     */
-//    public void setSyncSyncCallback(SyncSyncCallback syncSyncCallback) {
-//        if (mTaskSharedData != null) {
-//            mTaskSharedData.setSyncSyncCallback(syncSyncCallback);
-//        }
-//    }
+    public void onOperatorRelease() {
+        mCurrOperator = null;
+    }
 }

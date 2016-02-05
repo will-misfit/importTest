@@ -30,14 +30,19 @@ public class SyncShineDevice extends SyncCommonDevice {
         mDeviceType = DeviceType.SHINE;
     }
 
+    /**
+     * currently SyncCommonDevice supports only one Operator running
+     * */
     @Override
-    public void startSync(@NonNull SyncSyncParams syncParams, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
+    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
+                          SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
         if (isRunningOn()) {
             return;
         }
 
         TaskSharedData taskSharedData = createTaskSharedData();
-        taskSharedData.setSyncCalculationCallback(calcuCallback);
+        taskSharedData.setSyncSyncCallback(syncCallback);
+        taskSharedData.setSyncCalculationCallback(calculationCallback);
         taskSharedData.setSyncOtaCallback(otaCallback);
         taskSharedData.setSyncParams(syncParams);
 
@@ -48,7 +53,7 @@ public class SyncShineDevice extends SyncCommonDevice {
         syncTasks.add(new GetConfigurationTask());
         syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
 
-        SyncOperator syncOperator = new SyncOperator(taskSharedData, syncTasks);
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, syncTasks, this);
 
         startOperator(syncOperator);
     }

@@ -37,13 +37,15 @@ public class SyncShine2Device extends SyncCommonDevice {
     }
 
     @Override
-    public void startSync(@NonNull SyncSyncParams syncParams, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback, SyncOtaCallback otaCallback) {
+    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
+                          SyncOtaCallback otaCallback, SyncSyncParams syncParams) {
         if (isRunningOn()) {
             return;
         }
 
         TaskSharedData taskSharedData = createTaskSharedData();
-        taskSharedData.setSyncCalculationCallback(calcuCallback);
+        taskSharedData.setSyncSyncCallback(syncCallback);
+        taskSharedData.setSyncCalculationCallback(calculationCallback);
         taskSharedData.setSyncOtaCallback(otaCallback);
         taskSharedData.setSyncParams(syncParams);
 
@@ -62,7 +64,7 @@ public class SyncShine2Device extends SyncCommonDevice {
         tasks.add(new SetInactivityNudgeTask());
         tasks.add(new DisconnectTask());
 
-        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks);
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks, this);
 
         startOperator(syncOperator);
     }

@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity
     void sync() {
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
-        mSyncCommonDevice.startSync(syncParams, this, this, this);
+        mSyncCommonDevice.startSync(this, this, this, syncParams);
         mSyncOutputTextView.setText("");
         setOperationPanelEnabled(false);
     }
