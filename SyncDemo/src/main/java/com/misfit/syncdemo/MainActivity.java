@@ -19,9 +19,10 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
+import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
-import com.misfit.syncsdk.callback.SyncTaggingInputCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
@@ -97,6 +98,13 @@ public class MainActivity extends AppCompatActivity
     List<View> syncPanel;
 
     private SyncResult mShineSdkSyncResult = new SyncResult();
+
+    SyncOnTagInStateListener tagInStateListener = new SyncOnTagInStateListener() {
+        @Override
+        public void onDeviceTaggingIn(int deviceType, SyncOnTagInUserInputListener inputCallback) {
+            inputCallback.onUserInputForTaggingIn(mSwitchTaggingResponse.isChecked());
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -288,10 +296,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    @Override
-    public void onDeviceTaggingIn(int deviceType, SyncTaggingInputCallback inputCallback) {
-        inputCallback.onUserInputForTaggingIn(mSwitchTaggingResponse.isChecked());
-    }
 
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
         if (syncResultList == null || syncResultList.isEmpty()) {

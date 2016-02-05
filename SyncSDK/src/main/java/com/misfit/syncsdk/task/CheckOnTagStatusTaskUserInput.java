@@ -1,12 +1,12 @@
 package com.misfit.syncsdk.task;
 
 import com.misfit.ble.shine.ShineConfiguration;
-import com.misfit.syncsdk.callback.SyncTaggingInputCallback;
+import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 
 /**
  * check the tagging state, if true, then tell the app and wait for the callback
  */
-public class CheckTaggingStatusTask extends Task implements SyncTaggingInputCallback {
+public class CheckOnTagStatusTaskUserInput extends Task implements SyncOnTagInUserInputListener {
 
     @Override
     protected void prepare() {
@@ -21,11 +21,12 @@ public class CheckTaggingStatusTask extends Task implements SyncTaggingInputCall
         }
         byte taggingState = mTaskSharedData.getConfigurationSession().mShineConfiguration.mActivityTaggingState;
         if (taggingState == ShineConfiguration.ACTIVITY_TAGGING_STATE_TAGGED_IN) {
-            if (mTaskSharedData.getSyncSyncCallback() == null) {
-                taskFailed("SyncSyncCallback is null");
+            if (mTaskSharedData.getSyncParams().tagInStateListener == null) {
+                taskFailed("SyncOnTagInStateListener is null");
                 return;
             }
-            mTaskSharedData.getSyncSyncCallback().onDeviceTaggingIn(mTaskSharedData.getDeviceType(), this);
+
+            mTaskSharedData.getSyncParams().tagInStateListener.onDeviceTaggingIn(mTaskSharedData.getDeviceType(), this);
         } else {
             taskSucceed();
         }
