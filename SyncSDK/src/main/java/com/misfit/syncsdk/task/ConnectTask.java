@@ -75,14 +75,14 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
         }
         ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
         if (state == ShineProfile.State.CONNECTED) {
-            updateTaskSharedData();
+            updateDeviceInfo();
             taskSucceed();
         } else {
             retry();
         }
     }
 
-    private void updateTaskSharedData() {
+    private void updateDeviceInfo() {
         ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         mTaskSharedData.setFirmwareVersion(profileProxy.getFirmwareVersion());
         mTaskSharedData.setModelName(profileProxy.getModelNumber());
