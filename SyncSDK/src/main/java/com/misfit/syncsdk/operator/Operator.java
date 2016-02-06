@@ -108,11 +108,8 @@ public class Operator implements Task.TaskResultCallback {
 
     @Override
     public void onTaskFailed(Task task, int reason) {
-        Log.d(TAG, task.getClass().getSimpleName() + "failed, reason=" + reason + ", shouldIgnore=" + task.couldIgnoreResult() + ", shouldEndFlow=" + task.shouldEndFlow());
-        if (task.couldIgnoreResult()) {
-            Log.d(TAG, "ignore result");
-            gotoNext();
-        } else if (task.shouldEndFlow()) {
+        Log.d(TAG, task.getClass().getSimpleName() + " failed, reason=" + reason);
+        if (task.shouldEndFlow()) {
             onFlowEnded("task wants end flow");
         } else {
             retry();

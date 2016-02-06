@@ -22,11 +22,7 @@ public class SetInactivityNudgeTask extends Task implements ConnectionManager.Co
     protected void execute() {
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
-            taskFailed("proxy not prepared");
-            return;
-        }
-        if (mTaskSharedData.getSyncParams() == null) {
-            taskSucceed();
+            taskIgnored("proxy not prepared");
             return;
         }
         ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);

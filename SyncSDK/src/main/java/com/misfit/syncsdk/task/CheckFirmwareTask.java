@@ -12,15 +12,10 @@ public class CheckFirmwareTask extends Task {
     }
 
     @Override
-    public boolean couldIgnoreResult() {
-        return true;
-    }
-
-    @Override
     protected void execute() {
         String modelName = mTaskSharedData.getModelName();
         if (TextUtils.isDigitsOnly(modelName)) {
-            taskFailed("modelName is empty");
+            taskIgnored("modelName is empty");
             return;
         }
         FirmwareManager firmwareManager = FirmwareManager.getInstance();

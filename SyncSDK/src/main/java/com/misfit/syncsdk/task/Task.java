@@ -26,10 +26,6 @@ public abstract class Task {
     // Timer to monitor whether the Task execution timeout
     protected TimerTask mCurrTimerTask;
 
-    public boolean couldIgnoreResult() {
-        return false;
-    }
-
     public boolean shouldEndFlow() {
         return false;
     }
@@ -59,6 +55,17 @@ public abstract class Task {
         }
     }
 
+    protected void retryAndIgnored() {
+        mRemainingRetry--;
+        Log.d(TAG, this.getClass().getSimpleName() + " retry, remaining retry=" + mRemainingRetry);
+        if (mRemainingRetry <= 0) {
+            taskIgnored("retry out");
+        } else {
+            cleanup();
+            start(mTaskSharedData);
+        }
+    }
+
     protected void taskFailed(String reason) {
         mIsFinished = true;
         cleanup();
@@ -73,6 +80,15 @@ public abstract class Task {
         mIsFinished = true;
         cleanup();
         Log.d(TAG, this.getClass().getSimpleName() + " completed");
+        if (mTaskResultCallback != null) {
+            mTaskResultCallback.onTaskFinished();
+        }
+    }
+
+    protected void taskIgnored(String reason) {
+        mIsFinished = true;
+        cleanup();
+        Log.d(TAG, this.getClass().getSimpleName() + " was skipped by" + reason);
         if (mTaskResultCallback != null) {
             mTaskResultCallback.onTaskFinished();
         }

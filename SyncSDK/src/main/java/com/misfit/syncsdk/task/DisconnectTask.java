@@ -17,11 +17,6 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
     private final static String TAG = "DisconnectTask";
 
     @Override
-    public boolean couldIgnoreResult() {
-        return true;
-    }
-
-    @Override
     protected void prepare() {
 
     }
@@ -53,7 +48,7 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
             public void run() {
                 MLog.d(TAG, "time out");
                 ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), DisconnectTask.this);
-                retry();
+                retryAndIgnored();
             }
         };
         return mCurrTimerTask;

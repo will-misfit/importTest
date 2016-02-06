@@ -1,7 +1,5 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
@@ -25,10 +23,6 @@ public class ActivateTask extends Task implements ConnectionManager.ConfigComple
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
             taskFailed("proxy not prepared");
-            return;
-        }
-        if (mTaskSharedData.getSyncParams() == null) {
-            taskSucceed();
             return;
         }
         ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);

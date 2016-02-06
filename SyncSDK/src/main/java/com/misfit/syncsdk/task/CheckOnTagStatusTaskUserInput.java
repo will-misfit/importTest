@@ -15,17 +15,17 @@ public class CheckOnTagStatusTaskUserInput extends Task implements SyncOnTagInUs
 
     @Override
     protected void execute() {
-        if (mTaskSharedData.getConfigurationSession() == null) {
+        if (mTaskSharedData.getConfigurationSession() == null
+                || mTaskSharedData.getConfigurationSession().mShineConfiguration == null) {
             taskFailed("configuration is null");
+            return;
+        }
+        if (mTaskSharedData.getSyncParams().tagInStateListener == null) {
+            taskFailed("SyncOnTagInStateListener is null");
             return;
         }
         byte taggingState = mTaskSharedData.getConfigurationSession().mShineConfiguration.mActivityTaggingState;
         if (taggingState == ShineConfiguration.ACTIVITY_TAGGING_STATE_TAGGED_IN) {
-            if (mTaskSharedData.getSyncParams().tagInStateListener == null) {
-                taskFailed("SyncOnTagInStateListener is null");
-                return;
-            }
-
             mTaskSharedData.getSyncParams().tagInStateListener.onDeviceTaggingIn(mTaskSharedData.getDeviceType(), this);
         } else {
             taskSucceed();

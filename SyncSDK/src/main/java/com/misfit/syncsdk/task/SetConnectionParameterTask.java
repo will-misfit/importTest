@@ -26,11 +26,6 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
     }
 
     @Override
-    public boolean couldIgnoreResult() {
-        return true;
-    }
-
-    @Override
     protected void prepare() {
 
     }
@@ -42,7 +37,7 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
             ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
             proxy.startSettingConnectionParams(mParameters);
         } else {
-            taskFailed("connection did not ready");
+            taskIgnored("connection did not ready");
         }
     }
 
@@ -62,7 +57,7 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 taskSucceed();
             } else {
-                retry();
+                retryAndIgnored();
             }
         } else {
             Log.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);
