@@ -30,8 +30,6 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     private List<SyncResult> mSyncResultSummary;
 
-    //ShineSdkSyncCompleteCallback mShineSdkSyncCompleteCallback;
-
     /* callback of Task */
     @Override
     protected void prepare() {

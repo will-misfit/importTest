@@ -11,7 +11,9 @@ import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
+import com.misfit.syncsdk.task.CheckFirmwareTask;
 import com.misfit.syncsdk.task.GetConfigurationTask;
+import com.misfit.syncsdk.task.OtaTask;
 import com.misfit.syncsdk.task.PlayAnimationTask;
 import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SetConnectionParameterTask;
@@ -32,7 +34,7 @@ public class SyncShineDevice extends SyncCommonDevice {
 
     /**
      * currently SyncCommonDevice supports only one Operator running
-     * */
+     */
     @Override
     public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
@@ -47,11 +49,13 @@ public class SyncShineDevice extends SyncCommonDevice {
         taskSharedData.setSyncParams(syncParams);
 
         List<Task> syncTasks = prepareTasks();
+        syncTasks.add(new CheckFirmwareTask());
         syncTasks.add(new PlayAnimationTask());
         syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
         syncTasks.add(new SyncAndCalculateTask());
+        syncTasks.add(new OtaTask());
         syncTasks.add(new GetConfigurationTask());
-        syncTasks.add(new SetConfigurationTask());  //TODO:where to get configuration: from context
+        syncTasks.add(new SetConfigurationTask());
 
         SyncOperator syncOperator = new SyncOperator(taskSharedData, syncTasks, this);
 
