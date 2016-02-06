@@ -21,9 +21,8 @@ public class StopAnimationTask extends Task implements ConnectionManager.ConfigC
     @Override
     protected void execute() {
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-
         if (proxy == null || !proxy.isConnected()) {
-            taskFailed("proxy did not prepared");
+            taskFailed("proxy not prepared");
             return;
         }
         ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
@@ -46,7 +45,7 @@ public class StopAnimationTask extends Task implements ConnectionManager.ConfigC
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 taskSucceed();
             } else {
-                retry();
+                retryAndIgnored();
             }
         } else {
             MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);

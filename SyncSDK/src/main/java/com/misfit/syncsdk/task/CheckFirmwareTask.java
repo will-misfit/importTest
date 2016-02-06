@@ -14,7 +14,7 @@ public class CheckFirmwareTask extends Task {
     @Override
     protected void execute() {
         String modelName = mTaskSharedData.getModelName();
-        if (TextUtils.isDigitsOnly(modelName)) {
+        if (TextUtils.isEmpty(modelName)) {
             taskIgnored("modelName is empty");
             return;
         }

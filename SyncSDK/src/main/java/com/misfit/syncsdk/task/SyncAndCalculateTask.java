@@ -37,18 +37,19 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     @Override
     protected void execute() {
+        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+        if (proxy == null || !proxy.isConnected()) {
+            taskFailed("proxy not prepared");
+            return;
+        }
         if (mTaskSharedData.getSyncSyncCallback() == null) {
             taskFailed("SyncSyncCallback is not ready");
             return;
         }
 
-        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        if (proxy != null && proxy.isConnected()) {
 //            ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.serialNumber, this);//FIXME:need this?
-            proxy.startSyncing(this);
-        } else {
-            taskFailed("connection did not ready");
-        }
+        proxy.startSyncing(this);
+
     }
 
     @Override

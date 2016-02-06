@@ -24,11 +24,13 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
     @Override
     protected void execute() {
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        if (proxy != null && proxy.isConnected()) {
-            ConnectionManager.getInstance().subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
-            TimerManager.getInstance().addTimerTask(createTimeoutTimerTask(), 2000);
-            proxy.close();
+        if (proxy == null || !proxy.isConnected()) {
+            taskSucceed();
+            return;
         }
+        ConnectionManager.getInstance().subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+        TimerManager.getInstance().addTimerTask(createTimeoutTimerTask(), 2000);
+        proxy.close();
     }
 
     @Override

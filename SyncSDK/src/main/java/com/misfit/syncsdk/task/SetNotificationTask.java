@@ -25,12 +25,12 @@ public class SetNotificationTask extends Task implements ConnectionManager.Confi
             taskIgnored("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        if (mTaskSharedData.getSyncParams().inactivityNudgeSettings != null) {
-            proxy.setCallTextNotification(mTaskSharedData.getSyncParams().notificationsSettings);
-        } else {
-            taskSucceed();
+        if (mTaskSharedData.getSyncParams().notificationsSettings == null) {
+            taskIgnored("Notification settings is null");
+            return;
         }
+        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
+        proxy.setCallTextNotification(mTaskSharedData.getSyncParams().notificationsSettings);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SetNotificationTask extends Task implements ConnectionManager.Confi
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 taskSucceed();
             } else {
-                retry();
+                retryAndIgnored();
             }
         } else {
             MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);

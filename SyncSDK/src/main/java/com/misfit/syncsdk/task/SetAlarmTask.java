@@ -25,17 +25,14 @@ public class SetAlarmTask extends Task implements ConnectionManager.ConfigComple
             taskFailed("proxy not prepared");
             return;
         }
-        if (mTaskSharedData.getSyncParams() == null) {
-            taskSucceed();
-            return;
-        }
+
         ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
         if (mTaskSharedData.getSyncParams().shouldClearAlarmSettings) {
             proxy.clearAllAlarms();
         } else if (mTaskSharedData.getSyncParams().alarmSettings != null) {
             proxy.setSingleAlarm(mTaskSharedData.getSyncParams().alarmSettings);
         } else {
-            taskSucceed();
+            taskIgnored("no alarm settings");
         }
     }
 
@@ -55,7 +52,7 @@ public class SetAlarmTask extends Task implements ConnectionManager.ConfigComple
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 taskSucceed();
             } else {
-                retry();
+                retryAndIgnored();
             }
         } else {
             MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);

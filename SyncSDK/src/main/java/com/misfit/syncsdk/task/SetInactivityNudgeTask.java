@@ -25,12 +25,12 @@ public class SetInactivityNudgeTask extends Task implements ConnectionManager.Co
             taskIgnored("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        if (mTaskSharedData.getSyncParams().inactivityNudgeSettings != null) {
-            proxy.setInactivityNudge(mTaskSharedData.getSyncParams().inactivityNudgeSettings);
-        } else {
-            taskSucceed();
+        if (mTaskSharedData.getSyncParams().inactivityNudgeSettings == null) {
+            taskIgnored("InactivityNudge settings is null");
+            return;
         }
+        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
+        proxy.setInactivityNudge(mTaskSharedData.getSyncParams().inactivityNudgeSettings);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class SetInactivityNudgeTask extends Task implements ConnectionManager.Co
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 taskSucceed();
             } else {
-                retry();
+                retryAndIgnored();
             }
         } else {
             MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);

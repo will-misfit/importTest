@@ -33,12 +33,12 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
     @Override
     protected void execute() {
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        if (proxy != null && proxy.isConnected()) {
-            ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-            proxy.startSettingConnectionParams(mParameters);
-        } else {
-            taskIgnored("connection did not ready");
+        if (proxy == null || !proxy.isConnected()) {
+            taskFailed("proxy not prepared");
+            return;
         }
+        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
+        proxy.startSettingConnectionParams(mParameters);
     }
 
     @Override
@@ -53,7 +53,6 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
         if (actionID == ActionID.SET_CONNECTION_PARAMETERS) {
-            ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 taskSucceed();
             } else {

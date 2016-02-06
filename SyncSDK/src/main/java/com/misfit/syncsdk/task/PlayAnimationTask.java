@@ -25,12 +25,12 @@ public class PlayAnimationTask extends Task implements ConnectionManager.ConfigC
     @Override
     protected void execute() {
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        if (proxy != null && proxy.isConnected()) {
-            ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-            proxy.playAnimation();
-        } else {
-            taskFailed("connection did not ready");
+        if (proxy == null || !proxy.isConnected()) {
+            taskFailed("proxy not prepared");
+            return;
         }
+        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
+        proxy.playAnimation();
     }
 
     @Override
