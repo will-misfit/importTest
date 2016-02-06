@@ -1,5 +1,8 @@
 package com.misfit.syncsdk.operator;
 
+import android.support.annotation.NonNull;
+
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.task.Task;
 
@@ -12,8 +15,9 @@ public class SyncOperator extends Operator{
 
     //FIXME: add time out timer
 
-    public SyncOperator(TaskSharedData taskSharedData, List<Task> taskQueue, OperatorReleaseCallback releaseCallback) {
-        super(taskSharedData, taskQueue, releaseCallback);
+
+    public SyncOperator(@NonNull TaskSharedData taskSharedData, @NonNull List<Task> taskList, @NonNull SyncOperationResultCallback resultCallback, OperatorReleaseCallback releaseCallback) {
+        super(taskSharedData, taskList, resultCallback, releaseCallback);
     }
 
     @Override

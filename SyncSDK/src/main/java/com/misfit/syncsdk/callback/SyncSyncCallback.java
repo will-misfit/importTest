@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * a group of callbacks which will be called inside SyncSDK to inform App the sync results
  */
-public interface SyncSyncCallback extends OperationResultCallback {
+public interface SyncSyncCallback {
 
     /**
      * @param syncResultList is per minute Activity data collection from ShineSDK ShineProfile.SyncCallback

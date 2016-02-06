@@ -4,7 +4,9 @@ import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
+import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.SettingsElement;
@@ -36,9 +38,10 @@ public class SyncShineDevice extends SyncCommonDevice {
      * currently SyncCommonDevice supports only one Operator running
      */
     @Override
-    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
+    public void startSync(@NonNull SyncOperationResultCallback resultCallback, SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
         if (isRunning()) {
+            resultCallback.onFailed(SyncOperationResult.RUNNING);
             return;
         }
 
@@ -57,7 +60,7 @@ public class SyncShineDevice extends SyncCommonDevice {
         syncTasks.add(new GetConfigurationTask());
         syncTasks.add(new SetConfigurationTask());
 
-        SyncOperator syncOperator = new SyncOperator(taskSharedData, syncTasks, this);
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, syncTasks, resultCallback, this);
 
         startOperator(syncOperator);
     }

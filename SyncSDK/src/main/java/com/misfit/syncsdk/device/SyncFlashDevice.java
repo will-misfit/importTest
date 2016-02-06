@@ -3,7 +3,9 @@ package com.misfit.syncsdk.device;
 import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.DeviceType;
+import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.SettingsElement;
@@ -33,9 +35,10 @@ public class SyncFlashDevice extends SyncCommonDevice {
     }
 
     @Override
-    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback,
-                          SyncOtaCallback otaCallback, SyncSyncParams syncParams) {
+    public void startSync(@NonNull SyncOperationResultCallback resultCallback, SyncSyncCallback syncCallback, SyncCalculationCallback calcuCallback,
+                          SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
         if (isRunning()) {
+            resultCallback.onFailed(SyncOperationResult.RUNNING);
             return;
         }
 
@@ -45,7 +48,6 @@ public class SyncFlashDevice extends SyncCommonDevice {
         taskSharedData.setSyncOtaCallback(otaCallback);
         taskSharedData.setSyncParams(syncParams);
 
-        SyncAndCalculateTask syncAndCalculateTask = new SyncAndCalculateTask();
         List<Task> tasks = prepareTasks();
         tasks.add(new CheckFirmwareTask());
         tasks.add(new PlayAnimationTask());
@@ -54,12 +56,12 @@ public class SyncFlashDevice extends SyncCommonDevice {
         }
         tasks.add(new GetConfigurationTask());
         tasks.add(new CheckOnTagStatusTaskUserInput());
-        tasks.add(syncAndCalculateTask);
+        tasks.add(new SyncAndCalculateTask());
         tasks.add(new OtaTask());
         tasks.add(new SetConfigurationTask());
         tasks.add(new DisconnectTask());
 
-        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks, this);
+        SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks, resultCallback, this);
 
         startOperator(syncOperator);
     }

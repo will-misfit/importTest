@@ -3,7 +3,7 @@ package com.misfit.syncsdk.operator;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.misfit.syncsdk.callback.OperationResultCallback;
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.task.Task;
 
@@ -24,14 +24,15 @@ public class Operator implements Task.TaskResultCallback {
 
     protected TimerTask mCurrTimerTask;
 
-    OperationResultCallback mResultCallback;
+    SyncOperationResultCallback mResultCallback;
 
     private OperatorReleaseCallback mReleaseCallback;
 
-    public Operator(@NonNull TaskSharedData taskSharedData, @NonNull List<Task> taskList, OperatorReleaseCallback releaseCallback) {
+    public Operator(@NonNull TaskSharedData taskSharedData, @NonNull List<Task> taskList, @NonNull SyncOperationResultCallback resultCallback, OperatorReleaseCallback releaseCallback) {
         mTaskSharedData = taskSharedData;
         mTaskQueue = taskList;
         mReleaseCallback = releaseCallback;
+        mResultCallback = resultCallback;
     }
 
     public TaskSharedData getTaskSharedData() {
@@ -87,7 +88,7 @@ public class Operator implements Task.TaskResultCallback {
 
     /**
      * clean up internal resources, and invoke callback to release this Operator instance
-     * */
+     */
     private void cleanUpAndRelease() {
         cancelCurrentTimerTask();
         mTaskSharedData = null;

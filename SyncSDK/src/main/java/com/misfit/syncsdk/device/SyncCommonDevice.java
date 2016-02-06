@@ -6,6 +6,7 @@ import android.util.Log;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.model.SettingsElement;
@@ -55,7 +56,7 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
         return mCurrOperator != null;
     }
 
-    public void startSync(SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
+    public void startSync(@NonNull SyncOperationResultCallback resultCallback, SyncSyncCallback syncCallback, SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
     }
 
