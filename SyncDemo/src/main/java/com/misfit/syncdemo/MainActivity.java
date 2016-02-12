@@ -17,12 +17,12 @@ import android.widget.TextView;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncSdkAdapter;
+import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
 import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
@@ -44,7 +44,7 @@ import butterknife.OnTouch;
 
 
 public class MainActivity extends AppCompatActivity
-        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
+        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, ReadDataCallback {
 
     private final static String TAG = "MainActivity";
 
@@ -270,13 +270,13 @@ public class MainActivity extends AppCompatActivity
         return result;
     }
 
-    /* interface methods of SyncSyncCallback */
+    /* interface methods of ReadDataCallback */
 
     /**
      * separate the thread where SyncSDK callback comes from and the main UI thread
      */
     @Override
-    public void onShineProfileSyncReadDataCompleted(final List<SyncResult> syncResultList) {
+    public void onRawDataReadCompleted(final List<SyncResult> syncResultList) {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSyncAndCalculationCompleted(final List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
+    public void onDataCalculateCompleted(final List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {

@@ -8,16 +8,16 @@ import java.util.List;
 /**
  * a group of callbacks which will be called inside SyncSDK to inform App the sync results
  */
-public interface SyncSyncCallback {
+public interface ReadDataCallback {
 
     /**
      * @param syncResultList is per minute Activity data collection from ShineSDK ShineProfile.SyncCallback
      */
-    void onShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList);
+    void onRawDataReadCompleted(List<SyncResult> syncResultList);
 
     /**
      * @param sdkActivitySessionGroupList is activity session list and sleep session list after calculation
      */
-    void onSyncAndCalculationCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList);
+    void onDataCalculateCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList);
 
 }

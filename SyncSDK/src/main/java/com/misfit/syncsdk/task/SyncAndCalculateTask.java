@@ -42,8 +42,8 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
             taskFailed("proxy not prepared");
             return;
         }
-        if (mTaskSharedData.getSyncSyncCallback() == null) {
-            taskFailed("SyncSyncCallback is not ready");
+        if (mTaskSharedData.getReadDataCallback() == null) {
+            taskFailed("ReadDataCallback is not ready");
             return;
         }
 
@@ -73,8 +73,8 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         mSyncResultSummary = syncResults;
 
         // if test the ShineSDK ShineProfile SyncCallback result
-        if (mTaskSharedData.getSyncSyncCallback() != null) {
-            mTaskSharedData.getSyncSyncCallback().onShineProfileSyncReadDataCompleted(syncResults);
+        if (mTaskSharedData.getReadDataCallback() != null) {
+            mTaskSharedData.getReadDataCallback().onRawDataReadCompleted(syncResults);
         }
     }
 
@@ -201,8 +201,8 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
                 List<SdkActivitySessionGroup> sdkActivitySessionGroups =
                         DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult, mTaskSharedData.getSyncCalculationCallback());
-                if (mTaskSharedData.getSyncSyncCallback() != null) {
-                    mTaskSharedData.getSyncSyncCallback().onSyncAndCalculationCompleted(sdkActivitySessionGroups);
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroups);
                 }
                 taskSucceed();
             }

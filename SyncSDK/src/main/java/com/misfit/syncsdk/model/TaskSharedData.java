@@ -3,10 +3,10 @@ package com.misfit.syncsdk.model;
 import android.support.annotation.NonNull;
 
 import com.misfit.ble.shine.controller.ConfigurationSession;
+import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.DeviceBehavior;
 import com.misfit.syncsdk.utils.SdkConstants;
 
@@ -25,7 +25,7 @@ public class TaskSharedData {
 
     private int mDeviceType; // opt to update later
 
-    private SyncSyncCallback mSyncSyncCallback;
+    private ReadDataCallback mReadDataCallback;
     private SyncCalculationCallback mSyncCalculationCallback;
     private SyncOtaCallback mSyncOtaCallback;
     private SyncAnimationCallback mSyncAnimationCallback;
@@ -96,12 +96,12 @@ public class TaskSharedData {
         return mSyncCalculationCallback;
     }
 
-    public void setSyncSyncCallback(SyncSyncCallback syncSyncCallback) {
-        this.mSyncSyncCallback = syncSyncCallback;
+    public void setReadDataCallback(ReadDataCallback readDataCallback) {
+        this.mReadDataCallback = readDataCallback;
     }
 
-    public SyncSyncCallback getSyncSyncCallback() {
-        return this.mSyncSyncCallback;
+    public ReadDataCallback getReadDataCallback() {
+        return this.mReadDataCallback;
     }
 
     public void setSyncAnimationCallback(SyncAnimationCallback mSyncAnimationCallback) {
