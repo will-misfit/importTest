@@ -6,7 +6,6 @@ import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.FirmwareManager;
-import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.utils.ContextUtils;
@@ -23,7 +22,7 @@ public class OtaTask extends Task {
 
     private String mLatestFirmwareVersion;
     private boolean mIsRetryingOta = false;
-    private int mOtaType;
+    private boolean mForceOta = false;
 
     class GetLatestFirmwareState extends State implements FirmwareManager.GetLatestFirmwareListener {
 
@@ -72,7 +71,7 @@ public class OtaTask extends Task {
         @Override
         void execute() {
             if (mTaskSharedData.getSyncOtaCallback() != null) {
-                mOtaType = mTaskSharedData.getSyncOtaCallback().getOtaSuggestion(true);
+                mForceOta = mTaskSharedData.getSyncOtaCallback().isForceOta(true);
                 gotoState(new PrepareOtaState());
             } else {
                 taskSucceed();
@@ -92,25 +91,17 @@ public class OtaTask extends Task {
 
         @Override
         void execute() {
-            MLog.d(TAG, "OtaType=" + mOtaType);
+            MLog.d(TAG, "Force OTA =" + String.valueOf(mForceOta));
             FirmwareManager firmwareManager = FirmwareManager.getInstance();
-            switch (mOtaType) {
-                case OtaType.NO_NEED_TO_OTA:
-                    taskSucceed();
-                    break;
-                case OtaType.NEED_OTA:
-                    if (firmwareManager.isNewFirmwareReadyNow(mLatestFirmwareVersion)) {
-                        firmwareManager.isNewFirmwareReady(mLatestFirmwareVersion, this);
-                    } else {
-                        taskSucceed();  //skip this time
-                    }
-                    break;
-                case OtaType.FORCE_OTA:
+
+            if (mForceOta) {
+                firmwareManager.isNewFirmwareReady(mLatestFirmwareVersion, this);
+            } else {
+                if (firmwareManager.isNewFirmwareReadyNow(mLatestFirmwareVersion)) {
                     firmwareManager.isNewFirmwareReady(mLatestFirmwareVersion, this);
-                    break;
-                default:
-                    //TODO:MLog as unexpected event
-                    break;
+                } else {
+                    taskSucceed();  //skip this time
+                }
             }
         }
 

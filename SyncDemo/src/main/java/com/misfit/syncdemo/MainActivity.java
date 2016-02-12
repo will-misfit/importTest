@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncsdk.DeviceType;
-import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
@@ -220,9 +219,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public int getOtaSuggestion(boolean hasNewFirmware) {
-        int type = mSwitchShouldForceOta.isChecked() ? OtaType.FORCE_OTA : OtaType.NEED_OTA;
-        return type;
+    public boolean isForceOta(boolean hasNewFirmware) {
+        return mSwitchShouldForceOta.isChecked();
     }
 
     /* interface methods of SyncOperationResultCallback */
