@@ -21,6 +21,7 @@ import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
 import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.SyncSyncCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
@@ -44,7 +45,7 @@ import butterknife.OnTouch;
 
 
 public class MainActivity extends AppCompatActivity
-        implements SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
+        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, SyncSyncCallback {
 
     private final static String TAG = "MainActivity";
 
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity
     void sync() {
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
-        mSyncCommonDevice.startSync(this, this, this, syncParams);
+        mSyncCommonDevice.startSync(this, this, this, this, syncParams);
         mSyncOutputTextView.setText("");
         setOperationPanelEnabled(false);
     }
