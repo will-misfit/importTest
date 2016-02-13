@@ -5,6 +5,7 @@ import android.content.Context;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.enums.ScanFailedReason;
 import com.misfit.syncsdk.utils.ContextUtils;
 
 /**
@@ -39,14 +40,17 @@ public class SyncSdkAdapter {
      * @param scanCallback
      * @return true if scanning started, false for else.
      */
-    public boolean startScanning(int expectedDeviceType, SyncScanCallback scanCallback) {
+    public void startScanning(int expectedDeviceType, SyncScanCallback scanCallback) {
         //FIXME: check if should stop current scanning
-        //FIXME: warming for memory leaking(SyncScanCallback).
+        //FIXME: warning for memory leaking(SyncScanCallback).
         if (MisfitScanner.getInstance().isBluetoothEnabled() == false) {
-            MisfitScanner.getInstance().enableBluetooth();
+            scanCallback.onScanFailed(ScanFailedReason.NO_BLUETOOTH);
+            return;
         }
-        MisfitScanner.getInstance().startScan(expectedDeviceType, scanCallback);
-        return true;
+        boolean result = MisfitScanner.getInstance().startScan(expectedDeviceType, scanCallback);
+        if (result == false) {
+            scanCallback.onScanFailed(ScanFailedReason.INTERNAL_ERROR);
+        }
     }
 
     public void stopScanning() {

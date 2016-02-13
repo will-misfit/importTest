@@ -49,11 +49,12 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
      * @param expectedDeviceType
      * @param callback
      */
-    public void startScan(int expectedDeviceType, SyncScanCallback callback) {
+    public boolean startScan(int expectedDeviceType, SyncScanCallback callback) {
         Log.d(TAG, String.format("startScan, expected device type of %s", DeviceType.getDeviceTypeText(expectedDeviceType)));
         mCallback = callback;
         mExpectedDeviceType = expectedDeviceType;
-        mShineSDKAdapter.startScanning(this);
+        boolean result = mShineSDKAdapter.startScanning(this);
+        return result;
     }
 
     /**
@@ -61,10 +62,11 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
      *
      * @param scanCallback
      */
-    public void startScan(ShineAdapter.ShineScanCallback scanCallback) {
+    public boolean startScan(ShineAdapter.ShineScanCallback scanCallback) {
         //TODO:check if scanning
         Log.d(TAG, "startScan without specified device type");
-        mShineSDKAdapter.startScanning(scanCallback);
+        boolean result = mShineSDKAdapter.startScanning(scanCallback);
+        return result;
     }
 
     public void stopScan() {

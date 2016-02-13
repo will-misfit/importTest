@@ -14,6 +14,7 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.enums.ScanFailedReason;
 
 import java.util.ArrayList;
 
@@ -54,6 +55,11 @@ public class ScanListActivity extends AppCompatActivity implements SyncScanCallb
     public void onScanResultFiltered(SyncCommonDevice device, int rssi) {
         Log.w("will", "found dev=" + device.getSerialNumber());
         mAdapter.updateDevice(device, rssi);
+    }
+
+    @Override
+    public void onScanFailed(@ScanFailedReason.ScanFailedReasonValue int reason) {
+        Log.w("will", "scan failed, reason : " + reason);
     }
 
     @OnItemClick(R.id.list_device)
