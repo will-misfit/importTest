@@ -7,6 +7,10 @@ import com.misfit.ble.shine.ShineAdapter;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.device.SyncFlashDevice;
+import com.misfit.syncsdk.device.SyncIwcDevice;
+import com.misfit.syncsdk.device.SyncRayDevice;
+import com.misfit.syncsdk.device.SyncShine2Device;
 import com.misfit.syncsdk.device.SyncShineDevice;
 import com.misfit.syncsdk.device.SyncSwarovskiDevice;
 import com.misfit.syncsdk.utils.ContextUtils;
@@ -91,11 +95,30 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
 
         //TODO:wait to implement-different device
         SyncCommonDevice commonDevice;
-        if (deviceType == DeviceType.SWAROVSKI_SHINE) {
-            commonDevice = new SyncSwarovskiDevice(device.getSerialNumber());
-        } else {
-            commonDevice = new SyncShineDevice(device.getSerialNumber());
+        switch (deviceType) {
+            case DeviceType.SWAROVSKI_SHINE:
+                commonDevice = new SyncSwarovskiDevice(device.getSerialNumber());
+                break;
+            case DeviceType.SHINE:
+                commonDevice = new SyncShineDevice(device.getSerialNumber());
+                break;
+            case DeviceType.BMW:
+                commonDevice = new SyncRayDevice(device.getSerialNumber());
+                break;
+            case DeviceType.FLASH:
+                commonDevice = new SyncFlashDevice(device.getSerialNumber());
+                break;
+            case DeviceType.PLUTO:
+                commonDevice = new SyncShine2Device(device.getSerialNumber());
+                break;
+            case DeviceType.SILVERATTA:
+                commonDevice = new SyncIwcDevice(device.getSerialNumber());
+                break;
+            default:
+                commonDevice = new SyncShineDevice(device.getSerialNumber());
+                break;
         }
+
         mCallback.onScanResultFiltered(commonDevice, rssi);
     }
 }

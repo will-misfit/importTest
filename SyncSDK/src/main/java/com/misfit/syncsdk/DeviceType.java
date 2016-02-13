@@ -13,8 +13,7 @@ public class DeviceType {
     public final static int SPEEDO_SHINE = 4;
     public final static int SHINE_MK_II = 5;
     public final static int PLUTO = 6;
-    public final static int FLASH_LINK = 7;
-    public final static int SILVERATTA = 8;
+    public final static int SILVERATTA = 7;
     public final static int BMW = 9;
 
     private int mTypeVal;
@@ -28,7 +27,7 @@ public class DeviceType {
             return DeviceType.UNKNOWN;
         } else if (serialNumber.startsWith("SH")) {
             return DeviceType.SHINE;
-        } else if (serialNumber.startsWith("F0")) {
+        } else if (serialNumber.startsWith("F")) {
             return DeviceType.FLASH;
         }else if (serialNumber.startsWith("SC")) {
             return DeviceType.SWAROVSKI_SHINE;
@@ -45,7 +44,7 @@ public class DeviceType {
         } else {
             return DeviceType.UNKNOWN;
         }
-        //TODO:maybe we can classify the flash and flash-link by device name
+        //TODO:We need to classify the flash and button by model name
     }
 
     public static String getDeviceTypeText(int deviceType) {
@@ -64,8 +63,6 @@ public class DeviceType {
                 return "shine_mk_ii";
             case PLUTO:
                 return "pluto";
-            case FLASH_LINK:
-                return "flash_link";
             case SILVERATTA:
                 return "silvretta";
             case BMW:
