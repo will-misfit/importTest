@@ -6,6 +6,7 @@ import android.provider.Settings;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.misfit.syncsdk.BuildConfig;
+import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.utils.ContextUtils;
 
 import java.util.UUID;
@@ -99,7 +100,7 @@ public class LogSession {
 
     @Expose
     @SerializedName("failureReason")
-    private int mFailureReason = -1;
+    private int mFailureReason = FailedReason.DEFAULT;
 
     @Expose
     @SerializedName("deviceIdentifier")
