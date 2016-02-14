@@ -19,13 +19,14 @@ import retrofit2.http.Path;
 
 public class APIClient {
     private static Retrofit retrofit;
-    private static APIClient mInstance;
+
+    private static class APIClientHolder{
+        private final static APIClient INSTANCE = new APIClient();
+    }
+
 
     public static APIClient getInstance() {
-        if (mInstance == null) {
-            mInstance = new APIClient();
-        }
-        return mInstance;
+        return APIClientHolder.INSTANCE;
     }
 
     private APIClient() {
