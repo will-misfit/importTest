@@ -23,7 +23,7 @@ import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SwitchTrackerModeTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
-import com.misfit.syncsdk.task.UnmapEventAnimation;
+import com.misfit.syncsdk.task.UnmapEventAnimationTask;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
         if (syncParams.firstSync) {
             tasks.add(new ActivateTask());
             tasks.add(new SwitchTrackerModeTask());
-            tasks.add(new UnmapEventAnimation());
+            tasks.add(new UnmapEventAnimationTask());
         }
         tasks.add(new GetConfigurationTask());
         tasks.add(new CheckOnTagStatusTaskUserInput());
