@@ -140,16 +140,10 @@
         android:layout_marginTop="4dp"
         android:background="#999" />
 
-    <ScrollView
+    <com.misfit.syncdemo.util.LogView
+        android:id="@+id/tv_log"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/sync_output_msg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textSize="12sp" />
-    </ScrollView>
+        android:textSize="12sp" />
 
 </LinearLayout>

@@ -4,34 +4,62 @@ import android.util.Log;
 
 import com.misfit.syncsdk.BuildConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Will Hou on 1/29/16.
- */
 public class MLog {
+
+    private final static boolean OPEN_LOG = BuildConfig.DEBUG;
+
+    public interface LogNode {
+        void printLog(int priority, String tag, String msg);
+    }
+
+    private static List<LogNode> logNodes = new ArrayList<>();
+
+    public static void registerLogNode(LogNode node) {
+        if (logNodes.contains(node)) {
+            return;
+        }
+        logNodes.add(node);
+    }
+
+    public static void unregisterLogNode(LogNode node) {
+        logNodes.remove(node);
+    }
+
+    private static void notifyLogNodes(int priority, String tag, String msg) {
+        for (LogNode node : logNodes) {
+            node.printLog(priority, tag, msg);
+        }
+    }
+
     public static void d(String tag, String msg) {
-        if (BuildConfig.DEBUG) {
+        if (OPEN_LOG) {
             Log.d(tag, msg);
+            notifyLogNodes(Log.DEBUG, tag, msg);
         }
     }
 
     public static void w(String tag, String msg) {
-        if (BuildConfig.DEBUG) {
+        if (OPEN_LOG) {
             Log.w(tag, msg);
+            notifyLogNodes(Log.WARN, tag, msg);
         }
     }
 
     public static void i(String tag, String msg) {
-        if (BuildConfig.DEBUG) {
+        if (OPEN_LOG) {
             Log.i(tag, msg);
+            notifyLogNodes(Log.INFO, tag, msg);
         }
     }
 
     public static void e(String tag, String msg) {
-        if (BuildConfig.DEBUG) {
+        if (OPEN_LOG) {
             Log.e(tag, msg);
+            notifyLogNodes(Log.ERROR, tag, msg);
         }
     }
 

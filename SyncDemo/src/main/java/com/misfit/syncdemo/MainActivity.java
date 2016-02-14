@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +14,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.misfit.ble.shine.result.SyncResult;
+import com.misfit.syncdemo.util.LogView;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.ReadDataCallback;
@@ -31,6 +31,7 @@ import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.model.SyncSyncParams;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,8 +89,8 @@ public class MainActivity extends AppCompatActivity
     Switch mSwitchFirstSync;
     @Bind(R.id.switch_tagging_response)
     Switch mSwitchTaggingResponse;
-    @Bind(R.id.sync_output_msg)
-    TextView mSyncOutputTextView;
+    @Bind(R.id.tv_log)
+    LogView mLogTextView;
 
     @Bind({R.id.btn_sync,
             R.id.switch_first_sync,
@@ -120,6 +121,8 @@ public class MainActivity extends AppCompatActivity
         mSpinnerDeviceType.setAdapter(adapter);
         mSpinnerDeviceType.setSelection(0);
 
+        MLog.registerLogNode(mLogTextView);
+
         mSyncSdkAdapter = SyncSdkAdapter.getInstance();
         mSyncSdkAdapter.init(this.getApplicationContext(), "will-misfit");
     }
@@ -127,6 +130,12 @@ public class MainActivity extends AppCompatActivity
     private void initSpinnerData() {
         mSpinnerData = new ArrayList<>();
         mSpinnerData.addAll(Arrays.asList(mDeviceTypes));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MLog.unregisterLogNode(mLogTextView);
     }
 
     @OnTouch(R.id.ll_scan)
@@ -155,7 +164,7 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, ScanListActivity.class);
         int selectedDeviceType = mDeviceTypes[mSpinnerDeviceType.getSelectedItemPosition()];
         intent.putExtra(Const.EXT_DEVICE_TYPE, selectedDeviceType);
-        Log.i(TAG, String.format("start scan, device type is %s ", DeviceType.getDeviceTypeText(selectedDeviceType)));
+        MLog.i(TAG, String.format("start scan, device type is %s ", DeviceType.getDeviceTypeText(selectedDeviceType)));
         startActivityForResult(intent, REQ_SCAN);
     }
 
@@ -164,7 +173,7 @@ public class MainActivity extends AppCompatActivity
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
         mSyncCommonDevice.startSync(this, this, this, this, syncParams);
-        mSyncOutputTextView.setText("");
+        mLogTextView.clear();
         setOperationPanelEnabled(false);
     }
 
@@ -172,7 +181,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) {
-            Log.d(TAG, String.format("result not ok, req=%d, result=%d", requestCode, resultCode));
+            MLog.d(TAG, String.format("result not ok, req=%d, result=%d", requestCode, resultCode));
             return;
         }
         switch (requestCode) {
@@ -195,10 +204,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateDevice(String serialNumber) {
-        Log.d(TAG, "updated device, serialNumber=" + serialNumber);
+        MLog.d(TAG, "updated device, serialNumber=" + serialNumber);
         mSyncCommonDevice = SyncSdkAdapter.getInstance().getDevice(serialNumber);
         mTextSerialNumber.setText(serialNumber);
         mTextDeviceName.setText(DeviceType.getDeviceTypeText(serialNumber));
+        mSwitchTaggingResponse.setVisibility(DeviceType.getDeviceType(serialNumber) == DeviceType.FLASH ? View.VISIBLE : View.GONE);
     }
 
     private void setOperationPanelEnabled(boolean enabled) {
@@ -210,12 +220,12 @@ public class MainActivity extends AppCompatActivity
     /* interface methods of SyncOtaCallback */
     @Override
     public void onOtaProgress(float progress) {
-        Log.d(TAG, "OTA progress = " + progress);
+        MLog.d(TAG, "OTA progress = " + progress);
     }
 
     @Override
     public void onOtaCompleted() {
-        Log.d(TAG, "OTA Completed");
+        MLog.d(TAG, "OTA Completed");
     }
 
     @Override
@@ -226,12 +236,12 @@ public class MainActivity extends AppCompatActivity
     /* interface methods of SyncOperationResultCallback */
     @Override
     public void onSucceed() {
-        Log.d(TAG, "operation finished");
+        MLog.d(TAG, "operation finished");
     }
 
     @Override
     public void onFailed(int reason) {
-        Log.d(TAG, "operation failed, reason=" + reason);
+        MLog.d(TAG, "operation failed, reason=" + reason);
     }
 
     /* interface methods of SyncCalculationCallback */
@@ -298,7 +308,7 @@ public class MainActivity extends AppCompatActivity
 
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
         if (syncResultList == null || syncResultList.isEmpty()) {
-            mSyncOutputTextView.setText("ShineSDK sync data is null");
+            MLog.d(TAG, "ShineSDK sync data is null");
             return;
         }
 
@@ -309,12 +319,12 @@ public class MainActivity extends AppCompatActivity
             mShineSdkSyncResult.mSessionEvents.addAll(syncResult.mSessionEvents);
         }
         String shineSdkSyncResultStr = OperationUtils.buildShineSdkSyncResult(mShineSdkSyncResult);
-        mSyncOutputTextView.setText(shineSdkSyncResultStr);
+        MLog.d(TAG, shineSdkSyncResultStr);
     }
 
     private void handleOnSyncAndCalculationCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
         String syncAndCalculationResult = OperationUtils.buildSyncCalculationResult(sdkActivitySessionGroupList);
-        mSyncOutputTextView.setText(syncAndCalculationResult);
+        MLog.d(TAG, syncAndCalculationResult);
         mSyncButton.setEnabled(true);
     }
 
