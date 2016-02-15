@@ -54,11 +54,11 @@ public class FirmwareRequest extends JsonObjectRequest<FirmwareRequest>{
 
     protected void buildResult(Object result) {
         FirmwareRequest request = (FirmwareRequest) result;
-        versionNumber = request.versionNumber;
-        checksum = request.checksum;
-        downloadUrl = request.downloadUrl;
+        versionNumber   = request.versionNumber;
+        checksum        = request.checksum;
+        downloadUrl     = request.downloadUrl;
         supportCommands = request.supportCommands;
-        changeLog = request.changeLog;
-        modelNumber = request.modelNumber;
+        changeLog       = request.changeLog;
+        modelNumber     = request.modelNumber;
     }
 }

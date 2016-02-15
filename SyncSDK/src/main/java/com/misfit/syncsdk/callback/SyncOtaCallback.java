@@ -8,6 +8,5 @@ public interface SyncOtaCallback {
 
     void onOtaCompleted();
 
-    //TODO: need a discussion
     boolean isForceOta(boolean hasNewFirmware);
 }

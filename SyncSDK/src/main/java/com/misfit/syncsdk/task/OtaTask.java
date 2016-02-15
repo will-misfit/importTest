@@ -14,6 +14,15 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
+/**
+ * OtaTask is composed of several State instances, which works one by one in order as below:
+ *  GetLatestFirmwareState
+ *  AskAppSuggestionState
+ *  PrepareOtaState
+ *  OtaState
+ *  WaitForConnectState
+ *  ReconnectState
+ * */
 public class OtaTask extends Task {
 
     private final static String TAG = "OtaTask";
@@ -24,7 +33,10 @@ public class OtaTask extends Task {
     private boolean mIsRetryingOta = false;
     private boolean mForceOta = false;
 
-    class GetLatestFirmwareState extends State implements FirmwareManager.GetLatestFirmwareListener {
+    /**
+     * check latest firmware version and get to know it should OTA or not
+     * */
+    class CheckLatestFirmwareState extends State implements FirmwareManager.CheckLatestFirmwareListener {
 
         boolean mShouldStop = false;
 
@@ -45,13 +57,13 @@ public class OtaTask extends Task {
 
         @Override
         public void onSucceed(boolean shouldOta, String firmwareVersion) {
-            MLog.d(TAG, String.format("shouldOta=%s, firmware version=%s", shouldOta, firmwareVersion));
+            MLog.d(TAG, String.format("shouldOta = %s, firmware version = %s", shouldOta, firmwareVersion));
             if (mShouldStop) {
                 return;
             }
             if (shouldOta) {
                 mLatestFirmwareVersion = firmwareVersion;
-                gotoState(new AskAppSuggestionState());
+                gotoState(new AskAppForceOtaState());
             } else {
                 taskSucceed();
             }
@@ -66,7 +78,10 @@ public class OtaTask extends Task {
         }
     }
 
-    class AskAppSuggestionState extends State {
+    /**
+     * ask App invoker whether to force OTA
+     * */
+    class AskAppForceOtaState extends State {
 
         @Override
         void execute() {
@@ -80,10 +95,13 @@ public class OtaTask extends Task {
 
         @Override
         void stop() {
-
         }
     }
 
+    /**
+     * get to confirm whether latest firmware is ready or not
+     * if it is not ready yet while unnecessary to OTA, skip OTA
+     * */
     class PrepareOtaState extends State implements FirmwareManager.DownloadLatestFirmwareListener {
 
         public PrepareOtaState() {
@@ -91,37 +109,41 @@ public class OtaTask extends Task {
 
         @Override
         void execute() {
-            MLog.d(TAG, "Force OTA =" + String.valueOf(mForceOta));
+            MLog.d(TAG, "Force OTA = " + String.valueOf(mForceOta));
             FirmwareManager firmwareManager = FirmwareManager.getInstance();
 
-            if (mForceOta) {
-                firmwareManager.isNewFirmwareReady(mLatestFirmwareVersion, this);
+            if (firmwareManager.isFirmwareExisting(mLatestFirmwareVersion)) {
+                String fileName = FirmwareManager.getFirmwareFileName(mLatestFirmwareVersion);
+                gotoState(new OtaState(fileName));
+            } else if (mForceOta) {
+                firmwareManager.whenFirmwareReady(mLatestFirmwareVersion, this);
             } else {
-                if (firmwareManager.isNewFirmwareReadyNow(mLatestFirmwareVersion)) {
-                    firmwareManager.isNewFirmwareReady(mLatestFirmwareVersion, this);
-                } else {
-                    taskSucceed();  //skip this time
-                }
+                taskSucceed();  // skip OTA
             }
         }
 
         @Override
+        // TODO: clean the callback assign to FirmwareManager
         void stop() {
-
         }
 
         @Override
-        public void onFinished(String fileName) {
+        // TODO: clean the callback assign to FirmwareManager
+        public void onSucceed(String fileName) {
             MLog.d(TAG, "firmware ready, fileName=" + fileName);
             gotoState(new OtaState(fileName));
         }
 
         @Override
+        // TODO: clean the callback assign to FirmwareManager
         public void onFailed(int errorReason) {
             taskFailed("download not ok");
         }
     }
 
+    /**
+     * execute OTA
+     * */
     class OtaState extends State implements ShineProfile.OTACallback {
         private final static long TIMEOUT_OTA = 10000;
         private String mOtaFileName;
@@ -226,6 +248,9 @@ public class OtaTask extends Task {
         }
     }
 
+    /**
+     * wait for a while before reconnect
+     * */
     class WaitForConnectState extends State {
         private final static int DELAY_BEFORE_CONNECT = 5000;
 
@@ -245,6 +270,9 @@ public class OtaTask extends Task {
         }
     }
 
+    /**
+     * reconnect device post to OTA
+     * */
     class ReconnectState extends State implements ConnectionManager.ConnectionStateCallback {
 
         private int mRemainingRetry = 2;
@@ -319,7 +347,7 @@ public class OtaTask extends Task {
         if (mIsRetryingOta) {
             gotoState(new PrepareOtaState());
         } else {
-            gotoState(new GetLatestFirmwareState());
+            gotoState(new CheckLatestFirmwareState());
         }
     }
 

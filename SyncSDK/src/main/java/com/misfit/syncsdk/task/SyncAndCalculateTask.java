@@ -47,9 +47,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
             return;
         }
 
-//            ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.serialNumber, this);//FIXME:need this?
         proxy.startSyncing(this);
-
     }
 
     @Override

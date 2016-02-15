@@ -1,8 +1,6 @@
 package com.misfit.syncsdk;
 
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 import com.android.volley.VolleyError;
@@ -24,14 +22,14 @@ import java.net.URLConnection;
  */
 public class FirmwareManager {
 
-    public interface GetLatestFirmwareListener {
+    public interface CheckLatestFirmwareListener {
         void onSucceed(boolean shouldOta, String firmwareVersion);
         void onFailed(int errorReason);
     }
 
     public interface DownloadLatestFirmwareListener {
-        void onFinished(String filePath);
-        void onFailed(int errorReason);
+        void onSucceed(String filePath);
+        void onFailed(int failReason);
     }
 
     protected static final String TAG = "FirmwareDownloadService";
@@ -47,17 +45,21 @@ public class FirmwareManager {
     public static final String CHANGE_LOG_KEY       = "firmware_change_log_key";
     public static final String MODEL_NUMBER_KEY     = "firmware_model_number_key";
 
-    private boolean isCheckingFirmware = false;
+    private boolean mCheckingFirmware = false;
 
     public static FirmwareInfo latestFirmwareInfo;
 
-    private Handler mDownloadHandler;
+    private String mCurrentModelName;
+    private String mCurrentFirmwareVersion;
+
+    private CheckLatestFirmwareListener mCheckFirmwareListener;
+    private DownloadLatestFirmwareListener mDownloadFirmwareListener;
+
     private static FirmwareManager mFirmwareManager;
 
     private FirmwareManager() {
         /*
-        SharedPreferencesUtils sharedInstance = SharedPreferencesUtils
-                .sharedInstance();
+        SharedPreferencesUtils sharedInstance = SharedPreferencesUtils.sharedInstance();
         latestFirmware = new ShineFirmware(
                 sharedInstance.getInfo(TAG, MODEL_NUMBER_KEY, ""),
                 sharedInstance.getInfo(TAG, FIRMWARE_KEY, ""),
@@ -78,41 +80,43 @@ public class FirmwareManager {
         return mFirmwareManager;
     }
 
-    public void setDownloadHandler(Handler handler) {
-        this.mDownloadHandler = handler;
-    }
-
     /**
      * 1. query latest firmware version from remote firmware server
      * 2. download firmware if there is new firmware available
      * No callback to tell the result
      */
-    public void checkLatestFirmware(String modelName, String currFwVersionNumber) {
+    public void checkLatestFirmware(String modelName, String firmwareVersionNumber) {
+        mCurrentModelName = modelName;
+        mCurrentFirmwareVersion = firmwareVersionNumber;
+
+        mCheckingFirmware = true;
+        //TODO: send FirmwareRequest
     }
 
     /**
-     * @return: Firmware version number.
-     * If it needs to OTA, tell invoker by callback onSucceed()
-     * If it does not need OTA, tell invoker by callback onSucceed()
-     * If the query fails, tell invoker by callback onFail()
+     * if checkLatestFirmware is not working, start the FirmwareRequest, and inform the invoker via callback
      * */
-    public void shouldOta(String modelName, String currFwVersionNumber, GetLatestFirmwareListener getFirmwareListener) {
-        return;
+    public void shouldOta(String modelName, String firmwareVersionNumber, CheckLatestFirmwareListener getFirmwareListener) {
+        mCurrentModelName = modelName;
+        mCurrentFirmwareVersion = firmwareVersionNumber;
+        setCheckFirmwareListener(getFirmwareListener);
+        //TODO: send FirmwareRequest
     }
 
     /**
      * tells if the new firmware to OTA is downloaded already
-     * @return if the new firmware is ready, return true
-     * if the new firmware download is ongoing, return false now, and notify the invoker by the listener
+     * if the new firmware download is ongoing, notify the invoker by the listener
      * */
-    public boolean isNewFirmwareReady(String firmwareVersion, DownloadLatestFirmwareListener downloadListener) {
-        return true;
+    public void whenFirmwareReady(String firmwareVersion, DownloadLatestFirmwareListener downloadListener) {
+        setDownloadFirmwareListener(downloadListener);
+        //TODO: if firmware is not existing locally and download task is not started, start DownloadFirmware task;
+        //TODO: if it starts already, set callback and wait for its invoke
     }
 
     /**
-     * tells if the new firmware to OTA is downloaded already. return the result immediately
+     * tells if the given firmware file exists locally
      * */
-    public boolean isNewFirmwareReadyNow(String firmwareVersion) {
+    public boolean isFirmwareExisting(String firmwareVersion) {
         return LocalFileUtils.isFileExist(getFirmwareFileName(firmwareVersion));
     }
 
@@ -130,66 +134,65 @@ public class FirmwareManager {
     }
     */
 
-    public boolean isCheckingFirmware() {
-        return isCheckingFirmware;
-    }
-
-    public boolean shouldUpdate(int deviceType, String currentFirmware, String targetFirmware){
-        return false;
-    }
-
     /**
      * FirmwareRequest extends PrometheusJsonObjectRequest extending volley.toolbox.JsonRequest
      * RequestListener extends volley.Listener, ErrorListener
      * */
-    public RequestListener<FirmwareRequest> latestRequestListener = new RequestListener<FirmwareRequest>() {
+    public RequestListener<FirmwareRequest> latestFirmwareRequestListener = new RequestListener<FirmwareRequest>() {
 
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.d(TAG, "Network error when checking firmware version");
-            isCheckingFirmware = false;
+            mCheckingFirmware = false;
+            onCheckFirmwareFailed(error);
         }
 
         @Override
         public void onResponse(FirmwareRequest request) {
             FirmwareInfo newFirmwareInfo = request.exportFirmwareInfo();
-            String newFwVersionNumber = newFirmwareInfo.getVersionNumber();
-            String oldFwVersionNumber = latestFirmwareInfo.getVersionNumber();
             String newFwModelName = newFirmwareInfo.getModelName();
-            String oldFwModelName = latestFirmwareInfo.getModelName();
+            String oldFwModelName = mCurrentModelName;
+            String newFwVersionNumber = newFirmwareInfo.getVersionNumber();
+            String oldFwVersionNumber = mCurrentFirmwareVersion;
 
+            // FIXME: except model name of 'shine', is there any other device model need to OTA when oldFwModelName is null?
             if (!CheckUtils.isStringEmpty(newFwModelName)) {
                 if (newFwModelName.equals(oldFwModelName)
                         || (CheckUtils.isStringEmpty(newFwModelName) && oldFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))
                         || (CheckUtils.isStringEmpty(oldFwModelName) && newFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))) {
                     if (newFwVersionNumber != null && !newFwVersionNumber.equals(oldFwVersionNumber)) {
                         latestFirmwareInfo = newFirmwareInfo;
-                        saveLatestFwVersionInfoToPreferences();
                     }
 
                     if (shouldDownloadNewFirmware(newFwVersionNumber, oldFwVersionNumber)) {
+                        onCheckFirmwareSucceed(true, newFwVersionNumber);
                         String params[] = null;
                         new DownloadFirmwareTask(newFirmwareInfo, oldFwVersionNumber).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
                     } else {
-                        isCheckingFirmware = false;
+                        onCheckFirmwareSucceed(false, newFwVersionNumber);
+                        mCheckingFirmware = false;
                     }
-                } else {
+                } else {  // FIXME: do we need DownloadFirmware in this clause?
                     latestFirmwareInfo = newFirmwareInfo;
-                    saveLatestFwVersionInfoToPreferences();
 
-                    if (!isNewFirmwareReadyNow(newFwVersionNumber)) {
+                    if (!isFirmwareExisting(newFwVersionNumber)) {
+                        onCheckFirmwareSucceed(true, newFwVersionNumber);
                         String params[] = null;
                         new DownloadFirmwareTask(newFirmwareInfo, oldFwVersionNumber).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
                     } else {
-                        isCheckingFirmware = false;
+                        onCheckFirmwareSucceed(false, newFwVersionNumber);
+                        mCheckingFirmware = false;
                     }
                 }
             } else {
-                isCheckingFirmware = false;
+                mCheckingFirmware = false;
             }
         }
     };
 
+    /**
+     * AsyncTask to download the firmware
+     * */
     private class DownloadFirmwareTask extends AsyncTask<String, Integer, Boolean> {
         private String oldVersionNumber;
         private FirmwareInfo newFirmwareInfo;
@@ -206,12 +209,14 @@ public class FirmwareManager {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
-                // delete old firmware
                 if (!(CheckUtils.isStringEmpty(oldVersionNumber))){
                     deleteOldFirmware(oldVersionNumber, newFirmwareInfo.getVersionNumber());
                 }
+                onDownloadFirmwareSucceed(newFirmwareInfo.getVersionNumber());
+            } else {
+                onDownloadFirmwareFailed(-1);  // TODO: define the download error code
             }
-            isCheckingFirmware = false;
+            mCheckingFirmware = false;
         }
     }
 
@@ -302,40 +307,12 @@ public class FirmwareManager {
         }
     }
 
-    protected boolean shouldDownloadNewFirmware(String newFirmwareVersion,
-            String oldFirmwareVersion) {
-
-        if (newFirmwareVersion != null
-                && !newFirmwareVersion.equals(oldFirmwareVersion)) {
-            // If newfirmware and oldfirmware is different, we should download
-            // new firmware if it doesn't exist
-            return (!isNewFirmwareReadyNow(newFirmwareVersion));
+    protected boolean shouldDownloadNewFirmware(String newFirmwareVersion, String oldFirmwareVersion) {
+        if (newFirmwareVersion != null && !newFirmwareVersion.equals(oldFirmwareVersion)) {
+            return (!isFirmwareExisting(newFirmwareVersion));
         } else {
-            // If new firmware is null or is the newest firmware, we should
-            // download it again if it isn't ready (maybe md5 checking failed in
-            // the last downloading time)
-            return (!isNewFirmwareReadyNow(oldFirmwareVersion));
+            return false;
         }
-    }
-
-    private void sendMessage(int option) {
-        if (mDownloadHandler != null) {
-            Message msg = new Message();
-            msg.what = option;
-            mDownloadHandler.sendMessage(msg);
-        }
-    }
-
-    private static void saveLatestFwVersionInfoToPreferences() {
-        /*
-        SharedPreferencesUtils sharedInstance = SharedPreferencesUtils
-                .sharedInstance();
-        sharedInstance.saveInfo(TAG, FIRMWARE_KEY, latestFirmware.getVersionNumber());
-        sharedInstance.saveInfo(TAG, DOWNLOAD_KEY, latestFirmware.getDownloadUrl());
-        sharedInstance.saveInfo(TAG, CHECKSUM_KEY, latestFirmware.getChecksum());
-        sharedInstance.saveInfo(TAG, CHANGE_LOG_KEY, latestFirmware.getChangeLog());
-        sharedInstance.saveInfo(TAG, MODEL_NUMBER_KEY, latestFirmware.getModelNumber());
-        */
     }
 
     /* utility API */
@@ -376,8 +353,55 @@ public class FirmwareManager {
     }
 
     public static boolean isFirmwareReady() {
-        boolean isFirmwareReady = mFirmwareManager.isNewFirmwareReadyNow(latestFirmwareInfo.getVersionNumber());
-        Log.d(TAG, "isFirmwareReady " + isFirmwareReady);
-        return isFirmwareReady;
+        boolean downloaded = mFirmwareManager.isFirmwareExisting(latestFirmwareInfo.getVersionNumber());
+        Log.d(TAG, "isFirmwareReady " + downloaded);
+        return downloaded;
+    }
+
+    public void setDownloadFirmwareListener(DownloadLatestFirmwareListener downloadListener) {
+        mDownloadFirmwareListener = downloadListener;
+    }
+
+    public void cleanDownloadFirmwareListener() {
+        mDownloadFirmwareListener = null;
+    }
+
+    public void setCheckFirmwareListener(CheckLatestFirmwareListener checkFirmwareListener) {
+        mCheckFirmwareListener = checkFirmwareListener;
+    }
+
+    public void cleanGetFirmwareListener() {
+        mCheckFirmwareListener = null;
+    }
+
+    /* invoke GetLatestFirmwareListener callback */
+    private void onCheckFirmwareSucceed(boolean shouldOta, String fwVersionNumber) {
+        if (mCheckFirmwareListener != null) {
+            mCheckFirmwareListener.onSucceed(shouldOta, fwVersionNumber);
+        }
+    }
+
+    private void onCheckFirmwareFailed(VolleyError volleyError) {
+        int errorReason = -1;
+        if (volleyError != null && volleyError.networkResponse != null) {
+            errorReason = volleyError.networkResponse.statusCode;
+        }
+
+        if (mCheckFirmwareListener != null) {
+            mCheckFirmwareListener.onFailed(errorReason);
+        }
+    }
+
+    /* invoke DownloadFirmwareListener callback */
+    private void onDownloadFirmwareSucceed(String firmwareVersion) {
+        if (mDownloadFirmwareListener != null) {
+            mDownloadFirmwareListener.onSucceed(getFirmwareFileName(firmwareVersion));
+        }
+    }
+
+    private void onDownloadFirmwareFailed(int errorCode) {
+        if (mDownloadFirmwareListener != null) {
+            mDownloadFirmwareListener.onFailed(errorCode);
+        }
     }
 }

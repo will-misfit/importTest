@@ -6,7 +6,6 @@ package com.misfit.syncsdk.model;
 public class FirmwareInfo {
 
     private String mModelName;
-
     private String mVersionNumber;
     private String mChangeLog;
     private String mChecksum;
