@@ -30,6 +30,7 @@ public class LogView extends TextView implements MLog.LogNode {
             @Override
             public void run() {
                 // Display the text we just generated within the LogView.
+                append("\n");
                 append(msg);
                 int offset=getLineCount()*getLineHeight();
                 if(offset>getHeight()){
