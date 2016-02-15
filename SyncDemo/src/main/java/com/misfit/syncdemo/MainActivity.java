@@ -74,7 +74,10 @@ public class MainActivity extends AppCompatActivity
             DeviceType.FLASH,
             DeviceType.PLUTO,
             DeviceType.SWAROVSKI_SHINE,
-            DeviceType.SPEEDO_SHINE
+            DeviceType.SPEEDO_SHINE,
+            DeviceType.SILVERATTA,
+            DeviceType.BMW,
+            DeviceType.SHINE_MK_II
     };
 
     List<Integer> mSpinnerData;
@@ -172,6 +175,7 @@ public class MainActivity extends AppCompatActivity
     void sync() {
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
+        syncParams.tagInStateListener = tagInStateListener;
         mSyncCommonDevice.startSync(this, this, this, this, syncParams);
         mLogTextView.clear();
         setOperationPanelEnabled(false);
