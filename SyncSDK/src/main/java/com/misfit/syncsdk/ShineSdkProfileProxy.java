@@ -3,6 +3,7 @@ package com.misfit.syncsdk;
 import android.content.Context;
 import android.util.Log;
 
+import com.misfit.ble.setting.flashlink.FlashButtonMode;
 import com.misfit.ble.setting.pluto.AlarmSettings;
 import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
@@ -324,5 +325,11 @@ public class ShineSdkProfileProxy {
             reason = mShineProfile.getConnectFailCodeEnum();
         }
         return reason;
+    }
+
+    public void setFlashButtonMode(FlashButtonMode buttonMode) {
+        if (mShineProfile != null) {
+            mShineProfile.setFlashButtonMode(buttonMode, mConfigurationCallBack);
+        }
     }
 }

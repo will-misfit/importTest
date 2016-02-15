@@ -52,6 +52,7 @@ public class UnmapEventAnimationTask extends Task implements ConnectionManager.C
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
         if (actionID == ActionID.SET_SINGLE_ALARM_TIME || actionID == ActionID.CLEAR_ALL_ALARMS) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                // TODO: not need to unsubscribe ConfigCompletedCallback?
                 taskSucceed();
             } else {
                 retryAndIgnored();

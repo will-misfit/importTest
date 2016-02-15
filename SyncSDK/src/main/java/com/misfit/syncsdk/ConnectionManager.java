@@ -33,6 +33,7 @@ public class ConnectionManager {
     Map<String, ShineDevice> mShineDeviceCache;
     Map<String, ShineSdkProfileProxy> mShineProfileProxyCache;
 
+    // actually, each item of the HashMap includes both of ConnectionStateCallback and ConfigCompletedCallback
     Map<String, BleSdkProfileCallbackWrapper> mConnectionCallbackWrappers;
 
     private static ConnectionManager sharedInstance;
