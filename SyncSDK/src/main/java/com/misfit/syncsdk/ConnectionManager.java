@@ -22,7 +22,6 @@ public class ConnectionManager {
 
     private final static String TAG = "ConnectionManager";
 
-
     Map<String, ShineDevice> mShineDeviceCache = new HashMap<>();
     Map<String, ShineSdkProfileProxy> mShineProfileProxyCache = new HashMap<>();
 
