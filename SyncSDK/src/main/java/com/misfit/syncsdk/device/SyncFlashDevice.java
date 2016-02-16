@@ -3,11 +3,13 @@ package com.misfit.syncsdk.device;
 import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.DeviceType;
+import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.callback.UserTokenRequest;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
@@ -37,8 +39,12 @@ public class SyncFlashDevice extends SyncCommonDevice {
     }
 
     @Override
-    public void startSync(@NonNull SyncOperationResultCallback resultCallback, ReadDataCallback syncCallback, SyncCalculationCallback calcuCallback,
-                          SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
+    public void startSync(SyncOperationResultCallback resultCallback,
+                          ReadDataCallback syncCallback,
+                          SyncCalculationCallback calcuCallback,
+                          SyncOtaCallback otaCallback,
+                          UserTokenRequest userTokenRequest,
+                          @NonNull SyncSyncParams syncParams) {
         if (isRunning()) {
             resultCallback.onFailed(SyncOperationResult.RUNNING);
             return;
@@ -48,6 +54,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
         taskSharedData.setReadDataCallback(syncCallback);
         taskSharedData.setSyncCalculationCallback(calcuCallback);
         taskSharedData.setSyncOtaCallback(otaCallback);
+        FirmwareManager.getInstance().setUserTokenRequest(userTokenRequest);
         taskSharedData.setSyncParams(syncParams);
 
         List<Task> tasks = prepareTasks();

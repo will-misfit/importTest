@@ -9,6 +9,7 @@ import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
+import com.misfit.syncsdk.callback.UserTokenRequest;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
@@ -56,8 +57,12 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
         return mCurrOperator != null;
     }
 
-    public void startSync(@NonNull SyncOperationResultCallback resultCallback, ReadDataCallback syncCallback, SyncCalculationCallback calculationCallback,
-                          SyncOtaCallback otaCallback, @NonNull SyncSyncParams syncParams) {
+    public void startSync(SyncOperationResultCallback resultCallback,
+                          ReadDataCallback syncCallback,
+                          SyncCalculationCallback calculationCallback,
+                          SyncOtaCallback otaCallback,
+                          UserTokenRequest userTokenRequest,
+                          @NonNull SyncSyncParams syncParams) {
     }
 
     protected void startOperator(Operator operator) {

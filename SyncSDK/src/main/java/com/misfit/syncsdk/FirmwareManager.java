@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.VolleyError;
+import com.misfit.syncsdk.callback.UserTokenRequest;
 import com.misfit.syncsdk.model.FirmwareInfo;
 import com.misfit.syncsdk.request.FirmwareRequest;
 import com.misfit.syncsdk.request.RequestListener;
@@ -55,18 +56,11 @@ public class FirmwareManager {
     private CheckLatestFirmwareListener mCheckFirmwareListener;
     private DownloadLatestFirmwareListener mDownloadFirmwareListener;
 
+    private UserTokenRequest mUserTokenRequest;
+
     private static FirmwareManager mFirmwareManager;
 
     private FirmwareManager() {
-        /*
-        SharedPreferencesUtils sharedInstance = SharedPreferencesUtils.sharedInstance();
-        latestFirmware = new ShineFirmware(
-                sharedInstance.getInfo(TAG, MODEL_NUMBER_KEY, ""),
-                sharedInstance.getInfo(TAG, FIRMWARE_KEY, ""),
-                sharedInstance.getInfo(TAG, CHANGE_LOG_KEY, ""),
-                sharedInstance.getInfo(TAG, CHECKSUM_KEY, ""),
-                sharedInstance.getInfo(TAG, DOWNLOAD_KEY, ""));
-                */
     }
 
     public static FirmwareManager getInstance() {
@@ -89,8 +83,10 @@ public class FirmwareManager {
         mCurrentModelName = modelName;
         mCurrentFirmwareVersion = firmwareVersionNumber;
 
-        mCheckingFirmware = true;
-        //TODO: send FirmwareRequest
+        if (!mCheckingFirmware) {
+            mCheckingFirmware = true;
+            FirmwareRequest.getLatestRequest(latestFirmwareRequestListener, modelName).execute();
+        }
     }
 
     /**
@@ -100,17 +96,24 @@ public class FirmwareManager {
         mCurrentModelName = modelName;
         mCurrentFirmwareVersion = firmwareVersionNumber;
         setCheckFirmwareListener(getFirmwareListener);
-        //TODO: send FirmwareRequest
+
+        if (!mCheckingFirmware) {
+            mCheckingFirmware = true;
+            FirmwareRequest.getLatestRequest(latestFirmwareRequestListener, modelName).execute();
+        }
     }
 
     /**
      * tells if the new firmware to OTA is downloaded already
-     * if the new firmware download is ongoing, notify the invoker by the listener
+     * if the firmware download is ongoing, set callback and wait for its invoke
+     * if not, start CheckLatestFirmware request to start download
      * */
     public void whenFirmwareReady(String firmwareVersion, DownloadLatestFirmwareListener downloadListener) {
         setDownloadFirmwareListener(downloadListener);
-        //TODO: if firmware is not existing locally and download task is not started, start DownloadFirmware task;
-        //TODO: if it starts already, set callback and wait for its invoke
+        if (!mCheckingFirmware && !CheckUtils.isStringEmpty(mCurrentModelName)) {
+            mCheckingFirmware = true;
+            FirmwareRequest.getLatestRequest(latestFirmwareRequestListener, mCurrentModelName).execute();
+        }
     }
 
     /**
@@ -119,20 +122,6 @@ public class FirmwareManager {
     public boolean isFirmwareExisting(String firmwareVersion) {
         return LocalFileUtils.isFileExist(getFirmwareFileName(firmwareVersion));
     }
-
-    /*
-    public void checkLatestFirmware(String modelName, GetLatestFirmwareListener listener){
-        if (isCheckingFirmware) {
-            return;
-        }
-
-        isCheckingFirmware = true;
-        if (CheckUtils.isStringEmpty(modelName)) {
-            modelName = SHINE_MODEL_NAME;
-        }
-        // APIClient.CommonAPI.downloadLatestFirmware(latestRequestListener, modelName);
-    }
-    */
 
     /**
      * FirmwareRequest extends PrometheusJsonObjectRequest extending volley.toolbox.JsonRequest
@@ -372,6 +361,14 @@ public class FirmwareManager {
 
     public void cleanGetFirmwareListener() {
         mCheckFirmwareListener = null;
+    }
+
+    public void setUserTokenRequest(UserTokenRequest userTokenRequest) {
+        mUserTokenRequest = userTokenRequest;
+    }
+
+    public UserTokenRequest getUserTokenRequest() {
+        return mUserTokenRequest;
     }
 
     /* invoke GetLatestFirmwareListener callback */

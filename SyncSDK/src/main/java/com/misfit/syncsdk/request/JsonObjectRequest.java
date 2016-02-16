@@ -12,6 +12,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.enums.HttpStatus;
 import com.misfit.syncsdk.model.MetaMessage;
 import com.misfit.syncsdk.utils.CheckUtils;
@@ -72,7 +73,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
     }
 
     private void setup() {
-        setRetryPolicy(new DefaultRetryPolicy(getConnectionTimeoutMs(),getMaxRetries(), 0));
+        setRetryPolicy(new DefaultRetryPolicy(getConnectionTimeoutMs(), getMaxRetries(), 0));
         // Only allow cache for GET request.
         setShouldCache(method == Method.GET);
     }
@@ -109,7 +110,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
 
             Log.d(TAG, String.format("%d:%s", response.statusCode, jsonString));
 
-            if (CheckUtils.isStringEmpty(jsonString)) {
+            if (!CheckUtils.isStringEmpty(jsonString)) {
                 Object result = VolleyRequestUtils.getInstance().gson.fromJson(jsonString, super.getClass());
                 metaMessage = ((JsonObjectRequest) result).metaMessage;
                 buildResult(result);
@@ -148,14 +149,16 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
         // items.put("User-Agent", PrometheusBuild.USER_AGENT_INFO)
         items.put("call_id", callId);
 
-        // TODO: user AuthToken needs to get from App's database, it wil be added later
-        /*
-        String authToken = VolleyRequestUtils.getInstance().getAuthToken();
-        if (CheckUtils.isStringEmpty(authToken)) {
+        /**
+         TODO: Cloud team supports two kinds of AuthToken:
+         one is designed for App, specified with user account, it varies with user signIn/signOut
+         another is designed for SDK/library, specified with serial number.
+         Currently only 1st kind of AuthToken is available, so use it temporarily.
+         * */
+        String authToken = FirmwareManager.getInstance().getUserTokenRequest().getCurrentUserToken();
+        if (!CheckUtils.isStringEmpty(authToken)) {
             items.put("auth_token", authToken);
         }
-        */
-
         return items;
     }
 
