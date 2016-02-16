@@ -14,7 +14,7 @@ import java.util.Hashtable;
 /**
  * Created by Will Hou on 1/12/16.
  */
-public class SetConnectionParameterTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class SetConnectionParameterTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "SetConnParameterTask";
 
@@ -37,8 +37,7 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
             taskFailed("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.startSettingConnectionParams(mParameters);
+        proxy.startSettingConnectionParams(mParameters, this);
     }
 
     @Override
@@ -47,7 +46,6 @@ public class SetConnectionParameterTask extends Task implements ConnectionManage
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override

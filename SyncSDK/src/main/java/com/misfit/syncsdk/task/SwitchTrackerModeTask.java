@@ -13,7 +13,7 @@ import java.util.Hashtable;
 /**
  * when Flash Button want to sync with flagship app, its FlashButtonMode needs to set
  */
-public class SwitchTrackerModeTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class SwitchTrackerModeTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private static final String TAG = "SwitchTrackerModeTask";
 
@@ -21,7 +21,6 @@ public class SwitchTrackerModeTask extends Task implements ConnectionManager.Con
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
         if (actionID == ActionID.SET_FLASH_BUTTON_MODE) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
                 taskSucceed();
             } else {
                 retryAndIgnored();
@@ -42,9 +41,7 @@ public class SwitchTrackerModeTask extends Task implements ConnectionManager.Con
             taskFailed("proxy not prepared");
             return;
         }
-
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.setFlashButtonMode(FlashButtonMode.TRACKER);
+        proxy.setFlashButtonMode(FlashButtonMode.TRACKER, this);
     }
 
     @Override

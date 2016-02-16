@@ -13,7 +13,7 @@ import java.util.Hashtable;
 /**
  * Created by Will Hou on 1/12/16.
  */
-public class PlayAnimationTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class PlayAnimationTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "PlayAnimationTask";
 
@@ -29,8 +29,7 @@ public class PlayAnimationTask extends Task implements ConnectionManager.ConfigC
             taskFailed("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.playAnimation();
+        proxy.playAnimation(this);
     }
 
     @Override
@@ -39,14 +38,12 @@ public class PlayAnimationTask extends Task implements ConnectionManager.ConfigC
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
         if (actionID == ActionID.ANIMATE) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
                 taskSucceed();
             } else {
                 retry();

@@ -273,7 +273,7 @@ public class OtaTask extends Task {
     /**
      * reconnect device post to OTA
      * */
-    class ReconnectState extends State implements ConnectionManager.ConnectionStateCallback {
+    class ReconnectState extends State implements ShineSdkProfileProxy.ConnectionStateCallback {
 
         private int mRemainingRetry = 2;
         private final static int TIMEOUT_CONNECT = 45000;
@@ -310,13 +310,16 @@ public class OtaTask extends Task {
                 }
             }, TIMEOUT_CONNECT);
 
-            connectionManager.subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+            proxy.subscribeConnectionStateChanged(this);
             proxy.connectProfile(device, ContextUtils.getInstance().getContext());
         }
 
         private void cleanup() {
             cancelCurrentTimeoutTask();
-            ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+            ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+            if (proxy != null) {
+                proxy.unsubscribeConnectionStateChanged(this);
+            }
         }
 
         @Override

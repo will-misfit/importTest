@@ -9,7 +9,7 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class SetNotificationTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class SetNotificationTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "SetNotificationTask";
 
@@ -29,8 +29,7 @@ public class SetNotificationTask extends Task implements ConnectionManager.Confi
             taskIgnored("Notification settings is null");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.setCallTextNotification(mTaskSharedData.getSyncParams().notificationsSettings);
+        proxy.setCallTextNotification(mTaskSharedData.getSyncParams().notificationsSettings, this);
     }
 
     @Override
@@ -40,7 +39,6 @@ public class SetNotificationTask extends Task implements ConnectionManager.Confi
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override

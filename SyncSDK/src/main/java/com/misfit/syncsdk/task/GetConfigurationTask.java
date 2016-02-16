@@ -13,7 +13,7 @@ import java.util.Hashtable;
 /**
  * Created by Will Hou on 1/13/16.
  */
-public class GetConfigurationTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class GetConfigurationTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "GetConfigurationTask";
 
@@ -29,8 +29,7 @@ public class GetConfigurationTask extends Task implements ConnectionManager.Conf
             taskFailed("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.startGettingDeviceConfiguration();
+        proxy.startGettingDeviceConfiguration(this);
     }
 
     @Override
@@ -39,14 +38,12 @@ public class GetConfigurationTask extends Task implements ConnectionManager.Conf
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
         MLog.d(TAG, String.format("onConfigCompleted() actionId=%s, result=%s", actionID, resultCode));
         if (actionID == ActionID.GET_CONFIGURATION) {
-            ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 // TODO: check the object got from Hashtable data with key of Shine_Configuration_Session
                 mTaskSharedData.setConfigurationSession((ConfigurationSession) data.get(ShineProperty.SHINE_CONFIGURATION_SESSION));

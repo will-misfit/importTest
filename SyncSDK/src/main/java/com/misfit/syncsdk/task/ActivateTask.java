@@ -9,7 +9,7 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class ActivateTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class ActivateTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "ActivateTask";
 
@@ -25,8 +25,7 @@ public class ActivateTask extends Task implements ConnectionManager.ConfigComple
             taskFailed("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.startActivating();
+        proxy.startActivating(this);
     }
 
     @Override
@@ -36,7 +35,6 @@ public class ActivateTask extends Task implements ConnectionManager.ConfigComple
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override

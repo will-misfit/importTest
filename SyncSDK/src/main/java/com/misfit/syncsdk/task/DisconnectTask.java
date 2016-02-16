@@ -8,11 +8,7 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
-
-/**
- * Created by Will Hou on 1/13/16.
- */
-public class DisconnectTask extends Task implements ConnectionManager.ConnectionStateCallback {
+public class DisconnectTask extends Task implements ShineSdkProfileProxy.ConnectionStateCallback {
 
     private final static String TAG = "DisconnectTask";
 
@@ -28,7 +24,7 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
             taskSucceed();
             return;
         }
-        ConnectionManager.getInstance().subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+        proxy.subscribeConnectionStateChanged(this);
         TimerManager.getInstance().addTimerTask(createTimeoutTimerTask(), 2000);
         proxy.close();
     }
@@ -40,7 +36,10 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
-        ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+        if (proxy != null) {
+            proxy.unsubscribeConnectionStateChanged(this);
+        }
     }
 
     TimerTask createTimeoutTimerTask() {
@@ -49,7 +48,6 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
             @Override
             public void run() {
                 MLog.d(TAG, "time out");
-                ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), DisconnectTask.this);
                 retryAndIgnored();
             }
         };
@@ -64,8 +62,6 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
             return;
         }
         if (newState == ShineProfile.State.CLOSED) {
-            ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
-            cancelCurrentTimerTask();
             taskSucceed();
         }
     }

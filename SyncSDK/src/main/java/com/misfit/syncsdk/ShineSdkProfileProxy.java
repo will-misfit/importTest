@@ -16,6 +16,8 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.ble.shine.log.ConnectFailCode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -25,16 +27,41 @@ public class ShineSdkProfileProxy {
 
     public static final String TAG = "ShineSdkProfileProxy";
 
-    private static ShineProfile mShineProfile;
+    private ShineProfile mShineProfile;
 
+    public interface ConnectionStateCallback {
+        void onConnectionStateChanged(ShineProfile.State newState);
+    }
 
-    protected ShineProfile.ConnectionCallback mConnectionCallback;
-    protected ShineProfile.ConfigurationCallback mConfigurationCallBack;
+    protected ShineProfile.ConnectionCallback mConnectionCallback = new ShineProfile.ConnectionCallback() {
+        @Override
+        public void onConnectionStateChanged(ShineProfile shineProfile, ShineProfile.State newState) {
+            if (mConnectionStateCallbacks.isEmpty()) {
+                return;
+            }
+            for (ConnectionStateCallback callback : mConnectionStateCallbacks) {
+                callback.onConnectionStateChanged(newState);
+            }
+        }
+    };
 
-    public ShineSdkProfileProxy(ShineProfile.ConnectionCallback connectionCallback,
-                                ShineProfile.ConfigurationCallback configurationCallback) {
-        mConnectionCallback = connectionCallback;
-        mConfigurationCallBack = configurationCallback;
+    List<ConnectionStateCallback> mConnectionStateCallbacks = new ArrayList<>();
+
+    public void subscribeConnectionStateChanged(ConnectionStateCallback connectionStateCallback) {
+        if (mConnectionStateCallbacks.contains(connectionStateCallback)) {
+            return;
+        }
+        mConnectionStateCallbacks.add(connectionStateCallback);
+    }
+
+    public void unsubscribeConnectionStateChanged(ConnectionStateCallback connectionStateCallback) {
+        if (mConnectionStateCallbacks != null) {
+            mConnectionStateCallbacks.remove(connectionStateCallback);
+        }
+    }
+
+    public void releaseCallbacks() {
+        mConnectionStateCallbacks.clear();
     }
 
     public boolean close() {
@@ -72,19 +99,19 @@ public class ShineSdkProfileProxy {
         return true;
     }
 
-    public void startGettingDeviceConfiguration() {
+    public void startGettingDeviceConfiguration(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.getDeviceConfiguration(mConfigurationCallBack);
+            mShineProfile.getDeviceConfiguration(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't get device config");
         }
     }
 
-    public void startSettingDeviceConfig(ShineConfiguration shineConfiguration) {
+    public void startSettingDeviceConfig(ShineConfiguration shineConfiguration, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
             SetConfigurationSession setConfigurationSession = new SetConfigurationSession(shineConfiguration);
             setConfigurationSession.prepareSetTimeParams();
-            mShineProfile.setDeviceConfiguration(setConfigurationSession, mConfigurationCallBack);
+            mShineProfile.setDeviceConfiguration(setConfigurationSession, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't set device config");
         }
@@ -98,9 +125,9 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public void playAnimation() {
+    public void playAnimation(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.playAnimation(mConfigurationCallBack);
+            mShineProfile.playAnimation(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't play animation");
         }
@@ -133,17 +160,17 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public void startChangeSerialNumber(String newSerialNumber) {
+    public void startChangeSerialNumber(String newSerialNumber, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.changeSerialNumber(newSerialNumber, mConfigurationCallBack);
+            mShineProfile.changeSerialNumber(newSerialNumber, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't reset serial number");
         }
     }
 
-    public void startSettingConnectionParams(ShineConnectionParameters params) {
+    public void startSettingConnectionParams(ShineConnectionParameters params, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.setConnectionParameters(params, mConfigurationCallBack);
+            mShineProfile.setConnectionParameters(params, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't start setting connection params");
         }
@@ -154,17 +181,17 @@ public class ShineSdkProfileProxy {
     /* (non-Javadoc)
      * @see com.misfitwearables.prometheus.ble.AbstractShineProvider#startActivating()
 	 */
-    public void startActivating() {
+    public void startActivating(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.activate(mConfigurationCallBack);
+            mShineProfile.activate(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't start activating");
         }
     }
 
-    public void startGettingActivationState() {
+    public void startGettingActivationState(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.getActivationState(mConfigurationCallBack);
+            mShineProfile.getActivationState(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't start getting activation state");
         }
@@ -178,73 +205,73 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public void mapEventAnimation(ShineEventAnimationMapping[] mappings) {
+    public void mapEventAnimation(ShineEventAnimationMapping[] mappings, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.mapEventAnimations(mappings, mConfigurationCallBack);
+            mShineProfile.mapEventAnimations(mappings, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't map event user animation");
         }
     }
 
-    public void startButtonAnimation(short animationId, short repeats) {
+    public void startButtonAnimation(short animationId, short repeats, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.startButtonAnimation(animationId, repeats, mConfigurationCallBack);
+            mShineProfile.startButtonAnimation(animationId, repeats, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't start button animation");
         }
     }
 
-    public void unmapAllEventAnimation() {
+    public void unmapAllEventAnimation(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.unmapAllEventAnimation(mConfigurationCallBack);
+            mShineProfile.unmapAllEventAnimation(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't unmap all button animation");
         }
     }
 
-    public void setSingleAlarm(AlarmSettings alarmSettings) {
+    public void setSingleAlarm(AlarmSettings alarmSettings, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.setSingleAlarm(alarmSettings, mConfigurationCallBack);
+            mShineProfile.setSingleAlarm(alarmSettings, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't set single alarm");
         }
     }
 
-    public void setCallTextNotification(NotificationsSettings notification) {
+    public void setCallTextNotification(NotificationsSettings notification, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.setCallTextNotifications(notification, mConfigurationCallBack);
+            mShineProfile.setCallTextNotifications(notification, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't set call text notification");
         }
     }
 
-    public void disableAllCallTextNotification() {
+    public void disableAllCallTextNotification(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.disableAllCallTextNotifications(mConfigurationCallBack);
+            mShineProfile.disableAllCallTextNotifications(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't disable call text notification");
         }
     }
 
-    public void setInactivityNudge(InactivityNudgeSettings inactivityNudgeSettings) {
+    public void setInactivityNudge(InactivityNudgeSettings inactivityNudgeSettings, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.setInactivityNudge(inactivityNudgeSettings, mConfigurationCallBack);
+            mShineProfile.setInactivityNudge(inactivityNudgeSettings, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't set InactivityNudge");
         }
     }
 
-    public void clearAllAlarms() {
+    public void clearAllAlarms(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.clearAllAlarms(mConfigurationCallBack);
+            mShineProfile.clearAllAlarms(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't clear all alarms");
         }
     }
 
-    public void setHitGoalNotification(GoalHitNotificationSettings goalHitNotificationSettings) {
+    public void setHitGoalNotification(GoalHitNotificationSettings goalHitNotificationSettings, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.setGoalReachNotification(goalHitNotificationSettings, mConfigurationCallBack);
+            mShineProfile.setGoalReachNotification(goalHitNotificationSettings, callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't set hit goal notification");
         }
@@ -264,18 +291,18 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public boolean sendCallNotification() {
+    public boolean sendCallNotification(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            return mShineProfile.sendCallNotification(mConfigurationCallBack);
+            return mShineProfile.sendCallNotification(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't send call notification");
             return false;
         }
     }
 
-    public boolean sendTextNotification() {
+    public boolean sendTextNotification(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            return mShineProfile.sendTextNotification(mConfigurationCallBack);
+            return mShineProfile.sendTextNotification(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't send text notification");
             return false;
@@ -290,9 +317,9 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public void stopAnimation() {
+    public void stopAnimation(ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.stopPlayingAnimation(mConfigurationCallBack);
+            mShineProfile.stopPlayingAnimation(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't interrupt");
         }
@@ -327,9 +354,9 @@ public class ShineSdkProfileProxy {
         return reason;
     }
 
-    public void setFlashButtonMode(FlashButtonMode buttonMode) {
+    public void setFlashButtonMode(FlashButtonMode buttonMode, ShineProfile.ConfigurationCallback callback) {
         if (mShineProfile != null) {
-            mShineProfile.setFlashButtonMode(buttonMode, mConfigurationCallBack);
+            mShineProfile.setFlashButtonMode(buttonMode, callback);
         }
     }
 }

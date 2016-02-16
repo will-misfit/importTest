@@ -14,7 +14,7 @@ import java.util.TimerTask;
 /**
  * Task instance to do the connect operation.
  */
-public class ConnectTask extends Task implements ConnectionManager.ConnectionStateCallback {
+public class ConnectTask extends Task implements ShineSdkProfileProxy.ConnectionStateCallback {
 
     private final static String TAG = "ConnectTask";
 
@@ -48,16 +48,15 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
         TimerManager.getInstance().addTimerTask(mCurrTimerTask, CONNECT_TASK_TIMEOUT);
 
         //connect
-        ShineSdkProfileProxy shineSdkProfileProxy = connectionManager.createShineProfileProxy(mTaskSharedData.getSerialNumber());
-        connectionManager.subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
-        shineSdkProfileProxy.connectProfile(device, ContextUtils.getInstance().getContext());
+        proxy.subscribeConnectionStateChanged(this);
+        proxy.connectProfile(device, ContextUtils.getInstance().getContext());
     }
 
     @Override
     public void onStop() {
-        ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy != null) {
+            proxy.unsubscribeConnectionStateChanged(this);
             proxy.close();
         }
     }
@@ -65,7 +64,10 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
-        ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+        if (proxy != null) {
+            proxy.unsubscribeConnectionStateChanged(this);
+        }
     }
 
     @Override
@@ -73,7 +75,6 @@ public class ConnectTask extends Task implements ConnectionManager.ConnectionSta
         if (mIsFinished) {
             return;
         }
-        ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
         if (state == ShineProfile.State.CONNECTED) {
             updateDeviceInfo();
             taskSucceed();

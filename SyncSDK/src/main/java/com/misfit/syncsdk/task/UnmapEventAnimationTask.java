@@ -17,7 +17,7 @@ import java.util.Hashtable;
 /**
  * @author zhoufu24
  */
-public class UnmapEventAnimationTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class UnmapEventAnimationTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "UnmapEventAnimationTask";
 
@@ -33,9 +33,7 @@ public class UnmapEventAnimationTask extends Task implements ConnectionManager.C
             taskFailed("proxy not prepared");
             return;
         }
-
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.unmapAllEventAnimation();
+        proxy.unmapAllEventAnimation(this);
     }
 
     @Override
@@ -45,7 +43,6 @@ public class UnmapEventAnimationTask extends Task implements ConnectionManager.C
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override

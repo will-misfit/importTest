@@ -9,7 +9,7 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class SetInactivityNudgeTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class SetInactivityNudgeTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "SetInactivityNudgeTask";
 
@@ -29,8 +29,7 @@ public class SetInactivityNudgeTask extends Task implements ConnectionManager.Co
             taskIgnored("InactivityNudge settings is null");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.setInactivityNudge(mTaskSharedData.getSyncParams().inactivityNudgeSettings);
+        proxy.setInactivityNudge(mTaskSharedData.getSyncParams().inactivityNudgeSettings, this);
     }
 
     @Override
@@ -40,7 +39,6 @@ public class SetInactivityNudgeTask extends Task implements ConnectionManager.Co
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override

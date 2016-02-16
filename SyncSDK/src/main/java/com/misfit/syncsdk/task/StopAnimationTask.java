@@ -9,7 +9,7 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class StopAnimationTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class StopAnimationTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "StopAnimationTask";
 
@@ -25,8 +25,7 @@ public class StopAnimationTask extends Task implements ConnectionManager.ConfigC
             taskFailed("proxy not prepared");
             return;
         }
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
-        proxy.stopAnimation();
+        proxy.stopAnimation(this);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class StopAnimationTask extends Task implements ConnectionManager.ConfigC
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
+
     }
 
     @Override

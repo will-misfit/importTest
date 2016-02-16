@@ -55,6 +55,10 @@ public abstract class Task {
         }
     }
 
+    protected boolean canbeIgnored(){
+        return false;
+    }
+
     protected void retryAndIgnored() {
         mRemainingRetry--;
         Log.d(TAG, this.getClass().getSimpleName() + " retry, remaining retry=" + mRemainingRetry);

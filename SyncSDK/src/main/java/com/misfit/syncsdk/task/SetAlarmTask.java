@@ -9,7 +9,7 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class SetAlarmTask extends Task implements ConnectionManager.ConfigCompletedCallback {
+public class SetAlarmTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "SetAlarmTask";
 
@@ -26,11 +26,10 @@ public class SetAlarmTask extends Task implements ConnectionManager.ConfigComple
             return;
         }
 
-        ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
         if (mTaskSharedData.getSyncParams().shouldClearAlarmSettings) {
-            proxy.clearAllAlarms();
+            proxy.clearAllAlarms(this);
         } else if (mTaskSharedData.getSyncParams().alarmSettings != null) {
-            proxy.setSingleAlarm(mTaskSharedData.getSyncParams().alarmSettings);
+            proxy.setSingleAlarm(mTaskSharedData.getSyncParams().alarmSettings, this);
         } else {
             taskIgnored("no alarm settings");
         }
@@ -43,7 +42,6 @@ public class SetAlarmTask extends Task implements ConnectionManager.ConfigComple
 
     @Override
     protected void cleanup() {
-        ConnectionManager.getInstance().unsubscribeConfigCompleted(mTaskSharedData.getSerialNumber(), this);
     }
 
     @Override
