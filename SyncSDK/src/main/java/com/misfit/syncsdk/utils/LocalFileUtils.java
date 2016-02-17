@@ -19,47 +19,33 @@ public class LocalFileUtils {
         return ContextUtils.getInstance().getContext();
     }
 
-    public static boolean write(String fileName, String content) {
+    public static FileOutputStream openFileOutput(String fileName) {
         try {
             FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
-            fos.write(content.getBytes());
-            fos.close();
-            return true;
+            return fos;
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            return null;
+        }
+    }
+    
+    public static FileOutputStream openFileOutput(String fileName, int mode) {
+        try {
+            FileOutputStream fos = getContext().openFileOutput(fileName, mode);
+            return fos;
+        } catch (FileNotFoundException e) {
+            return null;
         }
     }
 
-    public static FileOutputStream getOutputStream(String fileName) {
-        try {
-            FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
-            return fos;
-        } catch (FileNotFoundException e) {
-            return null;
-        }
-    }
-    
-    public static FileOutputStream getOutputStreamForAppend(String fileName) {
-        try {
-            FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_APPEND);
-            return fos;
-        } catch (FileNotFoundException e) {
-            return null;
-        }
-    }
-    
     public static byte[] read(String fileName) {
+        FileInputStream fis = null;
         try {
             final long fileSize = fileSize(fileName);    
             if (fileSize <= 0) {
                 return null;
             }
 
-            FileInputStream fis = getContext().openFileInput(fileName);
+            fis = getContext().openFileInput(fileName);
             byte[] data = new byte[(int) fileSize];
             fis.read(data);
             fis.close();
@@ -68,6 +54,14 @@ public class LocalFileUtils {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }
@@ -86,8 +80,7 @@ public class LocalFileUtils {
     }
     
     public static boolean delete(String fileName) {
-        boolean result = getContext().deleteFile(fileName);
-        return result;
+        return getContext().deleteFile(fileName);
     }
     
     public static boolean rename(String oldFileName, String newFileName) {

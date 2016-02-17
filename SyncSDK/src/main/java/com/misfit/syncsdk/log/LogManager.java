@@ -9,15 +9,23 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.misfit.syncsdk.model.BaseResponse;
 import com.misfit.syncsdk.network.APIClient;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,20 +36,23 @@ public class LogManager {
 
     private final static String TAG = "LogManager";
 
-
     //FIXME:when close this thread?
     private HandlerThread mHandlerThread;
     private LogHandler mHandler;
 
+    private Gson mGson;
+    APIClient.LogAPI mAPI;
+
     private static LogManager mInstance;
 
     private LogManager() {
-        Gson gson = new GsonBuilder()
+        mGson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .create();
+        mAPI = APIClient.getInstance().getLogAPI();
         mHandlerThread = new HandlerThread("sync_sdk_log");
         mHandlerThread.start();
-        mHandler = new LogHandler(mHandlerThread.getLooper(), gson);
+        mHandler = new LogHandler(mHandlerThread.getLooper());
     }
 
     public static LogManager getInstance() {
@@ -51,21 +62,11 @@ public class LogManager {
         return mInstance;
     }
 
-    /**
-     * should be called in device reboot
-     */
-    public void uploadAllLogs() {
-        //TODO:get all file with session/event prefix
-        //TODO:convert to session/event
-        //TODO:upload sessions(accept multiple times?)
-        //TODO:upload events
-    }
-
-    void saveSession(LogSession session) {
+    public void saveSession(LogSession session) {
         mHandler.saveSession(session);
     }
 
-    void appendEvent(LogEvent event) {
+    public void appendEvent(LogEvent event) {
         mHandler.saveEvent(event);
     }
 
@@ -74,27 +75,23 @@ public class LogManager {
         mHandler.uploadEvents(sessionId);
     }
 
-    private static class LogHandler extends Handler {
-        private final static String TAG = "LogHandler";
+    /**
+     * when to upload all log files, it will search all local log files, and upload them one by one
+     * */
+    public void uploadAllLog() {
 
-        private final static String EVENTS_PREFIX = "events_";
-        private final static String SESSION_PREFIX = "session_";
-        private final static int SPLIT = ',';
-        private final static String SPLITSTR = ",";
+    }
+
+    private class LogHandler extends Handler {
+        private final static String TAG = "LogHandler";
 
         private final static int REQ_SAVE_SESSION = 1;
         private final static int REQ_SAVE_EVENT = 2;
         private final static int REQ_UPLOAD_SESSION = 3;
         private final static int REQ_UPLOAD_EVENTS = 4;
-        private final static int REQ_UPLOAD_ALL = 5;
 
-        private Gson mGson;
-        APIClient.LogAPI mAPI;
-
-        public LogHandler(Looper looper, Gson gson) {
+        public LogHandler(Looper looper) {
             super(looper);
-            mGson = gson;
-            mAPI = APIClient.getInstance().getLogAPI();
         }
 
         @Override
@@ -110,23 +107,15 @@ public class LogManager {
                     break;
                 case REQ_UPLOAD_SESSION:
                     sessionId = (String) msg.obj;
-                    if (uploadSessionToServer(sessionId) == false) {
-                        LocalFileUtils.delete(SESSION_PREFIX + sessionId);
-                    }
+                    uploadSessionToServer(sessionId);
                     break;
                 case REQ_UPLOAD_EVENTS:
                     sessionId = (String) msg.obj;
-                    if (uploadEventsToServer(sessionId) == false) {
-                        LocalFileUtils.delete(EVENTS_PREFIX + sessionId);
-                    }
-                    break;
-                case REQ_UPLOAD_ALL:
-                    //TODO:wait to finish...
+                    uploadEventsToServer(sessionId);
                     break;
                 default:
                     MLog.d(TAG, "unexpected message, what=" + msg.what);
             }
-            MLog.d(TAG, "handle message finished");
         }
 
         public void saveSession(LogSession session) {
@@ -144,111 +133,136 @@ public class LogManager {
         public void uploadEvents(String sessionId) {
             obtainMessage(REQ_UPLOAD_EVENTS, sessionId).sendToTarget();
         }
+    }
 
-        /**
-         * @param sessionId the target's sessionId
-         * @return true if upload started, false for else
-         */
-        private boolean uploadSessionToServer(String sessionId) {
-            String fileName = SESSION_PREFIX + sessionId;
-            byte[] sessionBytes = LocalFileUtils.read(fileName);
-            if (sessionBytes == null || sessionBytes.length == 0) {
-                return false;
-            }
-            String sessionStr = new String(sessionBytes);
-            LogSession session;
-            try {
-                session = mGson.fromJson(sessionStr, LogSession.class);
-                mAPI.uploadSession(session).enqueue(new LogUploadCallback(fileName));
-                return true;
-            } catch (Exception ex) {
-                MLog.d(TAG, Log.getStackTraceString(ex.getCause()));
-                return false;
-            }
-        }
+    /**
+     * write one LogSession to one file
+     * */
+    private void writeSessionToFile(LogSession session) {
+        BufferedWriter bufferedWriter = null;
+        try {
+            MLog.d(TAG, String.format("writing session to file, sessionId = %s", session.getId()));
+            String fileName = SdkConstants.SESSION_PREFIX + session.getId();
+            FileOutputStream stream = LocalFileUtils.openFileOutput(fileName);
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream));
+            byte[] sessionBytes = mGson.toJson(session).getBytes();
 
-        /**
-         * @param sessionId the target's sessionId
-         * @return true if upload started, false for else
-         */
-        private boolean uploadEventsToServer(String sessionId) {
-            String fileName = EVENTS_PREFIX + sessionId;
-            byte[] eventBytes = LocalFileUtils.read(fileName);
-            if (eventBytes == null || eventBytes.length == 0) {
-                return false;
-            }
-            String[] eventStrings = new String(eventBytes).split(SPLITSTR);
-            if (eventStrings.length == 0) {
-                return false;
-            }
-
-            List<LogEvent> eventList = new ArrayList<>();
-            for (String eventStr : eventStrings) {
-                LogEvent event;
+            bufferedWriter.newLine();
+            bufferedWriter.write(new String(sessionBytes));
+            bufferedWriter.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (bufferedWriter != null) {
                 try {
-                    event = mGson.fromJson(eventStr, LogEvent.class);
-                } catch (Exception ex) {
-                    event = null;
+                    bufferedWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                if (event != null) {
-                    eventList.add(event);
-                } else {
-                    MLog.d(TAG, "failed to convert string to LogEvent, string=" + eventStr);
-                }
-            }
-            if (eventList.size() <= 0) {
-                MLog.d(TAG, "no log will be uploaded");
-                return false;
-            }
-            mAPI.uploadEvents(sessionId, eventList).enqueue(new LogUploadCallback(fileName));
-            return true;
-        }
-
-        private void writeEventToFile(LogEvent event) {
-            try {
-                MLog.d(TAG, String.format("writing event to file, eventId=%s, sessionId=%s", event.id, event.sessionId));
-                FileOutputStream stream = ContextUtils.getInstance().getContext().openFileOutput(EVENTS_PREFIX + event.sessionId, Context.MODE_APPEND);
-                byte[] eventBytes = mGson.toJson(event).getBytes();
-                stream.write(eventBytes);
-                stream.write(SPLIT);
-                stream.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private void writeSessionToFile(LogSession session) {
-            try {
-                MLog.d(TAG, String.format("writing session to file, sessionId=%s", session.getId()));
-                FileOutputStream stream = ContextUtils.getInstance().getContext().openFileOutput(SESSION_PREFIX + session.getId(), Context.MODE_PRIVATE);
-                byte[] sessionBytes = mGson.toJson(session).getBytes();
-                stream.write(sessionBytes);
-                stream.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
 
+    /**
+     * write one LogEvent to file in one line
+     * */
+    private void writeEventToFile(LogEvent event) {
+        BufferedWriter bufferedWriter = null;
+        try {
+            MLog.d(TAG, String.format("writing event to file, eventId = %s, sessionId = %s", event.id, event.sessionId));
+            String fileName = getLogFileName(SdkConstants.EVENTS_PREFIX, event.sessionId);
+            FileOutputStream stream = LocalFileUtils.openFileOutput(fileName, Context.MODE_APPEND | Context.MODE_PRIVATE);
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream));
+            byte[] eventBytes = mGson.toJson(event).getBytes();
+
+            bufferedWriter.write(new String(eventBytes));
+            bufferedWriter.newLine();
+            bufferedWriter.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (bufferedWriter != null) {
+                try {
+                    bufferedWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * @param sessionId the target's sessionId
+     * @return true if upload started, false for else
+     */
+    private boolean uploadSessionToServer(String sessionId) {
+        String fileName = getLogFileName(SdkConstants.SESSION_PREFIX, sessionId);
+        byte[] sessionBytes = LocalFileUtils.read(fileName);
+        if (sessionBytes == null || sessionBytes.length == 0) {
+            MLog.d(TAG, String.format("session_%s file contains nothing text", sessionId));
+            return false;
+        }
+
+        String sessionStr = new String(sessionBytes);
+        LogSession session;
+        try {
+            session = mGson.fromJson(sessionStr, LogSession.class);
+            mAPI.uploadSession(session).enqueue(new LogUploadCallback(fileName));
+        } catch (JsonSyntaxException ex) {
+            MLog.d(TAG, Log.getStackTraceString(ex.getCause()));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param sessionId the target's sessionId
+     * @return true if upload started, false for else
+     */
+    private boolean uploadEventsToServer(String sessionId) {
+        String fileName = getLogFileName(SdkConstants.EVENTS_PREFIX, sessionId);
+        List<String> eventStrings = readEventsJsonFromFile(fileName);
+        if (CheckUtils.isCollectionEmpty(eventStrings)) {
+            MLog.d(TAG, String.format("events_%s file contains nothing text", sessionId));
+            return false;
+        }
+
+        List<LogEvent> eventList = new ArrayList<>();
+        for (String eventStr : eventStrings) {
+            LogEvent event;
+            try {
+                event = mGson.fromJson(eventStr, LogEvent.class);
+                eventList.add(event);
+            } catch (JsonSyntaxException ex) {
+                MLog.d(TAG, "failed to convert string to LogEvent, string = " + eventStr);
+            }
+        }
+
+        mAPI.uploadEvents(sessionId, eventList).enqueue(new LogUploadCallback(fileName));
+        return true;
+    }
+
+    /**
+     * retrofit2 response listener for LogSession and LogEvent(s)
+     * */
     private static class LogUploadCallback implements Callback<BaseResponse> {
 
         private final static String TAG = "LogUploadCallback";
-
-        String fileName;
+        private String mFileName;
 
         public LogUploadCallback(String fileName) {
-            this.fileName = fileName;
+            mFileName = fileName;
         }
 
         @Override
         public void onResponse(Response<BaseResponse> response) {
-            boolean result = LocalFileUtils.delete(fileName);
+            boolean result = LocalFileUtils.delete(mFileName);
             if (!result) {
-                MLog.d(TAG, "delete file failed, name=" + fileName);
+                MLog.d(TAG, "delete file failed, name = " + mFileName);
             }
         }
 
@@ -256,5 +270,43 @@ public class LogManager {
         public void onFailure(Throwable t) {
             MLog.d(TAG, "upload failed");
         }
+    }
+
+    private static String getLogFileName(String prefix, String sessionId) {
+        return prefix + sessionId;
+    }
+
+    /**
+     * from a file full of events, read them line by line
+     * Note: result does not contain null/empty String
+     * */
+    private static List<String> readEventsJsonFromFile(String fileName) {
+        List<String> jsonList = new ArrayList<>();
+
+        BufferedReader bufferedReader = null;
+        try {
+            FileInputStream inStream = new FileInputStream(new File(fileName));
+            bufferedReader = new BufferedReader(new InputStreamReader(inStream));
+            while(bufferedReader.ready()) {
+                String line = bufferedReader.readLine();
+                if (!CheckUtils.isStringEmpty(line)) {
+                    jsonList.add(line);
+                }
+            }
+            bufferedReader.close();
+        } catch (FileNotFoundException e) {
+            MLog.d(TAG, e.getMessage());
+        } catch (IOException e) {
+            MLog.d(TAG, e.getStackTrace().toString());
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return jsonList;
     }
 }

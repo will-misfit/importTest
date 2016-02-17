@@ -23,6 +23,7 @@ import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
 import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
+import com.misfit.syncsdk.callback.UserTokenRequest;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
@@ -45,7 +46,7 @@ import butterknife.OnTouch;
 
 
 public class MainActivity extends AppCompatActivity
-        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, ReadDataCallback {
+        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, ReadDataCallback, UserTokenRequest {
 
     private final static String TAG = "MainActivity";
 
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
         syncParams.tagInStateListener = tagInStateListener;
-        mSyncCommonDevice.startSync(this, this, this, this, syncParams);
+        mSyncCommonDevice.startSync(this, this, this, this, this, syncParams);
         mLogTextView.clear();
         setOperationPanelEnabled(false);
     }
@@ -309,6 +310,10 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    @Override
+    public String getCurrentUserToken() {
+        return "";
+    }
 
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
         if (syncResultList == null || syncResultList.isEmpty()) {

@@ -28,9 +28,13 @@ public class LogSession {
     @SerializedName("serialNumber")
     private String mSerialNumber;
 
+    /**
+     * this field represents the current firmware in use.
+     * for OTA, the new firmware version will be recorded in next sync session
+     * */
     @Expose
     @SerializedName("firmware")
-    private String mFirmwareVersion;    //FIXME:what should it be in OTA procedure?
+    private String mFirmwareVersion;
 
     @Expose
     @SerializedName("os")
@@ -51,12 +55,6 @@ public class LogSession {
     @Expose
     @SerializedName("calculationLibVersion")
     private final String mCalculationLibVersion = BuildConfig.ALGORITHM_LIB_VERSION;
-
-    @Expose
-    @SerializedName("appVersion")
-    private final String mClientVersion;
-
-    private final String mClientName;
 
     @Expose
     @SerializedName("syncMode")
@@ -134,7 +132,7 @@ public class LogSession {
     @SerializedName("isSuccess")
     private boolean isSuccess = false;
 
-    private int currSeq;
+    private int currEventSequence;
 
     public LogSession(String clientName, String clientVersion, String uid) {
         this(NO_SYNC_MODE, clientName, clientVersion, uid);
@@ -143,10 +141,8 @@ public class LogSession {
     public LogSession(int syncMode, String clientName, String clientVersion, String uid) {
         mDeviceIdentifier = Settings.Secure.getString(ContextUtils.getInstance().getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         mSyncMode = syncMode;
-        mClientName = clientName;
-        mClientVersion = clientVersion;
         mUid = uid;
-        currSeq = 0;
+        currEventSequence = 0;
     }
 
     public String getId() {
@@ -238,14 +234,14 @@ public class LogSession {
     }
 
     public void appendEvent(LogEvent event) {
-        currSeq++;
-        event.sequence = currSeq;
+        currEventSequence++;
+        event.sequence = currEventSequence;
         event.sessionId = id;
         LogManager.getInstance().appendEvent(event);
     }
 
     public void upload() {
-        LogManager.getInstance().uploadLog(id);
+        LogManager.getInstance().uploadAllLog();
     }
 
 }

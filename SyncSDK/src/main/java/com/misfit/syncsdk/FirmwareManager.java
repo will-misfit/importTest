@@ -241,7 +241,7 @@ public class FirmwareManager {
             }
 
             InputStream input = new BufferedInputStream(connection.getInputStream());
-            FileOutputStream output = LocalFileUtils.getOutputStream(tempFirmwareFileName);
+            FileOutputStream output = LocalFileUtils.openFileOutput(tempFirmwareFileName);
 
             byte[] data = new byte[1024];
             int count = 0;

@@ -20,4 +20,8 @@ public class SdkConstants {
 
 	/* .prometheus.app.PrometheusConfig.apiKey */
 	public static final String HTTP_REQUEST_API_KEY = "76801581";
+
+	/* local log file name prefix */
+	public final static String EVENTS_PREFIX = "events_";
+	public final static String SESSION_PREFIX = "session_";
 }
