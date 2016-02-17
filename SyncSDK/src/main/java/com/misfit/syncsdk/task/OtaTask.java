@@ -170,7 +170,7 @@ public class OtaTask extends Task {
 //            FIXME:use local read read method when firmwareManager not completed.
 //            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + mOtaFileName);
 //            byte[] firmwareData = read(file);
-            byte[] firmwareData = LocalFileUtils.read(mOtaFileName);
+            byte[] firmwareData = LocalFileUtils.read(FirmwareManager.FIRMWARE_FOLDER, mOtaFileName);
             if (firmwareData == null) {
                 taskFailed("file not ready");
                 return;

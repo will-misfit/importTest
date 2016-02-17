@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Util class to process local file read/write
@@ -19,33 +21,48 @@ public class LocalFileUtils {
         return ContextUtils.getInstance().getContext();
     }
 
-    public static FileOutputStream openFileOutput(String fileName) {
+    public static FileOutputStream openFileOutput(String dirName, String fileName) {
+        return openFileOutput(dirName, fileName, Context.MODE_PRIVATE);
+    }
+    
+    public static FileOutputStream openFileOutput(String dirName, String fileName, int mode) {
         try {
-            FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+            File directory = getContext().getDir(dirName, mode);
+            File file = new File(directory, fileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(file);
             return fos;
         } catch (FileNotFoundException e) {
             return null;
+        } catch (IOException e) {
+            return null;
         }
     }
-    
-    public static FileOutputStream openFileOutput(String fileName, int mode) {
+
+    public static FileInputStream openFileInput(String dirName, String fileName) {
         try {
-            FileOutputStream fos = getContext().openFileOutput(fileName, mode);
-            return fos;
+            File directory = getContext().getDir(dirName, Context.MODE_PRIVATE);
+            File file = new File(directory, fileName);
+            if (!file.exists()) {
+                return null;
+            }
+            return new FileInputStream(file);
         } catch (FileNotFoundException e) {
             return null;
         }
     }
 
-    public static byte[] read(String fileName) {
+    public static byte[] read(String dirName, String fileName) {
         FileInputStream fis = null;
         try {
-            final long fileSize = fileSize(fileName);    
+            final long fileSize = fileSize(dirName, fileName);
             if (fileSize <= 0) {
                 return null;
             }
 
-            fis = getContext().openFileInput(fileName);
+            fis = openFileInput(dirName, fileName);
             byte[] data = new byte[(int) fileSize];
             fis.read(data);
             fis.close();
@@ -66,21 +83,28 @@ public class LocalFileUtils {
         return null;
     }
     
-    public static boolean isFileExist(String fileName){
-        File file = getContext().getFileStreamPath(fileName);
+    public static boolean isFileExist(String dirName, String fileName){
+        File directory = getContext().getDir(dirName, Context.MODE_PRIVATE);
+        File file = new File(directory, fileName);
         return file.exists();
     }
     
-    public static long fileSize(String fileName) {
-        File file = getContext().getFileStreamPath(fileName);
+    public static long fileSize(String dirName, String fileName) {
+        File directory = getContext().getDir(dirName, Context.MODE_PRIVATE);
+        File file = new File(directory, fileName);
         if (file.isFile() && file.exists()) {
             return file.length();
         }
         return -1;
     }
     
-    public static boolean delete(String fileName) {
-        return getContext().deleteFile(fileName);
+    public static boolean delete(String dirName, String fileName) {
+        File directory = getContext().getDir(dirName, Context.MODE_PRIVATE);
+        File file = new File(directory, fileName);
+        if (file.exists()) {
+            return file.delete();
+        }
+        return true;
     }
     
     public static boolean rename(String oldFileName, String newFileName) {
@@ -107,5 +131,10 @@ public class LocalFileUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static File[] getFiles(String directoryName) {
+        File directory = ContextUtils.getInstance().getContext().getDir(directoryName, Context.MODE_PRIVATE);
+        return directory.exists() ? directory.listFiles() : null;
     }
 }

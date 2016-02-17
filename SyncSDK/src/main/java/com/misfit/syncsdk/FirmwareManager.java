@@ -35,6 +35,8 @@ public class FirmwareManager {
 
     protected static final String TAG = "FirmwareDownloadService";
 
+    public static final String FIRMWARE_FOLDER = "com.misfit.syncsdk.firmware";
+
     public static final String SHINE_MODEL_NAME = "shine";
 
     public static final String FIRMWARE_EXTENSION         = "bin";
@@ -120,7 +122,7 @@ public class FirmwareManager {
      * tells if the given firmware file exists locally
      * */
     public boolean isFirmwareExisting(String firmwareVersion) {
-        return LocalFileUtils.isFileExist(getFirmwareFileName(firmwareVersion));
+        return LocalFileUtils.isFileExist(FIRMWARE_FOLDER, getFirmwareFileName(firmwareVersion));
     }
 
     /**
@@ -226,22 +228,22 @@ public class FirmwareManager {
             connection.setRequestProperty("connection", "close");
             connection.connect();
 
-            if (LocalFileUtils.isFileExist(firmwareFileName)) {
+            if (LocalFileUtils.isFileExist(FIRMWARE_FOLDER, firmwareFileName)) {
                 // verify
-                String md5 = LocalFileUtils.getMD5String(LocalFileUtils.read(firmwareFileName));
+                String md5 = LocalFileUtils.getMD5String(LocalFileUtils.read(FIRMWARE_FOLDER, firmwareFileName));
                 if (checksum.equals(md5)) {
                     return true;
                 } else {
-                    LocalFileUtils.delete(firmwareFileName);
+                    LocalFileUtils.delete(FIRMWARE_FOLDER, firmwareFileName);
                 }
             }
             // Always delete temp file if it exists
-            if (LocalFileUtils.isFileExist(TEMP_FIRMWARE_EXTENSION)) {
-                LocalFileUtils.delete(TEMP_FIRMWARE_EXTENSION);
+            if (LocalFileUtils.isFileExist(FIRMWARE_FOLDER, TEMP_FIRMWARE_EXTENSION)) {
+                LocalFileUtils.delete(FIRMWARE_FOLDER, TEMP_FIRMWARE_EXTENSION);
             }
 
             InputStream input = new BufferedInputStream(connection.getInputStream());
-            FileOutputStream output = LocalFileUtils.openFileOutput(tempFirmwareFileName);
+            FileOutputStream output = LocalFileUtils.openFileOutput(FIRMWARE_FOLDER, tempFirmwareFileName);
 
             byte[] data = new byte[1024];
             int count = 0;
@@ -255,13 +257,13 @@ public class FirmwareManager {
             output.close();
             input.close();
 
-            byte[] fileData = LocalFileUtils.read(tempFirmwareFileName);
+            byte[] fileData = LocalFileUtils.read(FIRMWARE_FOLDER, tempFirmwareFileName);
 
             if (total > 0) {
                 String md5 = LocalFileUtils.getMD5String(fileData);
                 if (!md5.equals(checksum)) {
                     Log.d(TAG, "Download succeeds but MD5 verification fails");
-                    LocalFileUtils.delete(tempFirmwareFileName);
+                    LocalFileUtils.delete(FIRMWARE_FOLDER, tempFirmwareFileName);
                     return false;
                 } else {
                     Log.d(TAG, "Verification succeeds " + firmwareFileName);
@@ -270,11 +272,11 @@ public class FirmwareManager {
                 }
             } else {
                 Log.d(TAG, "Download fails");
-                LocalFileUtils.delete(tempFirmwareFileName);
+                LocalFileUtils.delete(FIRMWARE_FOLDER, tempFirmwareFileName);
                 return false;
             }
         } catch (Exception e) {
-            LocalFileUtils.delete(tempFirmwareFileName);
+            LocalFileUtils.delete(FIRMWARE_FOLDER, tempFirmwareFileName);
             Log.d(TAG, "Exception during download " + e.toString());
             return false;
         }
@@ -289,7 +291,7 @@ public class FirmwareManager {
 
     public void deleteFirmware(String firmwareVersion) {
         String firmwareName = getFirmwareFileName(firmwareVersion);
-        if (LocalFileUtils.delete(firmwareName)) {
+        if (LocalFileUtils.delete(FIRMWARE_FOLDER, firmwareName)) {
             Log.d(TAG, String.format("Delete old firmware %s successfully", firmwareVersion));
         } else {
             Log.d(TAG, String.format("Delete old firmware %s error/does't exist", firmwareVersion));
@@ -327,24 +329,6 @@ public class FirmwareManager {
                 && (CheckUtils.isStringEmpty(currentFirmwareVersion)
                     || modelNumber.equals(currentModelName)
                     || (SdkConstants.SHINE_MODEL_NAME.equals(modelNumber) && CheckUtils.isStringEmpty(currentModelName))));
-    }
-
-    public static byte[] getFirmwareData(String firmwareVersion) {
-        return LocalFileUtils.read(getFirmwareFileName(firmwareVersion));
-    }
-
-    public static byte[] getFirmwareData() {
-        return LocalFileUtils.read(getFirmwareFileName(latestFirmwareInfo.getVersionNumber()));
-    }
-
-    public static String getVersionNumber() {
-        return latestFirmwareInfo.getVersionNumber();
-    }
-
-    public static boolean isFirmwareReady() {
-        boolean downloaded = mFirmwareManager.isFirmwareExisting(latestFirmwareInfo.getVersionNumber());
-        Log.d(TAG, "isFirmwareReady " + downloaded);
-        return downloaded;
     }
 
     public void setDownloadFirmwareListener(DownloadLatestFirmwareListener downloadListener) {

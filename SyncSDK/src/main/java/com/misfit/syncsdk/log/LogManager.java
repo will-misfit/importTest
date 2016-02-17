@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,6 +37,7 @@ import retrofit2.Response;
 public class LogManager {
 
     private final static String TAG = "LogManager";
+    private static final String LOG_FOLDER = "com.misfit.syncsdk.log";
 
     //FIXME:when close this thread?
     private HandlerThread mHandlerThread;
@@ -70,7 +73,7 @@ public class LogManager {
         mHandler.saveEvent(event);
     }
 
-    void uploadLog(String sessionId) {
+    private void uploadLog(String sessionId) {
         mHandler.uploadSession(sessionId);
         mHandler.uploadEvents(sessionId);
     }
@@ -79,7 +82,20 @@ public class LogManager {
      * when to upload all log files, it will search all local log files, and upload them one by one
      * */
     public void uploadAllLog() {
+        File[] logFiles = LocalFileUtils.getFiles(LOG_FOLDER);
+        if (logFiles == null) {
+            return;
+        }
 
+        Set<String> sessionIdSet = new HashSet<>();
+        for (File file : logFiles) {
+            String sessionId = parseSessionId(file.getName());
+            if (sessionIdSet.contains(sessionId)) {
+                continue;
+            }
+            sessionIdSet.add(sessionId);
+            uploadLog(sessionId);
+        }
     }
 
     private class LogHandler extends Handler {
@@ -143,11 +159,14 @@ public class LogManager {
         try {
             MLog.d(TAG, String.format("writing session to file, sessionId = %s", session.getId()));
             String fileName = SdkConstants.SESSION_PREFIX + session.getId();
-            FileOutputStream stream = LocalFileUtils.openFileOutput(fileName);
+            FileOutputStream stream = LocalFileUtils.openFileOutput(LOG_FOLDER, fileName);
+            if (stream == null) {
+                return;
+            }
+
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream));
             byte[] sessionBytes = mGson.toJson(session).getBytes();
 
-            bufferedWriter.newLine();
             bufferedWriter.write(new String(sessionBytes));
             bufferedWriter.close();
         } catch (FileNotFoundException e) {
@@ -173,12 +192,17 @@ public class LogManager {
         try {
             MLog.d(TAG, String.format("writing event to file, eventId = %s, sessionId = %s", event.id, event.sessionId));
             String fileName = getLogFileName(SdkConstants.EVENTS_PREFIX, event.sessionId);
-            FileOutputStream stream = LocalFileUtils.openFileOutput(fileName, Context.MODE_APPEND | Context.MODE_PRIVATE);
+            FileOutputStream stream = LocalFileUtils.openFileOutput(LOG_FOLDER, fileName,
+                Context.MODE_APPEND | Context.MODE_PRIVATE);
+            if (stream == null) {
+                return;
+            }
+
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream));
             byte[] eventBytes = mGson.toJson(event).getBytes();
 
-            bufferedWriter.write(new String(eventBytes));
             bufferedWriter.newLine();
+            bufferedWriter.write(new String(eventBytes));
             bufferedWriter.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -201,9 +225,9 @@ public class LogManager {
      */
     private boolean uploadSessionToServer(String sessionId) {
         String fileName = getLogFileName(SdkConstants.SESSION_PREFIX, sessionId);
-        byte[] sessionBytes = LocalFileUtils.read(fileName);
+        byte[] sessionBytes = LocalFileUtils.read(LOG_FOLDER, fileName);
         if (sessionBytes == null || sessionBytes.length == 0) {
-            MLog.d(TAG, String.format("session_%s file contains nothing text", sessionId));
+            MLog.d(TAG, String.format("session_%s file does not exist or contain nothing", sessionId));
             return false;
         }
 
@@ -227,15 +251,14 @@ public class LogManager {
         String fileName = getLogFileName(SdkConstants.EVENTS_PREFIX, sessionId);
         List<String> eventStrings = readEventsJsonFromFile(fileName);
         if (CheckUtils.isCollectionEmpty(eventStrings)) {
-            MLog.d(TAG, String.format("events_%s file contains nothing text", sessionId));
+            MLog.d(TAG, String.format("events_%s file does not exist or contains nothing", sessionId));
             return false;
         }
 
         List<LogEvent> eventList = new ArrayList<>();
         for (String eventStr : eventStrings) {
-            LogEvent event;
             try {
-                event = mGson.fromJson(eventStr, LogEvent.class);
+                LogEvent event = mGson.fromJson(eventStr, LogEvent.class);
                 eventList.add(event);
             } catch (JsonSyntaxException ex) {
                 MLog.d(TAG, "failed to convert string to LogEvent, string = " + eventStr);
@@ -260,7 +283,7 @@ public class LogManager {
 
         @Override
         public void onResponse(Response<BaseResponse> response) {
-            boolean result = LocalFileUtils.delete(mFileName);
+            boolean result = LocalFileUtils.delete(LOG_FOLDER, mFileName);
             if (!result) {
                 MLog.d(TAG, "delete file failed, name = " + mFileName);
             }
@@ -285,7 +308,11 @@ public class LogManager {
 
         BufferedReader bufferedReader = null;
         try {
-            FileInputStream inStream = new FileInputStream(new File(fileName));
+            FileInputStream inStream = LocalFileUtils.openFileInput(LOG_FOLDER, fileName);
+            if (inStream == null) {
+                return jsonList;
+            }
+
             bufferedReader = new BufferedReader(new InputStreamReader(inStream));
             while(bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
@@ -308,5 +335,20 @@ public class LogManager {
             }
         }
         return jsonList;
+    }
+
+    /**
+     * log files are named like session_[sessionId] or events_[sessionId]
+     * */
+    private static String parseSessionId(String fileName) {
+        if (CheckUtils.isStringEmpty(fileName)) {
+            return null;
+        }
+        final String splitStr = "_";
+        int pos = fileName.lastIndexOf(splitStr);
+        if (pos == -1) {
+            return null;
+        }
+        return fileName.substring(pos + 1, fileName.length());
     }
 }
