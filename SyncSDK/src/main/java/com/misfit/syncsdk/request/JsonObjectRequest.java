@@ -16,6 +16,7 @@ import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.enums.HttpStatus;
 import com.misfit.syncsdk.model.MetaMessage;
 import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.ContextUtils;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.SdkConstants;
 import com.misfit.syncsdk.utils.VolleyRequestUtils;
@@ -155,7 +156,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
          another is designed for SDK/library, specified with serial number.
          Currently only 1st kind of AuthToken is available, so use it temporarily.
          * */
-        String authToken = FirmwareManager.getInstance().getUserTokenRequest().getCurrentUserToken();
+        String authToken = ContextUtils.getInstance().getUserAuthToken();
         if (!CheckUtils.isStringEmpty(authToken)) {
             items.put("auth_token", authToken);
         }

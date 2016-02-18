@@ -9,7 +9,6 @@ import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-import com.misfit.syncsdk.callback.UserTokenRequest;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
@@ -43,7 +42,6 @@ public class SyncFlashDevice extends SyncCommonDevice {
                           ReadDataCallback syncCallback,
                           SyncCalculationCallback calcuCallback,
                           SyncOtaCallback otaCallback,
-                          UserTokenRequest userTokenRequest,
                           @NonNull SyncSyncParams syncParams) {
         if (isRunning()) {
             resultCallback.onFailed(SyncOperationResult.RUNNING);
@@ -54,7 +52,6 @@ public class SyncFlashDevice extends SyncCommonDevice {
         taskSharedData.setReadDataCallback(syncCallback);
         taskSharedData.setSyncCalculationCallback(calcuCallback);
         taskSharedData.setSyncOtaCallback(otaCallback);
-        FirmwareManager.getInstance().setUserTokenRequest(userTokenRequest);
         taskSharedData.setSyncParams(syncParams);
 
         List<Task> tasks = prepareTasks();
@@ -63,7 +60,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
         if (syncParams.firstSync) {
             tasks.add(new ActivateTask());
             tasks.add(new SwitchTrackerModeTask());
-            tasks.add(new UnmapEventAnimationTask());
+            // tasks.add(new UnmapEventAnimationTask());  // add this task only when it is Flash Button
         }
         tasks.add(new GetConfigurationTask());
         tasks.add(new CheckOnTagStatusTaskUserInput());

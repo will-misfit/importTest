@@ -28,9 +28,10 @@ public class SyncSdkAdapter {
     }
 
     //FIXME: need double check
-    public void init(Context context, String userId) {
+    public void init(Context context, String userId, String authToken) {
         mContext = context.getApplicationContext();
         ContextUtils.getInstance().setContext(mContext);
+        ContextUtils.getInstance().setUserAuthToken(authToken);
         SDKSetting.setUp(context, userId);
     }
 

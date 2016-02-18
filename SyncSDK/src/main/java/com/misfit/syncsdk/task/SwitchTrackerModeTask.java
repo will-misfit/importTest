@@ -12,6 +12,7 @@ import java.util.Hashtable;
 
 /**
  * when Flash Button want to sync with flagship app, its FlashButtonMode needs to set
+ * Note: execute this task only when it is Flash Button
  */
 public class SwitchTrackerModeTask extends Task implements ShineProfile.ConfigurationCallback {
 

@@ -52,7 +52,7 @@ public class ConnectionManager {
 
     public void releaseShineProfileProxy(String serialNumber) {
         ShineSdkProfileProxy proxy = getShineSDKProfileProxy(serialNumber);
-        if(proxy!=null){
+        if (proxy != null) {
             proxy.releaseCallbacks();
             mShineProfileProxyCache.remove(serialNumber);
         }

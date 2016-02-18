@@ -9,6 +9,8 @@ public class ContextUtils {
 
     private Context mContext;
 
+    private String mUserAuthToken;
+
     private static ContextUtils mInstance;
 
     private ContextUtils() {
@@ -27,5 +29,13 @@ public class ContextUtils {
 
     public void setContext(Context mContext) {
         this.mContext = mContext;
+    }
+
+    public void setUserAuthToken(String authToken) {
+        this.mUserAuthToken = authToken;
+    }
+
+    public String getUserAuthToken() {
+        return this.mUserAuthToken;
     }
 }

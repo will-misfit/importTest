@@ -116,7 +116,7 @@ public class OtaTask extends Task {
                 String fileName = FirmwareManager.getFirmwareFileName(mLatestFirmwareVersion);
                 gotoState(new OtaState(fileName));
             } else if (mForceOta) {
-                firmwareManager.whenFirmwareReady(mLatestFirmwareVersion, this);
+                firmwareManager.onFirmwareReady(mLatestFirmwareVersion, this);
             } else {
                 taskSucceed();  // skip OTA
             }

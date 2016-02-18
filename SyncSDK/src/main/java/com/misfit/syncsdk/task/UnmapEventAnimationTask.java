@@ -15,7 +15,7 @@ import com.misfit.syncsdk.utils.MLog;
 import java.util.Hashtable;
 
 /**
- * @author zhoufu24
+ * Note: execute this task only when it is Flash Button
  */
 public class UnmapEventAnimationTask extends Task implements ShineProfile.ConfigurationCallback {
 
