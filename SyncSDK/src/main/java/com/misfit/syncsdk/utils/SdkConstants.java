@@ -24,4 +24,10 @@ public class SdkConstants {
 	/* local log file name prefix */
 	public final static String EVENTS_PREFIX = "events_";
 	public final static String SESSION_PREFIX = "session_";
+
+	/* SyncMode for LogSession */
+	public final static int SYNC_MODE_DEFAULT = -1;
+	public final static int SYNC_MODE_MANUAL  = 1;
+	public final static int SYNC_MODE_QUIET   = 2;
+	public final static int SYNC_MODE_BACKGROUND = 3;
 }

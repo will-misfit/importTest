@@ -69,6 +69,9 @@ public class LogManager {
         mHandler.saveSession(session);
     }
 
+    /**
+     * LogEvent is saved(written) in local file
+     * */
     public void appendEvent(LogEvent event) {
         mHandler.saveEvent(event);
     }
@@ -153,13 +156,15 @@ public class LogManager {
 
     /**
      * write one LogSession to one file
+     * since there are several moments to write LogSession to file, its solution is to
+     * override content in file instead of append
      * */
     private void writeSessionToFile(LogSession session) {
         BufferedWriter bufferedWriter = null;
         try {
             MLog.d(TAG, String.format("writing session to file, sessionId = %s", session.getId()));
             String fileName = SdkConstants.SESSION_PREFIX + session.getId();
-            FileOutputStream stream = LocalFileUtils.openFileOutput(LOG_FOLDER, fileName);
+            FileOutputStream stream = LocalFileUtils.openFileOutput(LOG_FOLDER, fileName, Context.MODE_PRIVATE, false);
             if (stream == null) {
                 return;
             }

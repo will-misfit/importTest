@@ -8,13 +8,13 @@ import com.google.gson.annotations.SerializedName;
 import com.misfit.syncsdk.BuildConfig;
 import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.UUID;
 
 
 //FIXME: how to know the int field was modified or not?
 public class LogSession {
-    private final static int NO_SYNC_MODE = Integer.MIN_VALUE;
 
     @Expose
     @SerializedName("id")
@@ -51,6 +51,10 @@ public class LogSession {
     @Expose
     @SerializedName("sdkVersion")
     private final String mSdkVersion = BuildConfig.BUILD_TYPE + BuildConfig.VERSION_NAME;
+
+    @Expose
+    @SerializedName("appVersion")
+    private final String mAppVersion;
 
     @Expose
     @SerializedName("calculationLibVersion")
@@ -134,15 +138,16 @@ public class LogSession {
 
     private int currEventSequence;
 
-    public LogSession(String clientName, String clientVersion, String uid) {
-        this(NO_SYNC_MODE, clientName, clientVersion, uid);
+    public LogSession(String appVersion, String uid) {
+        this(SdkConstants.SYNC_MODE_DEFAULT, appVersion, uid);
     }
 
-    public LogSession(int syncMode, String clientName, String clientVersion, String uid) {
+    public LogSession(int syncMode, String appVersion, String uid) {
         mDeviceIdentifier = Settings.Secure.getString(ContextUtils.getInstance().getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         mSyncMode = syncMode;
         mUid = uid;
         currEventSequence = 0;
+        mAppVersion = appVersion;
     }
 
     public String getId() {
@@ -233,6 +238,9 @@ public class LogSession {
         LogManager.getInstance().saveSession(this);
     }
 
+    /**
+     * NOTE: LogManager.appendEvent() is to save(write) the LogEvent to local file
+     * */
     public void appendEvent(LogEvent event) {
         currEventSequence++;
         event.sequence = currEventSequence;

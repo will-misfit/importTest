@@ -7,6 +7,7 @@ import android.util.Log;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.io.File;
 
@@ -23,7 +24,7 @@ public class LogTest extends InstrumentationTestCase {
     }
 
     public void testSaveSession() {
-        LogSession session = new LogSession(1, "Flagship", "2.6.4", "abc");
+        LogSession session = new LogSession(SdkConstants.SYNC_MODE_MANUAL, "2.6.4", "abc");
         File preSessionFile = getSessionFile(session.getId());
         assertTrue(!preSessionFile.exists());
         session.setFirmwareVersion("SH1.0");
@@ -45,7 +46,7 @@ public class LogTest extends InstrumentationTestCase {
     }
 
     public void testSaveEvent() {
-        LogSession session = new LogSession(1, "Flagship", "2.6.4", "abc");
+        LogSession session = new LogSession(SdkConstants.SYNC_MODE_MANUAL, "2.6.4", "abc");
         session.setFirmwareVersion("SH1.0");
         session.setSerialNumber("SH12345678");
         session.save();

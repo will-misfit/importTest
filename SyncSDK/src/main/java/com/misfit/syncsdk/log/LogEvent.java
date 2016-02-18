@@ -1,5 +1,7 @@
 package com.misfit.syncsdk.log;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -31,6 +33,7 @@ public class LogEvent {
 
     @Expose
     @SerializedName("parameter")
+    @Nullable
     private String mParameter;
 
     @Expose
@@ -43,6 +46,7 @@ public class LogEvent {
 
     @Expose
     @SerializedName("result")
+    @Nullable
     private String mResultMsg;
 
     @Expose

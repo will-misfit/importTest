@@ -2,6 +2,9 @@ package com.misfit.syncsdk.task;
 
 import android.util.Log;
 
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.TaskSharedData;
 
 import java.util.TimerTask;
@@ -22,6 +25,10 @@ public abstract class Task {
     protected int mRemainingRetry = 0;
     protected TaskSharedData mTaskSharedData;
     protected boolean mIsFinished = false;
+
+    protected LogEvent mLogEvent;
+
+    protected LogSession mLogSession;
 
     // Timer to monitor whether the Task execution timeout
     protected TimerTask mCurrTimerTask;
@@ -121,5 +128,13 @@ public abstract class Task {
             mCurrTimerTask.cancel();
             mCurrTimerTask = null;
         }
+    }
+
+    protected LogEvent createLogEvent(int eventId) {
+        String eventName = null;
+        if (eventId >= 0 && eventId < LogEventType.LogEventNames.length) {
+            eventName = LogEventType.LogEventNames[eventId];
+        }
+        return new LogEvent(eventId, eventName);
     }
 }

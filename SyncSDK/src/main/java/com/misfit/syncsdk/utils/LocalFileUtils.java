@@ -24,8 +24,12 @@ public class LocalFileUtils {
     public static FileOutputStream openFileOutput(String dirName, String fileName) {
         return openFileOutput(dirName, fileName, Context.MODE_PRIVATE);
     }
-    
+
     public static FileOutputStream openFileOutput(String dirName, String fileName, int mode) {
+        return openFileOutput(dirName, fileName, mode, true);
+    }
+    
+    public static FileOutputStream openFileOutput(String dirName, String fileName, int mode, boolean append) {
         try {
             File directory = getContext().getDir(dirName, mode);
             File file = new File(directory, fileName);

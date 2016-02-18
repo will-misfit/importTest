@@ -8,6 +8,7 @@ import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.device.DeviceBehavior;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.utils.SdkConstants;
 
 /**
@@ -34,6 +35,8 @@ public class TaskSharedData {
 
     private SyncSyncParams mSyncParams;
 
+    private LogSession mLogSession;
+
     public TaskSharedData(String serialNumber, int deviceType) {
         this(serialNumber, deviceType, SdkConstants.OPERATOR_RETRY_TIMES);
     }
@@ -50,6 +53,9 @@ public class TaskSharedData {
 
     public void setSyncParams(SyncSyncParams syncParams) {
         mSyncParams = syncParams;
+        if(mLogSession == null) {
+            mLogSession = new LogSession(syncParams.appVersion, syncParams.userId);
+        }
     }
 
     public String getModelName() {
@@ -152,5 +158,9 @@ public class TaskSharedData {
         } else {
             return false;
         }
+    }
+
+    public LogSession getLogSession() {
+        return mLogSession;
     }
 }

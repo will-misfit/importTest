@@ -5,13 +5,16 @@ import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.MisfitScanner;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
 
 /**
- * Created by Will Hou on 1/12/16.
+ * Task for scan
  */
 public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
@@ -31,9 +34,12 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
         return mCurrTimerTask;
     }
 
+    /**
+     *  prepare(), execute(), cleanup(), onStop() are invoked in start(TaskSharedData)
+     */
     @Override
     protected void prepare() {
-
+        mLogEvent = createLogEvent(LogEventType.START_SCANNING);
     }
 
     @Override
@@ -45,7 +51,15 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             return;
         }
         TimerManager.getInstance().addTimerTask(createTimeoutTask(), SCAN_TIMEOUT);
+        mLogEvent.start("");
         MisfitScanner.getInstance().startScan(this);
+        mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
+
+        LogSession mLogSession = mTaskSharedData.getLogSession();
+        if(mLogSession != null) {
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
+        }
     }
 
     @Override
@@ -55,7 +69,15 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
+        mLogEvent = createLogEvent(LogEventType.STOP_SCANNING);
+        mLogEvent.start("");
         MisfitScanner.getInstance().stopScan();
+        mLogEvent.end(LogEventType.STOP_SCANNING, "");
+
+        if (mLogSession != null) {
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
+        }
     }
 
     @Override
@@ -63,10 +85,26 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
         if (mIsFinished) {
             return;
         }
+
+        mLogEvent = createLogEvent(LogEventType.SCANNED_DEVICE);
+        mLogEvent.start("");
+        mLogEvent.end(LogEvent.RESULT_SUCCESS, device.getSerialNumber());
+        if (mLogSession != null) {
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
+        }
+
         if (mTaskSharedData.getSerialNumber().equals(device.getSerialNumber())) {
             cancelCurrentTimerTask();
             ConnectionManager.getInstance().saveShineDevice(device.getSerialNumber(), device);
+            mLogEvent = createLogEvent(LogEventType.STOP_SCANNING);
+            mLogEvent.start("");
             MisfitScanner.getInstance().stopScan();
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
+            if (mLogSession != null) {
+                mLogSession.appendEvent(mLogEvent);
+                mLogEvent = null;
+            }
             taskSucceed();
         }
     }

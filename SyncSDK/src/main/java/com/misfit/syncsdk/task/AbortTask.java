@@ -1,5 +1,8 @@
 package com.misfit.syncsdk.task;
 
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+
 /**
  * Created by Will Hou on 1/13/16.
  */
