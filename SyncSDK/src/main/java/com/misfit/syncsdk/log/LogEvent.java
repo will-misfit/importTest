@@ -58,6 +58,10 @@ public class LogEvent {
         this.eventName = eventName;
     }
 
+    public LogEvent start() {
+        return start("");
+    }
+
     public LogEvent start(String parameter) {
         mParameter = parameter;
         mStartTime = System.currentTimeMillis();

@@ -5,6 +5,8 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.ContextUtils;
 import com.misfit.syncsdk.utils.MLog;
 
@@ -22,16 +24,20 @@ public class ConnectTask extends Task implements ShineSdkProfileProxy.Connection
 
     @Override
     protected void prepare() {
+        mLogEvent = createLogEvent(LogEventType.CONNECT);
     }
 
     @Override
     protected void execute() {
+        mLogEvent.start(mTaskSharedData.getSerialNumber());
+
         ConnectionManager connectionManager = ConnectionManager.getInstance();
         ShineSdkProfileProxy proxy = connectionManager.getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null) {
             proxy = connectionManager.createShineProfileProxy(mTaskSharedData.getSerialNumber());
         }
         if (proxy.isConnected()) {
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "connected already, no need to start connect");
             taskSucceed();
             return;
         }
@@ -39,6 +45,7 @@ public class ConnectTask extends Task implements ShineSdkProfileProxy.Connection
         //get device
         ShineDevice device = connectionManager.getShineDevice(mTaskSharedData.getSerialNumber());
         if (device == null) {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "device not ready");
             taskFailed("device not ready");
             return;
         }
@@ -63,6 +70,9 @@ public class ConnectTask extends Task implements ShineSdkProfileProxy.Connection
 
     @Override
     protected void cleanup() {
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
+
         cancelCurrentTimerTask();
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy != null) {
@@ -77,8 +87,10 @@ public class ConnectTask extends Task implements ShineSdkProfileProxy.Connection
         }
         if (state == ShineProfile.State.CONNECTED) {
             updateDeviceInfo();
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "connected");
             taskSucceed();
         } else {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "changed connection state is " + state);
             retry();
         }
     }

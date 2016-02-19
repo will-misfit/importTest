@@ -41,6 +41,7 @@ public abstract class Task {
         mTaskSharedData = sharedData;
         mIsFinished = false;
         Log.d(TAG, this.getClass().getSimpleName() + " start");
+        mLogSession = mTaskSharedData.getLogSession();
         prepare();
         execute();
     }
@@ -106,7 +107,7 @@ public abstract class Task {
     }
 
     /**
-     * will be called in start
+     * will be called in start()
      */
     protected abstract void prepare();
 

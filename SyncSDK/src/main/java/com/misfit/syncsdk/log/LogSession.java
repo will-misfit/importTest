@@ -54,7 +54,7 @@ public class LogSession {
 
     @Expose
     @SerializedName("appVersion")
-    private final String mAppVersion;
+    private String mAppVersion;
 
     @Expose
     @SerializedName("calculationLibVersion")
@@ -64,6 +64,7 @@ public class LogSession {
     @SerializedName("syncMode")
     private int mSyncMode = -1;
 
+    /* below fields need to be updated before and after Sync/Calculate/getConfiguration commands  */
     @Expose
     @SerializedName("activityPoint")
     private long mPreActivityPoint = -1;
@@ -242,6 +243,9 @@ public class LogSession {
      * NOTE: LogManager.appendEvent() is to save(write) the LogEvent to local file
      * */
     public void appendEvent(LogEvent event) {
+        if (event == null) {
+            return;
+        }
         currEventSequence++;
         event.sequence = currEventSequence;
         event.sessionId = id;

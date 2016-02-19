@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
-import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
@@ -23,7 +22,7 @@ import com.misfit.syncsdk.task.SetAlarmTask;
 import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SetConnectionParameterTask;
 import com.misfit.syncsdk.task.SetInactivityNudgeTask;
-import com.misfit.syncsdk.task.SetNotificationTask;
+import com.misfit.syncsdk.task.SetCallNotificationTask;
 import com.misfit.syncsdk.task.StopAnimationTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
@@ -66,7 +65,7 @@ public class SyncShine2Device extends SyncCommonDevice {
         tasks.add(new GetConfigurationTask());
         tasks.add(new SetConfigurationTask());
         tasks.add(new SetAlarmTask());
-        tasks.add(new SetNotificationTask());
+        tasks.add(new SetCallNotificationTask());
         tasks.add(new SetInactivityNudgeTask());
         tasks.add(new DisconnectTask());
 

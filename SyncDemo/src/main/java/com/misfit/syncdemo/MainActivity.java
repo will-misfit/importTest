@@ -309,11 +309,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    @Override
-    public String getCurrentUserToken() {
-        return "";
-    }
-
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {
         if (syncResultList == null || syncResultList.isEmpty()) {
             MLog.d(TAG, "ShineSDK sync data is null");

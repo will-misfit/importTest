@@ -53,8 +53,11 @@ public class TaskSharedData {
 
     public void setSyncParams(SyncSyncParams syncParams) {
         mSyncParams = syncParams;
+        // now mLogSession should not be initialized yet
         if(mLogSession == null) {
             mLogSession = new LogSession(syncParams.appVersion, syncParams.userId);
+            mLogSession.setSerialNumber(mSerialNumber);
+            mLogSession.save();    // as long as data update, save LogSession to local file
         }
     }
 

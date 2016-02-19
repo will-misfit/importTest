@@ -12,6 +12,8 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.utils.CheckUtils;
@@ -23,6 +25,7 @@ import java.util.List;
 
 /**
  * Task implementation to call sync() of ShineSDK, and complete the calculation with algorithm library
+ * this task covers LogEvent of GetActivity and Calculate.
  */
 public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallback {
 
@@ -30,19 +33,21 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     private List<SyncResult> mSyncResultSummary;
 
-    /* callback of Task */
     @Override
     protected void prepare() {
+        mLogEvent = createLogEvent(LogEventType.GET_ACTIVITY);
     }
 
     @Override
     protected void execute() {
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
             taskFailed("proxy not prepared");
             return;
         }
         if (mTaskSharedData.getReadDataCallback() == null) {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "ReadDataCallback is not ready");
             taskFailed("ReadDataCallback is not ready");
             return;
         }
@@ -56,6 +61,8 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     @Override
     protected void cleanup() {
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
     }
 
     /* callback of ShineProfile.SyncCallback */
@@ -86,13 +93,20 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         MLog.d(TAG, String.format("OnSyncCompleted callback is received, result is %s", Boolean.toString(success)));
 
         if (success) {
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
             handleOnShineSdkSyncSucceed();
         } else {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "SyncResultSummary is null");
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
             handleOnShineSdkSyncFailed();
         }
     }
 
     private void handleOnShineSdkSyncSucceed() {
+        mLogEvent = createLogEvent(LogEventType.CALCULATE);
         SyncedDataCalculationTask syncCalculateTask = new SyncedDataCalculationTask(mSyncResultSummary);
         syncCalculateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -191,7 +205,6 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
             } else {
                 if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {
-                        // FIXME, previous sync log
                         MLog.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));
                         syncResult.mTapEventSummarys.clear();
                     }
@@ -199,6 +212,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
                 List<SdkActivitySessionGroup> sdkActivitySessionGroups =
                         DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult, mTaskSharedData.getSyncCalculationCallback());
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 if (mTaskSharedData.getReadDataCallback() != null) {
                     mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroups);
                 }

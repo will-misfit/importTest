@@ -3,7 +3,6 @@ package com.misfit.syncsdk.device;
 import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.DeviceType;
-import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;

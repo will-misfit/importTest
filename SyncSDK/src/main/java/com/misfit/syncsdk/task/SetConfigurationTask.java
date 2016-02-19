@@ -1,17 +1,18 @@
 package com.misfit.syncsdk.task;
 
+import com.misfit.syncsdk.log.LogEventType;
+
 /**
- * Created by Will Hou on 1/13/16.
+ * Task to set configuration
  */
 public class SetConfigurationTask extends Task {
     @Override
     protected void prepare() {
-
+        mLogEvent = createLogEvent(LogEventType.SET_CONFIGURATION);
     }
 
     @Override
     protected void execute() {
-        //TODO:wait to finished
         taskSucceed();
     }
 

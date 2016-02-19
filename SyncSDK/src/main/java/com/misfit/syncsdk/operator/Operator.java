@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
+import com.misfit.syncsdk.log.LogManager;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.task.Task;
 
@@ -28,7 +29,10 @@ public class Operator implements Task.TaskResultCallback {
 
     private OperatorReleaseCallback mReleaseCallback;
 
-    public Operator(@NonNull TaskSharedData taskSharedData, @NonNull List<Task> taskList, @NonNull SyncOperationResultCallback resultCallback, OperatorReleaseCallback releaseCallback) {
+    public Operator(@NonNull TaskSharedData taskSharedData,
+                    @NonNull List<Task> taskList,
+                    @NonNull SyncOperationResultCallback resultCallback,
+                    OperatorReleaseCallback releaseCallback) {
         mTaskSharedData = taskSharedData;
         mTaskQueue = taskList;
         mReleaseCallback = releaseCallback;
@@ -93,6 +97,7 @@ public class Operator implements Task.TaskResultCallback {
         cancelCurrentTimerTask();
         mTaskSharedData = null;
         mTaskQueue.clear();
+        LogManager.getInstance().uploadAllLog();
         if (mReleaseCallback != null) {
             mReleaseCallback.onOperatorRelease();
         }
