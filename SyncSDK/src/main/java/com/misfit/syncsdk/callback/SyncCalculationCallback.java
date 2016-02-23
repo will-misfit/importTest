@@ -3,6 +3,7 @@ package com.misfit.syncsdk.callback;
 import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
+import com.misfit.syncsdk.model.SdkGraphDay;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 
@@ -54,4 +55,9 @@ public interface SyncCalculationCallback {
      * query the SdkTimeZoneOffset changes since given moment
      * */
     List<SdkTimeZoneOffset> getSdkTimeZoneOffsetListAfter(long timestamp);
+
+    /**
+     * query the SdkGraphDay by the date of (Sdk)DateRange
+     * */
+    SdkGraphDay getSdkGraphDayByDate(String dateOfDateRange);
 }

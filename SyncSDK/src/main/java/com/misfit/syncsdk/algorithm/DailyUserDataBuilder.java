@@ -12,6 +12,7 @@ import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkDayRange;
+import com.misfit.syncsdk.model.SdkGraphItem;
 import com.misfit.syncsdk.model.SdkSleepSession;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.utils.DateUtils;
@@ -25,6 +26,8 @@ import java.util.TimeZone;
 
 /**
  *
+ * in flagship app, DailyUserDataBuilder#buildAndSaveDaysForGoogleFit() and groupDailyActivitiesForGoogleFit()
+ * are added for Standalone feature, but not moved to SyncSDK yet
  */
 public class DailyUserDataBuilder {
 
@@ -60,29 +63,31 @@ public class DailyUserDataBuilder {
     /**
      * build up ActivitySessions, SleepSessions, GraphItems
      * */
-    public List<SdkActivitySessionGroup> buildDaysForShine(ActivityShineVect activityShineVect, ACEEntryVect aceEntryVect, SWLEntryVect swlEntryVect, SyncCalculationCallback syncCallback) {
+    public List<SdkActivitySessionGroup> buildDaysForShine(ActivityShineVect activityShineVect, ACEEntryVect aceEntryVect,
+                                                           SWLEntryVect swlEntryVect, SyncCalculationCallback calculationCallback) {
         Log.d(TAG, "buildDaysForShine");
         List<SdkActivitySessionGroup> groupsResult = new ArrayList<>();
 
-        List<SdkSleepSession> sleepSessions = SdkSleepSessionBuilder.buildSdkSleepSessions(activityShineVect, syncCallback);
+        List<SdkSleepSession> sleepSessions = SdkSleepSessionBuilder.buildSdkSleepSessions(activityShineVect, calculationCallback);
 
         long startTime = activityShineVect.get(0).getStartTime();
         Map<Long, DailyActivityGroup> dailyActivityGroupMap = groupDailyActivities(activityShineVect,
-            syncCallback.getSdkTimeZoneOffsetBefore(startTime),
-            syncCallback.getSdkTimeZoneOffsetListAfter(startTime));
+            calculationCallback.getSdkTimeZoneOffsetBefore(startTime),
+            calculationCallback.getSdkTimeZoneOffsetListAfter(startTime));
 
         // SdkActivitySessions, SdkSleepSessions, GraphItems are built up inside each group
         for (Long dailyStartTime : dailyActivityGroupMap.keySet()) {
             SdkActivitySessionGroup res = new SdkActivitySessionGroup();
             DailyActivityGroup group = dailyActivityGroupMap.get(dailyStartTime);
             groupDailySleepSessions(group, sleepSessions);
-
             res.sleepSessionList.addAll(group.sleepSessions);
 
             List<SdkActivitySession> sdkActivitySessions = SdkActivitySessionBuilder.buildSdkActivitySessionForShine(
-                group.activities, aceEntryVect, swlEntryVect, syncCallback);
+                group.activities, aceEntryVect, swlEntryVect, calculationCallback);
             res.activitySessionList.addAll(sdkActivitySessions);
-            // List<GraphItem> graphItems = GraphItemBuilder.buildGraphItems(group.activities, graphDayQueryManager, group.dayRange);
+
+            List<SdkGraphItem> graphItems = SdkGraphItemBuilder.buildGraphItems(group.activities, group.sdkDayRange, calculationCallback);
+            res.graphItemList.addAll(graphItems);
 
             groupsResult.add(res);
         }

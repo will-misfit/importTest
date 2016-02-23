@@ -29,6 +29,7 @@ import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
+import com.misfit.syncsdk.model.SdkGraphDay;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.model.SyncSyncParams;
@@ -290,6 +291,13 @@ public class MainActivity extends AppCompatActivity
         List<SdkTimeZoneOffset> result = new ArrayList<>();
         result.add(new SdkTimeZoneOffset(timestamp + 10, DataSourceManager.Timezone_Offset_East_Eight));
         return result;
+    }
+
+    @Override
+    public SdkGraphDay getSdkGraphDayByDate(String dateOfDateRange) {
+        SdkGraphDay graphDay = new SdkGraphDay();
+        // fill in graphDay with valid fields
+        return graphDay;
     }
 
     /* interface methods of ReadDataCallback */

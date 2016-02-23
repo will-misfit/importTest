@@ -10,9 +10,11 @@ public class SdkActivitySessionGroup {
 
     public List<SdkActivitySession> activitySessionList;
     public List<SdkSleepSession> sleepSessionList;
+    public List<SdkGraphItem> graphItemList;
 
     public SdkActivitySessionGroup() {
         activitySessionList = new ArrayList<>();
         sleepSessionList = new ArrayList<>();
+        graphItemList = new ArrayList<>();
     }
 }
