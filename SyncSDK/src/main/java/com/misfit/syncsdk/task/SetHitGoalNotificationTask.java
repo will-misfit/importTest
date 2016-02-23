@@ -1,5 +1,6 @@
 package com.misfit.syncsdk.task;
 
+import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
@@ -11,28 +12,38 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class ActivateTask extends Task implements ShineProfile.ConfigurationCallback {
-
-    private final static String TAG = "ActivateTask";
+/**
+ * to set Hit Goal Notification settings
+ */
+public class SetHitGoalNotificationTask extends Task implements ShineProfile.ConfigurationCallback {
+    private final static String TAG = "SetHitGoalNotification";
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.ACTIVATION);
+        mLogEvent = createLogEvent(LogEventType.SET_GOAL_MET_NOTIFICATION);
     }
 
     @Override
     protected void execute() {
+        mLogEvent.start();
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
-            taskFailed("proxy not prepared");
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
+            taskIgnored("proxy not prepared");
             return;
         }
-        proxy.startActivating(this);
+
+        GoalHitNotificationSettings goalHitNotificationSettings = mTaskSharedData.getSyncParams().goalHitNotificationSettings;
+        if (goalHitNotificationSettings == null) {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "Hit Goal Notification settings is null");
+            taskIgnored("Hit Goal Notification settings is null");
+            return;
+        }
+        proxy.setHitGoalNotification(goalHitNotificationSettings, this);
     }
 
     @Override
     public void onStop() {
-
     }
 
     @Override
@@ -43,13 +54,13 @@ public class ActivateTask extends Task implements ShineProfile.ConfigurationCall
 
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-        if (actionID == ActionID.ACTIVATE) {
+        if (actionID == ActionID.SET_GOAL_HIT_NOTIFICATION) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "Config completed successfully");
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 taskSucceed();
             } else {
                 mLogEvent.end(LogEvent.RESULT_FAILURE, "resultCode is " + resultCode);
-                retry();
+                retryAndIgnored();
             }
         } else {
             MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);

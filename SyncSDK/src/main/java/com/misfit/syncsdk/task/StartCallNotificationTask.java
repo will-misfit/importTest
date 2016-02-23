@@ -11,23 +11,27 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class ActivateTask extends Task implements ShineProfile.ConfigurationCallback {
-
-    private final static String TAG = "ActivateTask";
+/**
+ * invoke ShineProfile.sendCallNotification
+ */
+public class StartCallNotificationTask extends Task implements ShineProfile.ConfigurationCallback{
+    private static final String TAG = "StartCallNotificationTask";
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.ACTIVATION);
+        mLogEvent = createLogEvent(LogEventType.START_CALL_NOTIFICATION);
     }
 
     @Override
     protected void execute() {
+        mLogEvent.start();
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
-            taskFailed("proxy not prepared");
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
+            taskIgnored("proxy not prepared");
             return;
         }
-        proxy.startActivating(this);
+        proxy.sendCallNotification(this);
     }
 
     @Override
@@ -41,15 +45,14 @@ public class ActivateTask extends Task implements ShineProfile.ConfigurationCall
         mLogEvent = null;
     }
 
-    @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-        if (actionID == ActionID.ACTIVATE) {
+        if (actionID == ActionID.SEND_CALL_NOTIFICATION) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "Config completed successfully");
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 taskSucceed();
             } else {
                 mLogEvent.end(LogEvent.RESULT_FAILURE, "resultCode is " + resultCode);
-                retry();
+                retryAndIgnored();
             }
         } else {
             MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);

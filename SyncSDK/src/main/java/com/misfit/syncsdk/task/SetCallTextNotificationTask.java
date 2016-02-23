@@ -11,13 +11,13 @@ import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
 
-public class SetCallNotificationTask extends Task implements ShineProfile.ConfigurationCallback {
+public class SetCallTextNotificationTask extends Task implements ShineProfile.ConfigurationCallback {
 
     private final static String TAG = "SetNotificationTask";
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.SET_CALL_NOTIFICATION);
+        mLogEvent = createLogEvent(LogEventType.SET_CALL_TEXT_NOTIFICATION);
     }
 
     @Override

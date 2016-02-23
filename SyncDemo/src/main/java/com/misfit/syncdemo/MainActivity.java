@@ -13,6 +13,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncdemo.util.LogView;
 import com.misfit.syncsdk.DeviceType;
@@ -249,6 +250,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     /* interface methods of SyncCalculationCallback */
+    @Override
+    public ShineConfiguration getUpdatedShineConfiguration() {
+        ShineConfiguration shineConfig = new ShineConfiguration();
+        // it had better be updated post to sync
+        return shineConfig;
+    }
+
     @Override
     public SdkProfile getUserProfile() {
         return DataSourceManager.getSdkProfile(SdkGender.MALE);

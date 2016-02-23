@@ -1,6 +1,7 @@
 package com.misfit.syncsdk.model;
 
 import com.misfit.ble.setting.pluto.AlarmSettings;
+import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
@@ -19,6 +20,8 @@ public class SyncSyncParams {
     public InactivityNudgeSettings inactivityNudgeSettings;
 
     public NotificationsSettings notificationsSettings;
+
+    public GoalHitNotificationSettings goalHitNotificationSettings;
 
     public SyncOnTagInStateListener tagInStateListener;
 

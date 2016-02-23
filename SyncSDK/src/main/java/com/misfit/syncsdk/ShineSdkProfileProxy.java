@@ -17,6 +17,7 @@ import com.misfit.ble.shine.ShineProfile.ConnectionCallback;
 import com.misfit.ble.shine.ShineProfile.ConfigurationCallback;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.ble.shine.log.ConnectFailCode;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +100,7 @@ public class ShineSdkProfileProxy {
         return true;
     }
 
-    public void startGettingDeviceConfiguration(ConfigurationCallback callback) {
+    public void gettingDeviceConfiguration(ConfigurationCallback callback) {
         if (mShineProfile != null) {
             mShineProfile.getDeviceConfiguration(callback);
         } else {
@@ -107,7 +108,7 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public void setDeviceConfig(ShineConfiguration shineConfiguration, ConfigurationCallback callback) {
+    public void setDeviceConfiguration(ShineConfiguration shineConfiguration, ConfigurationCallback callback) {
         if (mShineProfile != null) {
             SetConfigurationSession setConfigurationSession = new SetConfigurationSession(shineConfiguration);
             setConfigurationSession.prepareSetTimeParams();
@@ -304,6 +305,15 @@ public class ShineSdkProfileProxy {
             return mShineProfile.sendTextNotification(callback);
         } else {
             Log.d(TAG, "ShineProfile = null, can't send text notification");
+            return false;
+        }
+    }
+
+    public boolean stopNotification(ConfigurationCallback callback) {
+        if (mShineProfile != null) {
+            return mShineProfile.sendStopNotification(callback);
+        } else {
+            Log.d(TAG, "ShineProfile = null, can't send stop notification");
             return false;
         }
     }

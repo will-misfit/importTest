@@ -41,7 +41,7 @@ public class LogEventType {
 
     public static final int SET_ALARM = 26;
     public static final int SET_INACTIVE_NUDGES = 27;
-    public static final int SET_CALL_NOTIFICATION = 28;
+    public static final int SET_CALL_TEXT_NOTIFICATION = 28;
     public static final int SET_GOAL_MET_NOTIFICATION = 29;
 
     public static final int OTA = 30;
@@ -51,6 +51,12 @@ public class LogEventType {
     public static final int SET_FILE_STREAMING_PARAMETERS = 34;
     public static final int CLEAR_ALARM_SETTING = 35;
     public static final int SET_CLEAN_UP = 36;
+
+    public static final int CHECK_FIRMWARE = 37;
+    public static final int START_CALL_NOTIFICATION = 38;
+    public static final int START_TEXT_NOTIFICATION = 39;
+    public static final int DISABLE_ALL_CALL_TEXT_NOTIFICATION = 40;
+    public static final int STOP_NOTIFICATION = 41;
 
 
     /* constant Log Event names */
@@ -90,7 +96,7 @@ public class LogEventType {
 
         "SetAlarm",               // 26
         "SetInactiveNudges",      // 27
-        "SetCallNotification",    // 28
+        "SetCallTextNotification",// 28
         "SetGoalMetNotification", // 29
 
         "OTA",                    // 30
@@ -99,6 +105,12 @@ public class LogEventType {
         "StopRunningOperation",   // 33
         "SetFileStreamingParameters",  // 34
         "ClearAlarmSetting",      // 35
-        "SetCleanUp"              // 36
+        "SetCleanUp",             // 36
+
+        "CheckFirmware",          // 37
+        "StartCallNotification",  // 38
+        "StartTextNotification",  // 39
+        "DisableAllCallTextNotification", // 40
+        "StopNotification"        // 41
     };
 }

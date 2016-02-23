@@ -33,7 +33,7 @@ public class GetConfigurationTask extends Task implements ShineProfile.Configura
             taskFailed("proxy not prepared");
             return;
         }
-        proxy.startGettingDeviceConfiguration(this);
+        proxy.gettingDeviceConfiguration(this);
     }
 
     @Override

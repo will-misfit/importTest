@@ -58,21 +58,23 @@ public class LogEvent {
         this.eventName = eventName;
     }
 
-    public LogEvent start() {
-        return start("");
+    public void start() {
+        start("");
     }
 
-    public LogEvent start(String parameter) {
+    public void start(String parameter) {
         mParameter = parameter;
         mStartTime = System.currentTimeMillis();
-        return this;
     }
 
-    public LogEvent end(int resultCode, String resultMsg) {
+    public void end(int resultCode) {
+        end(resultCode, "");
+    }
+
+    public void end(int resultCode, String resultMsg) {
         mDuration = System.currentTimeMillis() - mStartTime;
         mResultCode = resultCode;
         mResultMsg = resultMsg;
-        return this;
     }
 
     public long getDuration() {

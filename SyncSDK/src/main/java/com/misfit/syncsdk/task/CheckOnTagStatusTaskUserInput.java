@@ -5,6 +5,7 @@ import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 
 /**
  * check the tagging state, if true, then tell the app and wait for the callback
+ * TODO: define a LogEventType for this task?
  */
 public class CheckOnTagStatusTaskUserInput extends Task implements SyncOnTagInUserInputListener {
 

@@ -1,5 +1,6 @@
 package com.misfit.syncsdk.callback;
 
+import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkProfile;
@@ -11,6 +12,11 @@ import java.util.List;
  * callback for calculation during sync. All methods are used to query data from App invoker
  */
 public interface SyncCalculationCallback {
+    /**
+     * get ShineConfiguration from App to update device config
+     * */
+    ShineConfiguration getUpdatedShineConfiguration();
+
     /**
      * query the Profile table in database
      *

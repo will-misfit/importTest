@@ -22,7 +22,7 @@ import com.misfit.syncsdk.task.SetAlarmTask;
 import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SetConnectionParameterTask;
 import com.misfit.syncsdk.task.SetInactivityNudgeTask;
-import com.misfit.syncsdk.task.SetCallNotificationTask;
+import com.misfit.syncsdk.task.SetCallTextNotificationTask;
 import com.misfit.syncsdk.task.StopAnimationTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
@@ -65,7 +65,7 @@ public class SyncShine2Device extends SyncCommonDevice {
         tasks.add(new GetConfigurationTask());
         tasks.add(new SetConfigurationTask());
         tasks.add(new SetAlarmTask());
-        tasks.add(new SetCallNotificationTask());
+        tasks.add(new SetCallTextNotificationTask());
         tasks.add(new SetInactivityNudgeTask());
         tasks.add(new DisconnectTask());
 
