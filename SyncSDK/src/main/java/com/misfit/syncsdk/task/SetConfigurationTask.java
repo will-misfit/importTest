@@ -34,7 +34,7 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
             taskFailed("ShineSdkProfileProxy not prepared yet");
             return;
         }
-        ShineConfiguration shineConfig = mTaskSharedData.getSyncCalculationCallback().getUpdatedShineConfiguration();
+        ShineConfiguration shineConfig = mTaskSharedData.getSyncCalculationCallback().getShineConfiguration();
         proxy.setDeviceConfiguration(shineConfig, this);
         taskSucceed();
     }

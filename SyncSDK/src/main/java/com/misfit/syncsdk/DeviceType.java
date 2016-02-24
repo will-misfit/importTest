@@ -14,7 +14,7 @@ public class DeviceType {
     public final static int SHINE_MK_II = 5;
     public final static int PLUTO = 6;
     public final static int SILVERATTA = 7;
-    public final static int BMW = 9;
+    public final static int RAY = 9;
 
     private int mTypeVal;
 
@@ -32,7 +32,7 @@ public class DeviceType {
         }else if (serialNumber.startsWith("SC")) {
             return DeviceType.SWAROVSKI_SHINE;
         } else if (serialNumber.startsWith("B0")) {
-            return DeviceType.BMW;
+            return DeviceType.RAY;
         } else if (serialNumber.startsWith("S2")) {
             return DeviceType.PLUTO;
         } else if (serialNumber.startsWith("C1")) {
@@ -65,7 +65,7 @@ public class DeviceType {
                 return "pluto";
             case SILVERATTA:
                 return "silvretta";
-            case BMW:
+            case RAY:
                 return "bmw";
             default:
                 return "unknown";

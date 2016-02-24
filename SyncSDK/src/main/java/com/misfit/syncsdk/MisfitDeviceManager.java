@@ -54,7 +54,7 @@ public class MisfitDeviceManager {
             case DeviceType.SHINE_MK_II:
                 result = new SyncShineDevice(serialNumber);
                 break;
-            case DeviceType.BMW:
+            case DeviceType.RAY:
                 result = new SyncRayDevice(serialNumber);
                 break;
             case DeviceType.SILVERATTA:

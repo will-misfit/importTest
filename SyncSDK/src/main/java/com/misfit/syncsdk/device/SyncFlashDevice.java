@@ -28,7 +28,7 @@ import com.misfit.syncsdk.task.UnmapEventAnimationTask;
 import java.util.List;
 
 /**
- * Created by Will Hou on 1/13/16.
+ * SyncCommonDevice for Flash
  */
 public class SyncFlashDevice extends SyncCommonDevice {
     public SyncFlashDevice(@NonNull String serialNumber) {

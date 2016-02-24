@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity
             DeviceType.SWAROVSKI_SHINE,
             DeviceType.SPEEDO_SHINE,
             DeviceType.SILVERATTA,
-            DeviceType.BMW,
+            DeviceType.RAY,
             DeviceType.SHINE_MK_II
     };
 
@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity
 
     /* interface methods of SyncCalculationCallback */
     @Override
-    public ShineConfiguration getUpdatedShineConfiguration() {
+    public ShineConfiguration getShineConfiguration() {
         ShineConfiguration shineConfig = new ShineConfiguration();
         // it had better be updated post to sync
         return shineConfig;

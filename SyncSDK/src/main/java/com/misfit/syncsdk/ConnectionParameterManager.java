@@ -22,4 +22,8 @@ public class ConnectionParameterManager {
     public static ShineConnectionParameters defaultIwcParams() {
         return new ShineConnectionParameters(15, 0, 720);
     }
+
+    public static ShineConnectionParameters defaultSwarovskiParams() {
+        return new ShineConnectionParameters(15, 0, 720);
+    }
 }

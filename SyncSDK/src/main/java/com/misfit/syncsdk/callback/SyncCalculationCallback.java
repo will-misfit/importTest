@@ -16,7 +16,7 @@ public interface SyncCalculationCallback {
     /**
      * get ShineConfiguration from App to update device config
      * */
-    ShineConfiguration getUpdatedShineConfiguration();
+    ShineConfiguration getShineConfiguration();
 
     /**
      * query the Profile table in database

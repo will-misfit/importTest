@@ -30,7 +30,7 @@ import com.misfit.syncsdk.task.Task;
 import java.util.List;
 
 /**
- * Created by Will Hou on 1/13/16.
+ * SyncCommonDevice subclass for Shine2(Pluto)
  */
 public class SyncShine2Device extends SyncCommonDevice {
     public SyncShine2Device(@NonNull String serialNumber) {

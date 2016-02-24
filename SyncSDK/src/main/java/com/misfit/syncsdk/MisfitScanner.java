@@ -102,7 +102,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
             case DeviceType.SHINE:
                 commonDevice = new SyncShineDevice(device.getSerialNumber());
                 break;
-            case DeviceType.BMW:
+            case DeviceType.RAY:
                 commonDevice = new SyncRayDevice(device.getSerialNumber());
                 break;
             case DeviceType.FLASH:
