@@ -4,10 +4,13 @@ import com.misfit.ble.setting.pluto.AlarmSettings;
 import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
+import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
 
 /**
- * a model class composed of some customized settings of device, e.g. Shine2
+ * a model class composed of
+ * 1. some customized settings of devices
+ * 2. some callback for specified devices
  */
 public class SyncSyncParams {
 
@@ -28,4 +31,6 @@ public class SyncSyncParams {
     public String userId;
 
     public String appVersion;
+
+    public ShineProfile.StreamingCallback streamingCallback;
 }
