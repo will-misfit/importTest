@@ -13,7 +13,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncdemo.util.LogView;
@@ -21,25 +20,17 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncSdkAdapter;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
-import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
 import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
-import com.misfit.syncsdk.enums.SdkGender;
-import com.misfit.syncsdk.model.SdkActivityChangeTag;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
-import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
-import com.misfit.syncsdk.model.SdkGraphDay;
-import com.misfit.syncsdk.model.SdkProfile;
-import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.model.SyncSyncParams;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 import butterknife.Bind;
@@ -49,7 +40,7 @@ import butterknife.OnTouch;
 
 
 public class MainActivity extends AppCompatActivity
-        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, ReadDataCallback, ConnectionStateCallback {
+        implements SyncOperationResultCallback, SyncOtaCallback, ReadDataCallback, ConnectionStateCallback {
 
     private final static String TAG = "MainActivity";
 
@@ -180,7 +171,7 @@ public class MainActivity extends AppCompatActivity
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
         syncParams.tagInStateListener = tagInStateListener;
-        mSyncCommonDevice.startSync(this, this, this, this, this, syncParams);
+        mSyncCommonDevice.startSync(this, this, this, this, syncParams);
         mLogTextView.clear();
         setOperationPanelEnabled(false);
     }
@@ -252,58 +243,7 @@ public class MainActivity extends AppCompatActivity
         MLog.d(TAG, "operation failed, reason=" + reason);
     }
 
-    /* interface methods of SyncCalculationCallback */
-    @Override
-    public ShineConfiguration getShineConfiguration() {
-        ShineConfiguration shineConfig = new ShineConfiguration();
-        // it had better be updated post to sync
-        return shineConfig;
-    }
-
-    @Override
-    public SdkProfile getUserProfile() {
-        return DataSourceManager.getSdkProfile(SdkGender.MALE);
-    }
-
-    @Override
-    public List<SdkActivityChangeTag> getSdkActivityChangeTagList(long startTime, long endTime) {
-        return DataSourceManager.getSdkActivityChangeTagList(startTime, endTime);
-    }
-
-    @Override
-    public List<SdkAutoSleepStateChangeTag> getSdkAutoSleepStateChangeTagList(long startTime, long endTime) {
-        List<SdkAutoSleepStateChangeTag> result = new ArrayList<>();
-        result.add(new SdkAutoSleepStateChangeTag(startTime, true));
-        result.add(new SdkAutoSleepStateChangeTag(endTime, true));
-        return result;
-    }
-
-    @Override
-    public SdkTimeZoneOffset getSdkTimeZoneOffsetInCurrentSettings() {
-        return new SdkTimeZoneOffset(Calendar.getInstance().getTimeInMillis() / 1000, DataSourceManager.Timezone_Offset_East_Eight);
-    }
-
-    @Override
-    public SdkTimeZoneOffset getSdkTimeZoneOffsetBefore(long timestamp) {
-        return new SdkTimeZoneOffset(timestamp - 100, DataSourceManager.Timezone_Offset_East_Eight);
-    }
-
-    @Override
-    public List<SdkTimeZoneOffset> getSdkTimeZoneOffsetListAfter(long timestamp) {
-        List<SdkTimeZoneOffset> result = new ArrayList<>();
-        result.add(new SdkTimeZoneOffset(timestamp + 10, DataSourceManager.Timezone_Offset_East_Eight));
-        return result;
-    }
-
-    @Override
-    public SdkGraphDay getSdkGraphDayByDate(String dateOfDateRange) {
-        SdkGraphDay graphDay = new SdkGraphDay();
-        // fill in graphDay with valid fields
-        return graphDay;
-    }
-
     /* interface methods of ReadDataCallback */
-
     /**
      * separate the thread where SyncSDK callback comes from and the main UI thread
      */
@@ -318,11 +258,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDataCalculateCompleted(final List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
+    public void onDataCalculateCompleted(final SdkActivitySessionGroup sdkActivitySessionGroup) {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                handleOnSyncAndCalculationCompleted(sdkActivitySessionGroupList);
+                handleOnSyncAndCalculationCompleted(sdkActivitySessionGroup);
             }
         });
     }
@@ -349,8 +289,8 @@ public class MainActivity extends AppCompatActivity
         MLog.d(TAG, shineSdkSyncResultStr);
     }
 
-    private void handleOnSyncAndCalculationCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
-        String syncAndCalculationResult = OperationUtils.buildSyncCalculationResult(sdkActivitySessionGroupList);
+    private void handleOnSyncAndCalculationCompleted(SdkActivitySessionGroup sdkActivitySessionGroup) {
+        String syncAndCalculationResult = OperationUtils.buildSyncCalculationResult(sdkActivitySessionGroup);
         MLog.d(TAG, syncAndCalculationResult);
         mSyncButton.setEnabled(true);
     }

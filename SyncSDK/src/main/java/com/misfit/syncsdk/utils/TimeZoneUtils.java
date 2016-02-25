@@ -1,8 +1,7 @@
 package com.misfit.syncsdk.utils;
 
 import android.util.SparseArray;
-
-import com.misfit.syncsdk.model.SdkTimeZoneOffset;
+import com.misfit.syncsdk.model.SdkTimezoneOffset;
 
 import java.util.List;
 import java.util.TimeZone;
@@ -11,12 +10,12 @@ import java.util.TimeZone;
  * similar class of prometheus.service.TimezoneService
  */
 public class TimeZoneUtils {
-    
+
     /**
      * method moved from prometheus.service.TimezoneService#getTimezoneChanges()
      * */
-    public static SparseArray<TimeZone> getTimezoneChanges(SdkTimeZoneOffset firstChange,
-                                                    List<SdkTimeZoneOffset> followingChanges) {
+    public static SparseArray<TimeZone> getTimezoneChanges(SdkTimezoneOffset firstChange,
+                                                    List<SdkTimezoneOffset> followingChanges) {
         // TODO: below method can be refactored
         SparseArray<TimeZone> timezoneChanges = new SparseArray<>();
         if (firstChange == null) {
@@ -34,10 +33,10 @@ public class TimeZoneUtils {
         }
 
         if (followingChanges != null) {
-            for (SdkTimeZoneOffset sdkTimeZoneOffset : followingChanges) {
-                int timezoneOffset = sdkTimeZoneOffset.getTimezoneOffsetInSecond();
+            for (SdkTimezoneOffset sdkTimezoneOffset : followingChanges) {
+                int timezoneOffset = sdkTimezoneOffset.getTimezoneOffsetInSecond();
                 TimeZone tz = DateUtils.getTimeZoneByOffset(timezoneOffset);
-                timezoneChanges.put((int)sdkTimeZoneOffset.getTimestamp(), tz);
+                timezoneChanges.put((int) sdkTimezoneOffset.getTimestamp(), tz);
             }
         }
         return timezoneChanges;

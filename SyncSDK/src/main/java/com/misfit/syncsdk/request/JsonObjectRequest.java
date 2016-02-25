@@ -12,7 +12,6 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.enums.HttpStatus;
 import com.misfit.syncsdk.model.MetaMessage;
 import com.misfit.syncsdk.utils.CheckUtils;

@@ -24,16 +24,16 @@ public class SdkGraphItemBuilder {
     private static final String TAG = "SdkGraphItemBuilder";
     public static final int GRAPH_ITEM_RESOLUTION = 900;  // seconds of 15 min
 
-    public static List<SdkGraphItem> buildGraphItems(ActivityShineVect activityShineVect,
-                                                     @NonNull SdkDayRange dayRange,
-                                                     @NonNull SyncCalculationCallback calculationCallback) {
+    /**
+     * @parameter ActivityShineVect of per minute activity data. its inner ActivityShine list must have been filtered by lastSyncTime
+     * */
+    public static List<SdkGraphItem> buildGraphItems(ActivityShineVect activityShineVect) {
         GraphItemShineAlgorithm graphItemShineAlgorithm = new GraphItemShineAlgorithm();
         int activityStartTime = activityShineVect.get(0).getStartTime();
-        int inGraphItemTimestamp = activityStartTime - activityStartTime % GRAPH_ITEM_RESOLUTION;
+        int inGraphItemTimestamp = activityStartTime - activityStartTime % GRAPH_ITEM_RESOLUTION; // start from a timestamp aligned with 15 min
         MLog.d(TAG, "incomplete graph item timestamp " + inGraphItemTimestamp);
 
-        SdkGraphDay graphDay= calculationCallback.getSdkGraphDayByDate(dayRange.day);
-        GraphItemShineVect inGraphItemShineVect = getIncompleteGraphItemShine(graphDay, inGraphItemTimestamp);
+        GraphItemShineVect inGraphItemShineVect = new GraphItemShineVect();
         GraphItemShineVect outGraphItemShineVect = new GraphItemShineVect();
         graphItemShineAlgorithm.buildGraphItems(activityShineVect, inGraphItemShineVect, outGraphItemShineVect);
         return convertGraphItemShineVect2List(outGraphItemShineVect);
@@ -48,6 +48,7 @@ public class SdkGraphItemBuilder {
      * @return the built graph items
      *
      * NOTE: this method will not be used in SyncSDK v1.0
+     * FIXME: SyncCalculationCallback is removed from startSync() API parameters, so that the SyncCalculationCallback cannot be called in SyncSyncParams now
      */
     public static List<SdkGraphItem> buildGraphItemsForGoogleFit(@NonNull List<SdkActivitySession> activitySessions,
                                                                  @NonNull SdkDayRange dayRange,

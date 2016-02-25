@@ -13,8 +13,10 @@ import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkDayRange;
 import com.misfit.syncsdk.model.SdkGraphItem;
+import com.misfit.syncsdk.model.SdkProfile;
+import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.model.SdkSleepSession;
-import com.misfit.syncsdk.model.SdkTimeZoneOffset;
+import com.misfit.syncsdk.model.SdkTimezoneOffset;
 import com.misfit.syncsdk.utils.DateUtils;
 import com.misfit.syncsdk.utils.TimeZoneUtils;
 
@@ -48,50 +50,41 @@ public class DailyUserDataBuilder {
 
     protected DailyUserDataBuilder() {}
 
-    public List<SdkActivitySessionGroup> buildDailyUserDataForShine(SyncResult syncResult, SyncCalculationCallback syncCalculationCallback) {
+    public SdkActivitySessionGroup buildDailyUserDataForShine(SyncResult syncResult,
+                                                              List<SdkResourceSettings> settingsChangesSinceLastSync,
+                                                              SdkProfile userProfile) {
         ActivityShineVect activityShineVect = AlgorithmUtils.convertSdkActivityToShineActivityForShine(
             syncResult.mActivities, syncResult.mTapEventSummarys);
         SWLEntryVect swlEntryVec = AlgorithmUtils.convertSwimSessionsToSWLEntry(syncResult.mSwimSessions);
         ACEEntryVect aceEntryVect = new ACEEntryVect(); // placeholder for ACE algorithm result in future
 
         if (activityShineVect.size() == 0) {
-            return new ArrayList<>();
+            return new SdkActivitySessionGroup();
         }
-        return buildDaysForShine(activityShineVect, aceEntryVect, swlEntryVec, syncCalculationCallback);
+        return buildDaysForShine(activityShineVect, aceEntryVect, swlEntryVec, settingsChangesSinceLastSync, userProfile);
     }
 
     /**
      * build up ActivitySessions, SleepSessions, GraphItems
      * */
-    public List<SdkActivitySessionGroup> buildDaysForShine(ActivityShineVect activityShineVect, ACEEntryVect aceEntryVect,
-                                                           SWLEntryVect swlEntryVect, SyncCalculationCallback calculationCallback) {
+    private SdkActivitySessionGroup buildDaysForShine(ActivityShineVect activityShineVect,
+                                                     ACEEntryVect aceEntryVect,
+                                                     SWLEntryVect swlEntryVect,
+                                                     List<SdkResourceSettings> settingsChangesSinceLasySync,
+                                                     SdkProfile userProfile) {
         Log.d(TAG, "buildDaysForShine");
-        List<SdkActivitySessionGroup> groupsResult = new ArrayList<>();
+        SdkActivitySessionGroup result = new SdkActivitySessionGroup();
 
-        List<SdkSleepSession> sleepSessions = SdkSleepSessionBuilder.buildSdkSleepSessions(activityShineVect, calculationCallback);
+        List<SdkSleepSession> sleepSessions = SdkSleepSessionBuilder.buildSdkSleepSessions(activityShineVect, settingsChangesSinceLasySync);
+        result.sleepSessionList.addAll(sleepSessions);
 
-        long startTime = activityShineVect.get(0).getStartTime();
-        Map<Long, DailyActivityGroup> dailyActivityGroupMap = groupDailyActivities(activityShineVect,
-            calculationCallback.getSdkTimeZoneOffsetBefore(startTime),
-            calculationCallback.getSdkTimeZoneOffsetListAfter(startTime));
+        List<SdkActivitySession> sdkActivitySessions = SdkActivitySessionBuilder.buildSdkActivitySessionForShine(
+            activityShineVect, aceEntryVect, swlEntryVect, settingsChangesSinceLasySync, userProfile);
+        result.activitySessionList.addAll(sdkActivitySessions);
 
-        // SdkActivitySessions, SdkSleepSessions, GraphItems are built up inside each group
-        for (Long dailyStartTime : dailyActivityGroupMap.keySet()) {
-            SdkActivitySessionGroup res = new SdkActivitySessionGroup();
-            DailyActivityGroup group = dailyActivityGroupMap.get(dailyStartTime);
-            groupDailySleepSessions(group, sleepSessions);
-            res.sleepSessionList.addAll(group.sleepSessions);
-
-            List<SdkActivitySession> sdkActivitySessions = SdkActivitySessionBuilder.buildSdkActivitySessionForShine(
-                group.activities, aceEntryVect, swlEntryVect, calculationCallback);
-            res.activitySessionList.addAll(sdkActivitySessions);
-
-            List<SdkGraphItem> graphItems = SdkGraphItemBuilder.buildGraphItems(group.activities, group.sdkDayRange, calculationCallback);
-            res.graphItemList.addAll(graphItems);
-
-            groupsResult.add(res);
-        }
-        return groupsResult;
+        List<SdkGraphItem> graphItems = SdkGraphItemBuilder.buildGraphItems(activityShineVect);
+        result.graphItemList.addAll(graphItems);
+        return result;
     }
 
     public void buildDailyUserDataForFlash(SyncResult syncResult, SyncCalculationCallback syncCalculationCallback) {
@@ -103,8 +96,8 @@ public class DailyUserDataBuilder {
      * group per minute ActivityShine to day by day list with consideration of timezone changes
      * */
     private Map<Long, DailyActivityGroup> groupDailyActivities(ActivityShineVect activities,
-                                                               SdkTimeZoneOffset timeZoneBefore,
-                                                               List<SdkTimeZoneOffset> timeZoneListAfter) {
+                                                               SdkTimezoneOffset timeZoneBefore,
+                                                               List<SdkTimezoneOffset> timeZoneListAfter) {
         Log.d(TAG, String.format("groupDailyActivities(), @param ActivityShineVect size %d", activities.size()));
         Map<Long, DailyActivityGroup> result = new HashMap<>();
         if (activities == null || activities.size() <= 0) {

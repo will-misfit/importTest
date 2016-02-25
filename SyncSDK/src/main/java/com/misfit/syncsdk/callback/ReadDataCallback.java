@@ -16,8 +16,8 @@ public interface ReadDataCallback {
     void onRawDataReadCompleted(List<SyncResult> syncResultList);
 
     /**
-     * @param sdkActivitySessionGroupList is activity session list and sleep session list after calculation
+     * @param sdkActivitySessionGroup is activity session list and sleep session list after calculation
      */
-    void onDataCalculateCompleted(List<SdkActivitySessionGroup> sdkActivitySessionGroupList);
+    void onDataCalculateCompleted(SdkActivitySessionGroup sdkActivitySessionGroup);
 
 }

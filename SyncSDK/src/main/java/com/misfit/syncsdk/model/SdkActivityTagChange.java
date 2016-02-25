@@ -7,15 +7,15 @@ import com.misfit.syncsdk.enums.SdkActivityType;
  * a data model to reflect ActivityChangeTagShine in algorithm library namespace
  * open to Misfit flagship app
  */
-public class SdkActivityChangeTag {
+public class SdkActivityTagChange {
 
 	private long mTimestamp = 0;
 
 	private int mMisfitActivityType = SdkActivityType.UNKNOWN_TYPE;
 
-	public SdkActivityChangeTag() {}
+	public SdkActivityTagChange() {}
 
-	public SdkActivityChangeTag(long timestamp, int activityTypeInt){
+	public SdkActivityTagChange(long timestamp, int activityTypeInt){
 		mTimestamp = timestamp;
 		mMisfitActivityType = activityTypeInt;
 	}

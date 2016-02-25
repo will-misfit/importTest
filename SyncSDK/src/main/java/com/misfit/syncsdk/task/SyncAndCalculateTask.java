@@ -210,11 +210,12 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     }
                 }
 
-                List<SdkActivitySessionGroup> sdkActivitySessionGroups =
-                        DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult, mTaskSharedData.getSyncCalculationCallback());
+                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult,
+                    mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
+                    mTaskSharedData.getSyncParams().userProfile);
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 if (mTaskSharedData.getReadDataCallback() != null) {
-                    mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroups);
+                    mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
                 }
                 taskSucceed();
             }
@@ -222,7 +223,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     /**
-     * in Misfit app code, the LastSyncTime needs to save in SharedProference. it is not ready yet in SyncSDK
+     * FIXME: lastSyncTime must be utilized in SyncSDK to filter per minute raw data
      */
     private long getLastSyncTime() {
         return 0l;

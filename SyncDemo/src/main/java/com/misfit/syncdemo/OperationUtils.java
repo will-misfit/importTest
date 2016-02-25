@@ -10,8 +10,6 @@ import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkSleepSession;
 
-import java.util.List;
-
 /**
  * support some utility methods for operations on SyncDemo
  */
@@ -59,33 +57,32 @@ public class OperationUtils {
     /**
      * one SdkActivitySessionGroup includes all activity session and all sleep session in one day,
      * */
-    public static String buildSyncCalculationResult(List<SdkActivitySessionGroup> sdkActivitySessionGroupList) {
+    public static String buildSyncCalculationResult(SdkActivitySessionGroup sdkActivitySessionGroup) {
         StringBuilder strBuilder = new StringBuilder();
-        if (sdkActivitySessionGroupList == null || sdkActivitySessionGroupList.isEmpty()) {
+        if (sdkActivitySessionGroup == null) {
             return strBuilder.toString();
         }
 
-        for (SdkActivitySessionGroup sdkActivitySessionGroup : sdkActivitySessionGroupList) {
-            for (SdkActivitySession sdkActSession: sdkActivitySessionGroup.activitySessionList) {
-                strBuilder.append(String.format("Activity Session, activity type %s, Is Gap Session: %s, starts at %d, duration seconds %d, points %d, steps %d, calories %.2f\n",
-                    SdkActivityType.getActivityTypeString(sdkActSession.getActivityType()),
-                    Boolean.toString(sdkActSession.isGapSession()),
-                    sdkActSession.getStartTime(),
-                    sdkActSession.getDuration(),
-                    sdkActSession.getPoints(),
-                    sdkActSession.getSteps(),
-                    sdkActSession.getCalories()));
-            }
-
-            for (SdkSleepSession sdkSleepSession: sdkActivitySessionGroup.sleepSessionList) {
-                strBuilder.append(String.format("Sleep Session, real starts at %d, real ends at %d, sleep duration seconds %d, deep sleep seconds %d\n",
-                    sdkSleepSession.getRealStartTime(),
-                    sdkSleepSession.getRealEndTime(),
-                    sdkSleepSession.getSleepDuration(),
-                    sdkSleepSession.getDeepSleepSecs()));
-            }
-            strBuilder.append("==============================\n");
+        for (SdkActivitySession sdkActSession: sdkActivitySessionGroup.activitySessionList) {
+            strBuilder.append(String.format("Activity Session, activity type %s, Is Gap Session: %s, starts at %d, duration seconds %d, points %d, steps %d, calories %.2f\n",
+                SdkActivityType.getActivityTypeString(sdkActSession.getActivityType()),
+                Boolean.toString(sdkActSession.isGapSession()),
+                sdkActSession.getStartTime(),
+                sdkActSession.getDuration(),
+                sdkActSession.getPoints(),
+                sdkActSession.getSteps(),
+                sdkActSession.getCalories()));
         }
+
+        for (SdkSleepSession sdkSleepSession: sdkActivitySessionGroup.sleepSessionList) {
+            strBuilder.append(String.format("Sleep Session, real starts at %d, real ends at %d, sleep duration seconds %d, deep sleep seconds %d\n",
+                sdkSleepSession.getRealStartTime(),
+                sdkSleepSession.getRealEndTime(),
+                sdkSleepSession.getSleepDuration(),
+                sdkSleepSession.getDeepSleepSecs()));
+        }
+        strBuilder.append("==============================\n");
+
         return strBuilder.toString();
     }
 }

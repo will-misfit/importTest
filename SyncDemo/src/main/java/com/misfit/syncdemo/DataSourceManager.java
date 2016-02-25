@@ -1,15 +1,13 @@
 package com.misfit.syncdemo;
 
-import com.misfit.syncsdk.algorithm.SdkActivitySessionBuilder;
 import com.misfit.syncsdk.enums.SdkActivityType;
 import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.enums.SdkUnit;
-import com.misfit.syncsdk.model.SdkActivityChangeTag;
+import com.misfit.syncsdk.model.SdkActivityTagChange;
 import com.misfit.syncsdk.model.SdkProfile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Provide data query to SyncDemo, including user profile, activity type change history,
@@ -39,10 +37,10 @@ public class DataSourceManager {
     /* for SynCalculationCallback.getSdkActivityChangeTagList() */
     public final static int Activity_Tag_Size = 2;
 
-    public static List<SdkActivityChangeTag> getSdkActivityChangeTagList(long startTime, long endTime) {
-        List<SdkActivityChangeTag> result = new ArrayList<>();
+    public static List<SdkActivityTagChange> getSdkActivityChangeTagList(long startTime, long endTime) {
+        List<SdkActivityTagChange> result = new ArrayList<>();
         if (endTime <= startTime) {
-            SdkActivityChangeTag walkingActivityTag = new SdkActivityChangeTag(endTime, SdkActivityType.WALKING_TYPE);
+            SdkActivityTagChange walkingActivityTag = new SdkActivityTagChange(endTime, SdkActivityType.WALKING_TYPE);
             result.add(walkingActivityTag);
             return result;
         }
@@ -50,7 +48,7 @@ public class DataSourceManager {
         long duration = endTime - startTime;
         long intervalTime = duration / Activity_Tag_Size;
         for (int i = 0; i < Activity_Tag_Size; i++) {
-            result.add(new SdkActivityChangeTag(startTime + i * intervalTime, SdkActivityType.WALKING_TYPE));
+            result.add(new SdkActivityTagChange(startTime + i * intervalTime, SdkActivityType.WALKING_TYPE));
         }
         return result;
     }

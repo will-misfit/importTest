@@ -3,15 +3,15 @@ package com.misfit.syncsdk.model;
 /**
  * model class to reflect Timezone offset in seconds
  */
-public class SdkTimeZoneOffset {
+public class SdkTimezoneOffset {
 
     private long mTimestamp;
 
     private int mTimezoneOffsetInSecond;
 
-    public SdkTimeZoneOffset() {}
+    public SdkTimezoneOffset() {}
 
-    public SdkTimeZoneOffset(long timestamp, int timezoneOffsetSeconds) {
+    public SdkTimezoneOffset(long timestamp, int timezoneOffsetSeconds) {
         mTimestamp = timestamp;
         mTimezoneOffsetInSecond = timezoneOffsetSeconds;
     }

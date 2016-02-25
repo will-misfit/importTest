@@ -9,7 +9,6 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
-import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
@@ -63,7 +62,6 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
 
     public void startSync(SyncOperationResultCallback resultCallback,
                           ReadDataCallback syncCallback,
-                          SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback,
                           ConnectionStateCallback connectionStateCallback,
                           @NonNull SyncSyncParams syncParams) {

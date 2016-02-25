@@ -7,7 +7,6 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
-import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.model.SettingsElement;
@@ -42,7 +41,6 @@ public class SyncShine2Device extends SyncCommonDevice {
     @Override
     public void startSync(SyncOperationResultCallback resultCallback,
                           ReadDataCallback syncCallback,
-                          SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback,
                           ConnectionStateCallback connectionStateCallback,
                           @NonNull SyncSyncParams syncParams) {
@@ -54,7 +52,6 @@ public class SyncShine2Device extends SyncCommonDevice {
 
         TaskSharedData taskSharedData = createTaskSharedData();
         taskSharedData.setReadDataCallback(syncCallback);
-        taskSharedData.setSyncCalculationCallback(calculationCallback);
         taskSharedData.setSyncOtaCallback(otaCallback);
         taskSharedData.setSyncParams(syncParams);
 
