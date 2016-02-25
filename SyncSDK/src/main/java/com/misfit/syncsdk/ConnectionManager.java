@@ -1,17 +1,10 @@
 package com.misfit.syncsdk;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineDevice;
-import com.misfit.ble.shine.ShineProfile;
-import com.misfit.ble.shine.ShineProperty;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 
@@ -53,7 +46,7 @@ public class ConnectionManager {
     public void releaseShineProfileProxy(String serialNumber) {
         ShineSdkProfileProxy proxy = getShineSDKProfileProxy(serialNumber);
         if (proxy != null) {
-            proxy.releaseCallbacks();
+            proxy.clearAllConnectionStateCallbacks();
             mShineProfileProxyCache.remove(serialNumber);
         }
     }

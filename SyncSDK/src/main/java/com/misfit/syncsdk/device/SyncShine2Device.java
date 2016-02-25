@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncOperationResult;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
@@ -43,11 +44,13 @@ public class SyncShine2Device extends SyncCommonDevice {
                           ReadDataCallback syncCallback,
                           SyncCalculationCallback calculationCallback,
                           SyncOtaCallback otaCallback,
+                          ConnectionStateCallback connectionStateCallback,
                           @NonNull SyncSyncParams syncParams) {
         if (isRunning()) {
             resultCallback.onFailed(SyncOperationResult.RUNNING);
             return;
         }
+        setConnectionStateCallback(connectionStateCallback);
 
         TaskSharedData taskSharedData = createTaskSharedData();
         taskSharedData.setReadDataCallback(syncCallback);

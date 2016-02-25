@@ -14,10 +14,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.misfit.ble.shine.ShineConfiguration;
+import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncdemo.util.LogView;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncSdkAdapter;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
@@ -47,7 +49,7 @@ import butterknife.OnTouch;
 
 
 public class MainActivity extends AppCompatActivity
-        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, ReadDataCallback{
+        implements SyncOperationResultCallback, SyncOtaCallback, SyncCalculationCallback, ReadDataCallback, ConnectionStateCallback {
 
     private final static String TAG = "MainActivity";
 
@@ -77,8 +79,8 @@ public class MainActivity extends AppCompatActivity
             DeviceType.PLUTO,
             DeviceType.SWAROVSKI_SHINE,
             DeviceType.SPEEDO_SHINE,
-            DeviceType.SILVERATTA,
-            DeviceType.RAY,
+            DeviceType.SILVRETTA,
+            DeviceType.BMW,
             DeviceType.SHINE_MK_II
     };
 
@@ -178,7 +180,7 @@ public class MainActivity extends AppCompatActivity
         SyncSyncParams syncParams = new SyncSyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
         syncParams.tagInStateListener = tagInStateListener;
-        mSyncCommonDevice.startSync(this, this, this, this, syncParams);
+        mSyncCommonDevice.startSync(this, this, this, this, this, syncParams);
         mLogTextView.clear();
         setOperationPanelEnabled(false);
     }
@@ -323,6 +325,12 @@ public class MainActivity extends AppCompatActivity
                 handleOnSyncAndCalculationCompleted(sdkActivitySessionGroupList);
             }
         });
+    }
+
+    /* interface methods of ConnectionStateCallback */
+    @Override
+    public void onConnectionStateChanged(ShineProfile.State newState) {
+        MLog.d(TAG, "connection state changes to " + newState);
     }
 
     private void handleOnShineProfileSyncReadDataCompleted(List<SyncResult> syncResultList) {

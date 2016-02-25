@@ -5,6 +5,7 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.ContextUtils;
@@ -16,7 +17,7 @@ import java.util.TimerTask;
 /**
  * Task instance to do the connect operation.
  */
-public class ConnectTask extends Task implements ShineSdkProfileProxy.ConnectionStateCallback {
+public class ConnectTask extends Task implements ConnectionStateCallback {
 
     private final static String TAG = "ConnectTask";
 

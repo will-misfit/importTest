@@ -17,7 +17,7 @@ import com.misfit.ble.shine.ShineProfile.ConnectionCallback;
 import com.misfit.ble.shine.ShineProfile.ConfigurationCallback;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.ble.shine.log.ConnectFailCode;
-import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,6 @@ public class ShineSdkProfileProxy {
     public static final String TAG = "ShineSdkProfileProxy";
 
     private ShineProfile mShineProfile;
-
-    public interface ConnectionStateCallback {
-        void onConnectionStateChanged(ShineProfile.State newState);
-    }
 
     protected ConnectionCallback mConnectionCallback = new ConnectionCallback() {
         @Override
@@ -63,7 +59,7 @@ public class ShineSdkProfileProxy {
         }
     }
 
-    public void releaseCallbacks() {
+    public void clearAllConnectionStateCallbacks() {
         mConnectionStateCallbacks.clear();
     }
 

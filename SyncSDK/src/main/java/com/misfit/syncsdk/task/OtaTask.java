@@ -7,6 +7,7 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.utils.ContextUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
@@ -273,7 +274,7 @@ public class OtaTask extends Task {
     /**
      * reconnect device post to OTA
      * */
-    class ReconnectState extends State implements ShineSdkProfileProxy.ConnectionStateCallback {
+    class ReconnectState extends State implements ConnectionStateCallback {
 
         private int mRemainingRetry = 2;
         private final static int TIMEOUT_CONNECT = 45000;

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncOperationResult;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
@@ -23,7 +24,6 @@ import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SwitchTrackerModeTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
-import com.misfit.syncsdk.task.UnmapEventAnimationTask;
 
 import java.util.List;
 
@@ -41,11 +41,13 @@ public class SyncFlashDevice extends SyncCommonDevice {
                           ReadDataCallback syncCallback,
                           SyncCalculationCallback calcuCallback,
                           SyncOtaCallback otaCallback,
+                          ConnectionStateCallback connectionStateCallback,
                           @NonNull SyncSyncParams syncParams) {
         if (isRunning()) {
             resultCallback.onFailed(SyncOperationResult.RUNNING);
             return;
         }
+        setConnectionStateCallback(connectionStateCallback);
 
         TaskSharedData taskSharedData = createTaskSharedData();
         taskSharedData.setReadDataCallback(syncCallback);

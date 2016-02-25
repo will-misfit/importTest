@@ -2,6 +2,8 @@ package com.misfit.syncsdk;
 
 import android.text.TextUtils;
 
+import com.misfit.syncsdk.utils.CheckUtils;
+
 /**
  * Created by Will Hou on 1/11/16.
  */
@@ -13,8 +15,9 @@ public class DeviceType {
     public final static int SPEEDO_SHINE = 4;
     public final static int SHINE_MK_II = 5;
     public final static int PLUTO = 6;
-    public final static int SILVERATTA = 7;
-    public final static int RAY = 9;
+    public final static int FLASH_LINK = 7;
+    public final static int SILVRETTA = 8;
+    public final static int BMW = 9;
 
     private int mTypeVal;
 
@@ -23,28 +26,42 @@ public class DeviceType {
     }
 
     public static int getDeviceType(String serialNumber) {
+        return getDeviceType(serialNumber, null);
+    }
+
+    /**
+     * per design, model name 'FL.2.1' for Flash Button, 'FL.2.0' for Misfit Flash
+     * */
+    public static int getDeviceType(String serialNumber, String modelName) {
+        int result = DeviceType.UNKNOWN;
+
         if (TextUtils.isEmpty(serialNumber)) {
-            return DeviceType.UNKNOWN;
+            result = DeviceType.UNKNOWN;
         } else if (serialNumber.startsWith("SH")) {
-            return DeviceType.SHINE;
+            result = DeviceType.SHINE;
         } else if (serialNumber.startsWith("F")) {
-            return DeviceType.FLASH;
+            result = DeviceType.FLASH;
         }else if (serialNumber.startsWith("SC")) {
-            return DeviceType.SWAROVSKI_SHINE;
+            result = DeviceType.SWAROVSKI_SHINE;
         } else if (serialNumber.startsWith("B0")) {
-            return DeviceType.RAY;
+            result = DeviceType.BMW;
         } else if (serialNumber.startsWith("S2")) {
-            return DeviceType.PLUTO;
+            result = DeviceType.PLUTO;
         } else if (serialNumber.startsWith("C1")) {
-            return DeviceType.SILVERATTA;
+            result = DeviceType.SILVRETTA;
         } else if (serialNumber.startsWith("SV0EZ")) {
-            return DeviceType.SPEEDO_SHINE;
+            result = DeviceType.SPEEDO_SHINE;
         } else if (serialNumber.startsWith("SV")) {
-            return DeviceType.SHINE_MK_II;
-        } else {
-            return DeviceType.UNKNOWN;
+            result = DeviceType.SHINE_MK_II;
         }
-        //TODO:We need to classify the flash and button by model name
+
+        if (result == DeviceType.FLASH) {
+            if (!CheckUtils.isStringEmpty(modelName) && modelName.equals("FL.2.1")) {
+                result = DeviceType.FLASH_LINK;
+            }
+        }
+        return result;
+
     }
 
     public static String getDeviceTypeText(int deviceType) {
@@ -63,9 +80,9 @@ public class DeviceType {
                 return "shine_mk_ii";
             case PLUTO:
                 return "pluto";
-            case SILVERATTA:
+            case SILVRETTA:
                 return "silvretta";
-            case RAY:
+            case BMW:
                 return "bmw";
             default:
                 return "unknown";

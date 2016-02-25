@@ -44,13 +44,13 @@ public final class FailedReason {
     public final static int BLE_SET_FILE_STREAM_NUMBER_OF_PACKETS_PER_EVENT_REQUEST_FAILURE = -130;
     public final static int BLE_SET_FLASH_BUTTON_MODE_REQUEST_FAILURE = -131;
     public final static int BLE_STOP_FILE_STREAMING_REQUEST_FAILURE = -132;
-    public final static int BLE_O_T_A_ENTER_REQUEST_FAILURE = -133;
-    public final static int BLE_O_T_A_ERASE_REQUEST_FAILURE = -134;
-    public final static int BLE_O_T_A_GET_SIZE_WRITTEN_REQUEST_FAILURE = -135;
-    public final static int BLE_O_T_A_PUT_REQUEST_FAILURE = -136;
-    public final static int BLE_O_T_A_RESET_REQUEST_FAILURE = -137;
-    public final static int BLE_O_T_A_VERIFY_FILE_REQUEST_FAILURE = -138;
-    public final static int BLE_O_T_A_VERIFY_SEGMENT_REQUEST_FAILURE = -139;
+    public final static int BLE_OTA_ENTER_REQUEST_FAILURE = -133;
+    public final static int BLE_OTA_ERASE_REQUEST_FAILURE = -134;
+    public final static int BLE_OTA_GET_SIZE_WRITTEN_REQUEST_FAILURE = -135;
+    public final static int BLE_OTA_PUT_REQUEST_FAILURE = -136;
+    public final static int BLE_OTA_RESET_REQUEST_FAILURE = -137;
+    public final static int BLE_OTA_VERIFY_FILE_REQUEST_FAILURE = -138;
+    public final static int BLE_OTA_VERIFY_SEGMENT_REQUEST_FAILURE = -139;
     public final static int BLE_CLEAR_ALL_ALARMS_REQUEST_FAILURE = -140;
     public final static int BLE_DISA_BLE_ALL_BLE_NOTIFICATIONS_REQUEST_FAILURE = -141;
     public final static int BLE_GET_ALARM_PARAMETERS_REQUEST_FAILURE = -142;
@@ -59,7 +59,7 @@ public final class FailedReason {
     public final static int BLE_GET_GOAL_HIT_NOTIFICATION_REQUEST_FAILURE = -145;
     public final static int BLE_GET_INACTIVITY_NUDGE_REQUEST_FAILURE = -146;
     public final static int BLE_GET_SINGLE_ALARM_REQUEST_FAILURE = -147;
-    public final static int BLE_PLAY_L_E_D_REQUEST_FAILURE = -148;
+    public final static int BLE_PLAY_LED_REQUEST_FAILURE = -148;
     public final static int BLE_PLAY_SOUND_REQUEST_FAILURE = -149;
     public final static int BLE_PLAY_VIBRATION_REQUEST_FAILURE = -150;
     public final static int BLE_SET_ALARM_PARAMETERS_REQUEST_FAILURE = -151;
@@ -111,13 +111,13 @@ public final class FailedReason {
     public final static int BLE_SET_FILE_STREAM_NUMBER_OF_PACKETS_PER_EVENT_REQUEST_TIMEOUT = -230;
     public final static int BLE_SET_FLASH_BUTTON_MODE_REQUEST_TIMEOUT = -231;
     public final static int BLE_STOP_FILE_STREAMING_REQUEST_TIMEOUT = -232;
-    public final static int BLE_O_T_A_ENTER_REQUEST_TIMEOUT = -233;
-    public final static int BLE_O_T_A_ERASE_REQUEST_TIMEOUT = -234;
-    public final static int BLE_O_T_A_GET_SIZE_WRITTEN_REQUEST_TIMEOUT = -235;
-    public final static int BLE_O_T_A_PUT_REQUEST_TIMEOUT = -236;
-    public final static int BLE_O_T_A_RESET_REQUEST_TIMEOUT = -237;
-    public final static int BLE_O_T_A_VERIFY_FILE_REQUEST_TIMEOUT = -238;
-    public final static int BLE_O_T_A_VERIFY_SEGMENT_REQUEST_TIMEOUT = -239;
+    public final static int BLE_OTA_ENTER_REQUEST_TIMEOUT = -233;
+    public final static int BLE_OTA_ERASE_REQUEST_TIMEOUT = -234;
+    public final static int BLE_OTA_GET_SIZE_WRITTEN_REQUEST_TIMEOUT = -235;
+    public final static int BLE_OTA_PUT_REQUEST_TIMEOUT = -236;
+    public final static int BLE_OTA_RESET_REQUEST_TIMEOUT = -237;
+    public final static int BLE_OTA_VERIFY_FILE_REQUEST_TIMEOUT = -238;
+    public final static int BLE_OTA_VERIFY_SEGMENT_REQUEST_TIMEOUT = -239;
     public final static int BLE_CLEAR_ALL_ALARMS_REQUEST_TIMEOUT = -240;
     public final static int BLE_DISA_BLE_ALL_BLE_NOTIFICATIONS_REQUEST_TIMEOUT = -241;
     public final static int BLE_GET_ALARM_PARAMETERS_REQUEST_TIMEOUT = -242;
@@ -126,7 +126,7 @@ public final class FailedReason {
     public final static int BLE_GET_GOAL_HIT_NOTIFICATION_REQUEST_TIMEOUT = -245;
     public final static int BLE_GET_INACTIVITY_NUDGE_REQUEST_TIMEOUT = -246;
     public final static int BLE_GET_SINGLE_ALARM_REQUEST_TIMEOUT = -247;
-    public final static int BLE_PLAY_L_E_D_REQUEST_TIMEOUT = -248;
+    public final static int BLE_PLAY_LED_REQUEST_TIMEOUT = -248;
     public final static int BLE_PLAY_SOUND_REQUEST_TIMEOUT = -249;
     public final static int BLE_PLAY_VIBRATION_REQUEST_TIMEOUT = -250;
     public final static int BLE_SET_ALARM_PARAMETERS_REQUEST_TIMEOUT = -251;
@@ -176,4 +176,3 @@ public final class FailedReason {
     public final static int NETWORK_SESSION_REQUEST_FAILURE = -600;
     public final static int NETWORK_ACTIVITY_DATA_REQUEST_FAILURE = -601;
 }
-
