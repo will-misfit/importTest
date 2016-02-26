@@ -2,6 +2,7 @@ package com.misfit.syncsdk.algorithm;
 
 import android.util.Log;
 
+import com.misfit.cloud.algorithm.algos.ActivitySessionsFlashAlgorithm;
 import com.misfit.cloud.algorithm.algos.ActivitySessionsShineAlgorithm;
 import com.misfit.cloud.algorithm.models.ACEEntryVect;
 import com.misfit.cloud.algorithm.models.ActivityChangeTagShineVect;
@@ -19,6 +20,7 @@ import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,35 +36,64 @@ public class SdkActivitySessionBuilder {
 
     private final static String TAG = "SDKActSessionBuilder";
 
-    public static List<SdkActivitySession> buildSdkActivitySessionForShine(ActivityShineVect activityShineVect,
-                                                                           ACEEntryVect aceEntryVect,
-                                                                           SWLEntryVect swlEntryVect,
-                                                                           List<SdkResourceSettings> settingsSinceLastSync,
-                                                                           SdkProfile sdkUserProfile) {
-        Log.d(TAG, "buildSdkActivitySessionForShine()");
-        List<SdkActivitySession> result = new ArrayList<>();
+    /**
+     * build up SdkActivitySession list for Shine
+     * */
+    public static List<SdkActivitySession> buildSdkActivitySessionsForShine(ActivityShineVect activityShineVect,
+                                                                            ACEEntryVect aceEntryVect,
+                                                                            SWLEntryVect swlEntryVect,
+                                                                            List<SdkResourceSettings> settingsSinceLastSync,
+                                                                            SdkProfile sdkUserProfile) {
+        MLog.d(TAG, "buildSdkActivitySessionsForShine()");
         ActivitySessionsShineAlgorithm activitySessionsShineAlgorithm = new ActivitySessionsShineAlgorithm();
         ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect gapSessionShineVect = new GapSessionShineVect();
         activitySessionsShineAlgorithm.buildActivitySession(activityShineVect, aceEntryVect, swlEntryVect,
                 activitySessionShineVect, gapSessionShineVect);
         if (activitySessionShineVect.isEmpty() && gapSessionShineVect.isEmpty()) {
-            Log.d(TAG, "buildSdkActivitySessionForShine(), no session to build");
-            return result;
+            Log.d(TAG, "buildSdkActivitySessionsForShine(), no session to build");
+            return new ArrayList<>();
         }
 
-        List<SdkActivityTagChange> sdkChangeTags = getSdkActivityTagChangeList(settingsSinceLastSync);
+        List<SdkActivityTagChange> sdkTagChanges = getSdkActivityTagChangeList(settingsSinceLastSync);
 
         ActivitySessionShineVect resultActivitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect resultGapSessionShineVect = new GapSessionShineVect();
 
         activitySessionsShineAlgorithm.buildUserSessions(activitySessionShineVect, gapSessionShineVect,
                 resultActivitySessionShineVect, resultGapSessionShineVect,
-                buildActivityChangeTagShineVect(sdkChangeTags),
+                buildActivityChangeTagShineVect(sdkTagChanges),
                 buildProfileShine(sdkUserProfile));
 
-        result = convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
-        return result;
+        return convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
+    }
+
+    /**
+     * build up SdkActivitySession list for Flash
+     * */
+    public static List<SdkActivitySession> buildSdkActivitySessionsForFlash(ActivityShineVect activityShineVect,
+                                                                            List<SdkResourceSettings> settingsSinceLastSync,
+                                                                            SdkProfile sdkUserProfile) {
+        MLog.d(TAG, "buildSdkActivitySessionsForFlash");
+        ActivitySessionsFlashAlgorithm activitySessionsFlashAlgorithm = new ActivitySessionsFlashAlgorithm();
+        ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
+        GapSessionShineVect gapSessionShineVect = new GapSessionShineVect();
+        activitySessionsFlashAlgorithm.buildActivitySession(activityShineVect, activitySessionShineVect, gapSessionShineVect);
+        if (activitySessionShineVect == null && gapSessionShineVect == null) {
+            MLog.d(TAG, "buildSdkActivitySessionsForFlash(), no session build");
+            return new ArrayList<>();
+        }
+
+        List<SdkActivityTagChange> sdkTagChanges = getSdkActivityTagChangeList(settingsSinceLastSync);
+
+        ActivitySessionShineVect resultActivitySessionShineVect = new ActivitySessionShineVect();
+        GapSessionShineVect resultGapSessionShineVect = new GapSessionShineVect();
+        activitySessionsFlashAlgorithm.buildUserSessions(activitySessionShineVect, gapSessionShineVect,
+            resultActivitySessionShineVect, resultGapSessionShineVect,
+            buildActivityChangeTagShineVect(sdkTagChanges),
+            buildProfileShine(sdkUserProfile));
+
+        return convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
     }
 
     /**

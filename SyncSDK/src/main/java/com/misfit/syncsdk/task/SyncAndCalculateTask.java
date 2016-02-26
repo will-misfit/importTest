@@ -40,6 +40,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     @Override
     protected void execute() {
+        mLogEvent.start();
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
@@ -201,7 +202,14 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     MLog.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
                     syncResult.mSessionEvents.clear();
                 }
-                DailyUserDataBuilder.getInstance().buildUserSessionsForFlash(syncResult, mTaskSharedData.getSyncCalculationCallback());
+                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForFlash(syncResult,
+                    mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
+                    mTaskSharedData.getSyncParams().userProfile);
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                }
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
+                taskSucceed();
             } else {
                 if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {
@@ -210,13 +218,14 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     }
                 }
 
-                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult,
+                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForShine(syncResult,
                     mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
                     mTaskSharedData.getSyncParams().userProfile);
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 if (mTaskSharedData.getReadDataCallback() != null) {
                     mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
                 }
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
                 taskSucceed();
             }
         }
