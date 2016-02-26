@@ -5,9 +5,12 @@ import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.MisfitScanner;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
 
@@ -19,14 +22,13 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
     private final static String TAG = "ScanTask";
 
-    private final static long SCAN_TIMEOUT = 30000;
-
     private TimerTask createTimeoutTask() {
         cancelCurrentTimerTask();
         mCurrTimerTask = new TimerTask() {
             @Override
             public void run() {
-                MLog.d(TAG, "time out, will do retry");
+                MLog.d(TAG, "scan time out, required device is not found yet");
+                mTaskSharedData.setFailureReason(FailedReason.NO_DEVICE_WITH_SERIAL_NUMBER_FOUND);
                 taskFailed("scan timeout");
             }
         };
@@ -38,7 +40,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
      */
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.START_SCANNING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_SCANNING);
     }
 
     @Override
@@ -51,7 +53,8 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             taskSucceed();
             return;
         }
-        TimerManager.getInstance().addTimerTask(createTimeoutTask(), SCAN_TIMEOUT);
+
+        TimerManager.getInstance().addTimerTask(createTimeoutTask(), SdkConstants.SCAN_ONE_DEVICE_TIMEOUT);
         MisfitScanner.getInstance().startScan(this);
         mLogEvent.end(LogEvent.RESULT_SUCCESS, "scan cmd is started");
 
@@ -69,7 +72,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
         cancelCurrentTimerTask();
         mLogSession.appendEvent(mLogEvent);
 
-        mLogEvent = createLogEvent(LogEventType.STOP_SCANNING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_SCANNING);
         mLogEvent.start();
         MisfitScanner.getInstance().stopScan();
         mLogEvent.end(LogEventType.STOP_SCANNING, "");
@@ -84,7 +87,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             return;
         }
 
-        mLogEvent = createLogEvent(LogEventType.SCANNED_DEVICE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SCANNED_DEVICE);
         mLogEvent.start();
         mLogEvent.end(LogEvent.RESULT_SUCCESS, device.getSerialNumber());
         mLogSession.appendEvent(mLogEvent);

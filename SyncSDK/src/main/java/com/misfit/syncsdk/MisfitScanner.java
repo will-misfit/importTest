@@ -13,10 +13,19 @@ import com.misfit.syncsdk.device.SyncRayDevice;
 import com.misfit.syncsdk.device.SyncShine2Device;
 import com.misfit.syncsdk.device.SyncShineDevice;
 import com.misfit.syncsdk.device.SyncSwarovskiDevice;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.utils.ContextManager;
+import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
+
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * class to scan devices, via ShineSdkAdapterProxy
+ *
+ * it is used to scan an expected device type, it must be monitored by timer management
  */
 public class MisfitScanner implements ShineAdapter.ShineScanCallback {
 
@@ -26,10 +35,18 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
     SyncScanCallback mCallback;
     int mExpectedDeviceType;
 
-    private static MisfitScanner sharedInstance;
+    // current architecture which put scan with given device type
+    private LogSession mLogSession;
+
+    private LogEvent mCurrLogEvent;
+
+    private AtomicBoolean isScanning = new AtomicBoolean(false);
+
+    private static MisfitScanner sharedInstance ;
 
     private MisfitScanner(Context context) {
         mShineSDKAdapter = new ShineSdkAdapterProxy(context);
+        isScanning.set(false);
     }
 
     public static MisfitScanner getInstance() {
@@ -47,6 +64,14 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
         mShineSDKAdapter.mShineAdapter.enableBluetooth();
     }
 
+    private TimerTask mScanTimerTask = new TimerTask() {
+        @Override
+        public void run() {
+            MLog.d(TAG, "Scanning for given device type is timeout");
+            // if there is LogSession, write the FailureReason of LogSession
+        }
+    };
+
     /**
      * support invoke from external - App
      *
@@ -54,9 +79,15 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
      * @param callback
      */
     public boolean startScan(int expectedDeviceType, SyncScanCallback callback) {
+        if (isScanning.get()) {
+            return false;
+        }
+
+        isScanning.set(true);
         Log.d(TAG, String.format("startScan, expected device type of %s", DeviceType.getDeviceTypeText(expectedDeviceType)));
         mCallback = callback;
         mExpectedDeviceType = expectedDeviceType;
+        TimerManager.getInstance().addTimerTask(mScanTimerTask, SdkConstants.SCAN_DEVICE_TYPE_TIMEOUT);
         boolean result = mShineSDKAdapter.startScanning(this);
         return result;
     }

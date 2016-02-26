@@ -2,13 +2,21 @@ package com.misfit.syncsdk.model;
 
 import android.support.annotation.NonNull;
 
+import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.controller.ConfigurationSession;
+import com.misfit.syncsdk.ConnectionManager;
+import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncAnimationCallback;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.device.DeviceBehavior;
+import com.misfit.syncsdk.enums.FailedReason;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.log.LogSession;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.SdkConstants;
 
 /**
@@ -33,9 +41,29 @@ public class TaskSharedData {
 
     private DeviceBehavior mDeviceBehavior;
 
-    private SyncSyncParams mSyncParams;
+    private SyncParams mSyncParams;
 
     private LogSession mLogSession;
+
+    /**
+     * ConnectionStateCallback to monitor connection state change(mainly Disconnected) during entire sync process
+     *
+     * if Disconnected unexpectedly, record it in LogSession - FailureReason field.
+     * other Task subclass will notice the unexpected Disconnected as ShineProfile.isConnected() return false
+     *
+     * */
+    private ConnectionStateCallback mConnectionStateCallbackPostConnect = new ConnectionStateCallback() {
+        @Override
+        public void onConnectionStateChanged(ShineProfile.State newState) {
+            if (newState == ShineProfile.State.DISCONNECTED) {
+                setFailureReason(FailedReason.DISCONNECTED_UNEXPECTEDLY);
+            } else {
+                // when the Sync process runs after connect, we don't care other State except Disconnected
+                LogEvent logEvent = GeneralUtils.createLogEvent(LogEventType.UNEXPECTED_CONNECTION_STATE);
+                mLogSession.appendEvent(logEvent);
+            }
+        }
+    };
 
     public TaskSharedData(String serialNumber, int deviceType) {
         this(serialNumber, deviceType, SdkConstants.OPERATOR_RETRY_TIMES);
@@ -47,11 +75,11 @@ public class TaskSharedData {
         mRemainingRetryCount = retryTimes;
     }
 
-    public SyncSyncParams getSyncParams() {
+    public SyncParams getSyncParams() {
         return mSyncParams;
     }
 
-    public void setSyncParams(SyncSyncParams syncParams) {
+    public void setSyncParams(SyncParams syncParams) {
         mSyncParams = syncParams;
         // now mLogSession should not be initialized yet
         if(mLogSession == null) {
@@ -141,6 +169,11 @@ public class TaskSharedData {
     }
 
     public void cleanUp() {
+        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mSerialNumber);
+        if (proxy != null) {
+            proxy.unsubscribeConnectionStateChanged(mConnectionStateCallbackPostConnect);
+        }
+
         mDeviceBehavior = null;
         mConfigurationSession = null;
         mSyncCalculationCallback = null;
@@ -165,5 +198,16 @@ public class TaskSharedData {
 
     public LogSession getLogSession() {
         return mLogSession;
+    }
+
+    public ConnectionStateCallback getPostConnectConnectionStateCallback() {
+        return mConnectionStateCallbackPostConnect;
+    }
+
+    public void setFailureReason(int failureReasonId) {
+        if (mLogSession != null) {
+            mLogSession.setFailureReason(failureReasonId);
+            mLogSession.save();
+        }
     }
 }

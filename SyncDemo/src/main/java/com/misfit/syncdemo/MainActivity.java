@@ -26,7 +26,7 @@ import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
-import com.misfit.syncsdk.model.SyncSyncParams;
+import com.misfit.syncsdk.model.SyncParams;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.btn_sync)
     void sync() {
-        SyncSyncParams syncParams = new SyncSyncParams();
+        SyncParams syncParams = new SyncParams();
         syncParams.firstSync = mSwitchFirstSync.isChecked();
         syncParams.tagInStateListener = tagInStateListener;
         mSyncCommonDevice.startSync(this, this, this, this, syncParams);

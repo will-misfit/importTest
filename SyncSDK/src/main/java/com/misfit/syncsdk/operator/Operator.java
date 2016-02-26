@@ -95,15 +95,13 @@ public class Operator implements Task.TaskResultCallback {
      */
     private void cleanUpAndRelease() {
         cancelCurrentTimerTask();
-        mTaskSharedData = null;
         mTaskQueue.clear();
         LogManager.getInstance().uploadAllLog();
         if (mReleaseCallback != null) {
             mReleaseCallback.onOperatorRelease();
         }
-    }
-
-    protected void submitLog() {
+        mTaskSharedData.cleanUp();
+        mTaskSharedData = null;
     }
 
     @Override

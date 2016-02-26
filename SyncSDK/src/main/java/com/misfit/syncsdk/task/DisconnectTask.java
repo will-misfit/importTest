@@ -7,6 +7,7 @@ import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
@@ -17,7 +18,7 @@ public class DisconnectTask extends Task implements ConnectionStateCallback {
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.DISCONNECT);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.DISCONNECT);
     }
 
     @Override

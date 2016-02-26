@@ -25,6 +25,9 @@ import java.util.TimeZone;
 
 /**
  * proxy of com.misfit.ble.shine.ShineProfile to provide API of ShineProfile
+ *
+ * it has a ConnectionStateCallback list for each connection(ShineProfile), because in current SyncSDK architecture,
+ * there are different objects pay attention to connection state change in different moments.
  */
 public class ShineSdkProfileProxy {
 

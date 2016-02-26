@@ -9,6 +9,7 @@ import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.ContextManager;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
@@ -23,9 +24,10 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
 
     private final static long CONNECT_TASK_TIMEOUT = 45000;
 
+    /* inherited interface API of Task */
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.CONNECT);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CONNECT);
     }
 
     @Override
@@ -81,6 +83,11 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
         }
     }
 
+    /* inherited interface API of ConnectionStateCallback */
+    /**
+     * ConnectionStateCallback inside ConnectTask only cares Connected and Disconnected event during this task duration
+     * when the task finish, no matter succeed or failed, its ConnectionStateCallback should be removed from ShineSdk
+     * */
     @Override
     public void onConnectionStateChanged(ShineProfile.State state) {
         if (mIsFinished) {
@@ -89,6 +96,14 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
         if (state == ShineProfile.State.CONNECTED) {
             updateDeviceInfo();
             mLogEvent.end(LogEvent.RESULT_SUCCESS, "connected");
+
+            // ConnectTask successful, subscribe a monitoring ConnectionStateCallback for remaining Tasks
+            ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+            if (proxy != null) {
+                ConnectionStateCallback postConnectMonitor = mTaskSharedData.getPostConnectConnectionStateCallback();
+                proxy.subscribeConnectionStateChanged(postConnectMonitor);
+            }
+
             taskSucceed();
         } else {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "changed connection state is " + state);

@@ -5,7 +5,8 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
-import com.misfit.syncsdk.model.SyncSyncParams;
+import com.misfit.syncsdk.model.SyncParams;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 /**
@@ -14,7 +15,7 @@ import com.misfit.syncsdk.utils.MLog;
 public class StartUserInputStreamingTask extends Task implements ShineProfile.StreamingCallback {
     private final static String TAG = "StartUserInputStreamingTask";
 
-    SyncSyncParams mSyncParams;
+    SyncParams mSyncParams;
     ShineProfile.StreamingCallback mStreamingCallback = null;
 
     @Override
@@ -24,7 +25,7 @@ public class StartUserInputStreamingTask extends Task implements ShineProfile.St
             mStreamingCallback = mSyncParams.streamingCallback;
         }
 
-        mLogEvent = createLogEvent(LogEventType.START_FILE_STREAMING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_FILE_STREAMING);
     }
 
     @Override

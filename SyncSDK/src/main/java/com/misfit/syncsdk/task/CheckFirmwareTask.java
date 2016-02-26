@@ -5,12 +5,13 @@ import android.text.TextUtils;
 import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 
 public class CheckFirmwareTask extends Task {
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.CHECK_FIRMWARE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CHECK_FIRMWARE);
     }
 
     @Override

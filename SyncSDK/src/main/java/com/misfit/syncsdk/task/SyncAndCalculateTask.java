@@ -12,11 +12,13 @@ import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
+import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.GET_ACTIVITY);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.GET_ACTIVITY);
     }
 
     @Override
@@ -44,11 +46,13 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
+            mTaskSharedData.setFailureReason(FailedReason.SYNC_FAIL);
             taskFailed("proxy not prepared");
             return;
         }
         if (mTaskSharedData.getReadDataCallback() == null) {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ReadDataCallback is not ready");
+            mTaskSharedData.setFailureReason(FailedReason.SYNC_FAIL);
             taskFailed("ReadDataCallback is not ready");
             return;
         }
@@ -107,7 +111,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     private void handleOnShineSdkSyncSucceed() {
-        mLogEvent = createLogEvent(LogEventType.CALCULATE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CALCULATE);
         SyncedDataCalculationTask syncCalculateTask = new SyncedDataCalculationTask(mSyncResultSummary);
         syncCalculateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

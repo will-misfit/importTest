@@ -10,7 +10,7 @@ import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.model.SettingsElement;
-import com.misfit.syncsdk.model.SyncSyncParams;
+import com.misfit.syncsdk.model.SyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.SyncOperator;
 import com.misfit.syncsdk.task.CheckFirmwareTask;
@@ -38,12 +38,12 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
                           ReadDataCallback syncCallback,
                           SyncOtaCallback otaCallback,
                           ConnectionStateCallback connectionStateCallback,
-                          @NonNull SyncSyncParams syncParams) {
+                          @NonNull SyncParams syncParams) {
         if (isRunning()) {
             resultCallback.onFailed(SyncOperationResult.RUNNING);
             return;
         }
-        setConnectionStateCallback(connectionStateCallback);
+        setPostSyncConnectionStateCallback(connectionStateCallback);
 
         TaskSharedData taskSharedData = createTaskSharedData();
         taskSharedData.setReadDataCallback(syncCallback);

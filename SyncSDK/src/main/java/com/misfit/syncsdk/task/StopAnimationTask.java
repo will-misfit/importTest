@@ -7,6 +7,7 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
@@ -17,7 +18,7 @@ public class StopAnimationTask extends Task implements ShineProfile.Configuratio
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.STOP_ANIMATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_ANIMATION);
     }
 
     @Override

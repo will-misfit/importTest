@@ -4,6 +4,7 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 
 /**
  * stop user input streaming
@@ -11,7 +12,7 @@ import com.misfit.syncsdk.log.LogEventType;
 public class StopUserInputStreamingTask extends Task {
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.STOP_FILE_STREAMING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_FILE_STREAMING);
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.misfit.syncsdk.utils;
 
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+
 import java.util.Locale;
 import java.util.Random;
 
@@ -23,6 +26,14 @@ public class GeneralUtils {
             mGeneralUtils = new GeneralUtils();
         }
         return mGeneralUtils;
+    }
+
+    public static LogEvent createLogEvent(int eventId) {
+        String eventName = null;
+        if (eventId >= 0 && eventId < LogEventType.LogEventNames.length) {
+            eventName = LogEventType.LogEventNames[eventId];
+        }
+        return new LogEvent(eventId, eventName);
     }
 
     public int randomInt() {

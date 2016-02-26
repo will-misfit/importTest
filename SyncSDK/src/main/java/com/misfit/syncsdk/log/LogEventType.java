@@ -58,6 +58,8 @@ public class LogEventType {
     public static final int DISABLE_ALL_CALL_TEXT_NOTIFICATION = 40;
     public static final int STOP_NOTIFICATION = 41;
 
+    public static final int UNEXPECTED_CONNECTION_STATE = 100;
+
 
     /* constant Log Event names */
     public static final String[] LogEventNames = {
@@ -111,6 +113,8 @@ public class LogEventType {
         "StartCallNotification",  // 38
         "StartTextNotification",  // 39
         "DisableAllCallTextNotification", // 40
-        "StopNotification"        // 41
+        "StopNotification",       // 41
+
+        "UnexpectedConnectionState" // 100
     };
 }

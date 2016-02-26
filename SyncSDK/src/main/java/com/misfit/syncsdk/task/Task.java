@@ -131,11 +131,4 @@ public abstract class Task {
         }
     }
 
-    protected LogEvent createLogEvent(int eventId) {
-        String eventName = null;
-        if (eventId >= 0 && eventId < LogEventType.LogEventNames.length) {
-            eventName = LogEventType.LogEventNames[eventId];
-        }
-        return new LogEvent(eventId, eventName);
-    }
 }

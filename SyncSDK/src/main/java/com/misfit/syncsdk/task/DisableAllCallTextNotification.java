@@ -7,6 +7,7 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.Hashtable;
@@ -19,7 +20,7 @@ public class DisableAllCallTextNotification extends Task implements ShineProfile
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.DISABLE_ALL_CALL_TEXT_NOTIFICATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.DISABLE_ALL_CALL_TEXT_NOTIFICATION);
     }
 
     @Override

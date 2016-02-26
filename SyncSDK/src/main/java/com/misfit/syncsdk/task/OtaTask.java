@@ -168,9 +168,7 @@ public class OtaTask extends Task {
                 taskFailed("firmware file name is empty");
                 return;
             }
-//            FIXME:use local read read method when firmwareManager not completed.
-//            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + mOtaFileName);
-//            byte[] firmwareData = read(file);
+
             byte[] firmwareData = LocalFileUtils.read(FirmwareManager.FIRMWARE_FOLDER, mOtaFileName);
             if (firmwareData == null) {
                 taskFailed("file not ready");
@@ -190,26 +188,6 @@ public class OtaTask extends Task {
             }, TIMEOUT_OTA);
             profileProxy.startOTA(firmwareData, this);
         }
-
-        //TODO: delete while firmwareManager completed.
-//        private byte[] read(File file) {
-//            try {
-//                if (file == null || !file.isFile()) {
-//                    return null;
-//                }
-//                long fileSize = file.length();
-//                FileInputStream fis = new FileInputStream(file);
-//                byte[] data = new byte[(int) fileSize];
-//                fis.read(data);
-//                fis.close();
-//                return data;
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return null;
-//        }
 
         @Override
         void stop() {

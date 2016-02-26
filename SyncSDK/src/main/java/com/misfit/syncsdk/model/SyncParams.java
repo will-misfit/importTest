@@ -15,7 +15,7 @@ import java.util.List;
  * 1. some customized settings of devices
  * 2. some callback for specified devices
  */
-public class SyncSyncParams {
+public class SyncParams {
 
     public boolean firstSync;
 
@@ -35,6 +35,7 @@ public class SyncSyncParams {
 
     public String appVersion;
 
+    // TODO: StreamingCallback should not be here
     public ShineProfile.StreamingCallback streamingCallback;
 
     /**

@@ -13,7 +13,7 @@ import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.model.SettingsElement;
-import com.misfit.syncsdk.model.SyncSyncParams;
+import com.misfit.syncsdk.model.SyncParams;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.operator.Operator;
 import com.misfit.syncsdk.task.ConnectTask;
@@ -63,8 +63,8 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
     public void startSync(SyncOperationResultCallback resultCallback,
                           ReadDataCallback syncCallback,
                           SyncOtaCallback otaCallback,
-                          ConnectionStateCallback connectionStateCallback,
-                          @NonNull SyncSyncParams syncParams) {
+                          ConnectionStateCallback postSyncConnectionStateCallback,
+                          @NonNull SyncParams syncParams) {
     }
 
     protected void startOperator(Operator operator) {
@@ -112,7 +112,7 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
         mCurrOperator = null;
     }
 
-    protected void setConnectionStateCallback(ConnectionStateCallback connectionStateCallback) {
+    protected void setPostSyncConnectionStateCallback(ConnectionStateCallback connectionStateCallback) {
         mPostSyncConnectionStateCallback = connectionStateCallback;
     }
 

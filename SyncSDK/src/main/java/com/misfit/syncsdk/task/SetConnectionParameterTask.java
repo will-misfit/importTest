@@ -10,6 +10,7 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
 
 import java.util.Hashtable;
 
@@ -28,7 +29,7 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
     @Override
     protected void prepare() {
-        mLogEvent = createLogEvent(LogEventType.SET_CONNECTION_PARAMETER);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_CONNECTION_PARAMETER);
     }
 
     @Override
