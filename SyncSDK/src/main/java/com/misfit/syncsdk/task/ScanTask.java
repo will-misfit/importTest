@@ -67,7 +67,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
-        mLogSession.appendEvent(mLogEvent); // if mLogEvent is null, nothing happens
+        mLogSession.appendEvent(mLogEvent);
 
         mLogEvent = createLogEvent(LogEventType.STOP_SCANNING);
         mLogEvent.start();

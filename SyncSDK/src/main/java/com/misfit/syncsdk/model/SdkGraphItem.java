@@ -7,8 +7,6 @@ public class SdkGraphItem {
 
     private static final long serialVersionUID = 6037777389903773621L;
 
-    private int timestamp;
-
     private double value;
 
     // timestamp in second
@@ -16,14 +14,6 @@ public class SdkGraphItem {
 
     // timestamp in second
     private long endTime;
-
-    public int getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(int timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public double getValue() {
         return value;

@@ -170,9 +170,8 @@ public class LogManager {
             }
 
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream));
-            byte[] sessionBytes = mGson.toJson(session).getBytes();
-
-            bufferedWriter.write(new String(sessionBytes));
+            String sessionJsonStr = mGson.toJson(session);
+            bufferedWriter.write(new String(sessionJsonStr));
             bufferedWriter.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -240,7 +239,7 @@ public class LogManager {
         LogSession session;
         try {
             session = mGson.fromJson(sessionStr, LogSession.class);
-            mAPI.uploadSession(session).enqueue(new LogUploadCallback(fileName));
+            mAPI.uploadSession(session).enqueue(new UploadLogCallback(fileName));
         } catch (JsonSyntaxException ex) {
             MLog.d(TAG, Log.getStackTraceString(ex.getCause()));
             return false;
@@ -270,19 +269,19 @@ public class LogManager {
             }
         }
 
-        mAPI.uploadEvents(sessionId, eventList).enqueue(new LogUploadCallback(fileName));
+        mAPI.uploadEvents(sessionId, eventList).enqueue(new UploadLogCallback(fileName));
         return true;
     }
 
     /**
      * retrofit2 response listener for LogSession and LogEvent(s)
      * */
-    private static class LogUploadCallback implements Callback<BaseResponse> {
+    private static class UploadLogCallback implements Callback<BaseResponse> {
 
         private final static String TAG = "LogUploadCallback";
         private String mFileName;
 
-        public LogUploadCallback(String fileName) {
+        public UploadLogCallback(String fileName) {
             mFileName = fileName;
         }
 

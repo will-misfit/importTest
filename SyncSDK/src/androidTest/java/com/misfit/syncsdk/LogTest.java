@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogSession;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class LogTest extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        ContextUtils.getInstance().setContext(getInstrumentation().getContext().getApplicationContext());
+        ContextManager.getInstance().setContext(getInstrumentation().getContext().getApplicationContext());
     }
 
     public void testSaveSession() {

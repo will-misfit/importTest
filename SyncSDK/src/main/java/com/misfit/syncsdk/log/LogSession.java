@@ -7,7 +7,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.misfit.syncsdk.BuildConfig;
 import com.misfit.syncsdk.enums.FailedReason;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.UUID;
@@ -144,7 +144,7 @@ public class LogSession {
     }
 
     public LogSession(int syncMode, String appVersion, String uid) {
-        mDeviceIdentifier = Settings.Secure.getString(ContextUtils.getInstance().getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        mDeviceIdentifier = Settings.Secure.getString(ContextManager.getInstance().getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         mSyncMode = syncMode;
         mUid = uid;
         currEventSequence = 0;

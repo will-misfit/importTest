@@ -6,7 +6,7 @@ import com.misfit.ble.setting.SDKSetting;
 import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.ScanFailedReason;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.ContextManager;
 
 /**
  * Class open to app providing static methods
@@ -30,8 +30,8 @@ public class SyncSdkAdapter {
     //FIXME: need double check
     public void init(Context context, String userId, String authToken) {
         mContext = context.getApplicationContext();
-        ContextUtils.getInstance().setContext(mContext);
-        ContextUtils.getInstance().setUserAuthToken(authToken);
+        ContextManager.getInstance().setContext(mContext);
+        ContextManager.getInstance().setUserAuthToken(authToken);
         SDKSetting.setUp(context, userId);
     }
 

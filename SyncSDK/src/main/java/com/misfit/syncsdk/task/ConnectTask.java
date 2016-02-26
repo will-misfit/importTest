@@ -8,7 +8,7 @@ import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
@@ -57,7 +57,7 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
 
         //connect
         proxy.subscribeConnectionStateChanged(this);
-        proxy.connectProfile(device, ContextUtils.getInstance().getContext());
+        proxy.connectProfile(device, ContextManager.getInstance().getContext());
     }
 
     @Override

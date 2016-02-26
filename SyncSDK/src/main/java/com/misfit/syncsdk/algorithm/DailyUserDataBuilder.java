@@ -4,9 +4,12 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.misfit.ble.shine.result.SyncResult;
+import com.misfit.cloud.algorithm.algos.ActivitySessionsFlashAlgorithm;
 import com.misfit.cloud.algorithm.models.ACEEntryVect;
+import com.misfit.cloud.algorithm.models.ActivitySessionShineVect;
 import com.misfit.cloud.algorithm.models.ActivityShine;
 import com.misfit.cloud.algorithm.models.ActivityShineVect;
+import com.misfit.cloud.algorithm.models.GapSessionShineVect;
 import com.misfit.cloud.algorithm.models.SWLEntryVect;
 import com.misfit.syncsdk.callback.SyncCalculationCallback;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
@@ -18,6 +21,7 @@ import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.model.SdkSleepSession;
 import com.misfit.syncsdk.model.SdkTimezoneOffset;
 import com.misfit.syncsdk.utils.DateUtils;
+import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.TimeZoneUtils;
 
 import java.util.ArrayList;
@@ -61,18 +65,18 @@ public class DailyUserDataBuilder {
         if (activityShineVect.size() == 0) {
             return new SdkActivitySessionGroup();
         }
-        return buildDaysForShine(activityShineVect, aceEntryVect, swlEntryVec, settingsChangesSinceLastSync, userProfile);
+        return buildUserSessionsForShine(activityShineVect, aceEntryVect, swlEntryVec, settingsChangesSinceLastSync, userProfile);
     }
 
     /**
      * build up ActivitySessions, SleepSessions, GraphItems
      * */
-    private SdkActivitySessionGroup buildDaysForShine(ActivityShineVect activityShineVect,
-                                                     ACEEntryVect aceEntryVect,
-                                                     SWLEntryVect swlEntryVect,
-                                                     List<SdkResourceSettings> settingsChangesSinceLasySync,
-                                                     SdkProfile userProfile) {
-        Log.d(TAG, "buildDaysForShine");
+    private SdkActivitySessionGroup buildUserSessionsForShine(ActivityShineVect activityShineVect,
+                                                              ACEEntryVect aceEntryVect,
+                                                              SWLEntryVect swlEntryVect,
+                                                              List<SdkResourceSettings> settingsChangesSinceLasySync,
+                                                              SdkProfile userProfile) {
+        MLog.d(TAG, "buildUserSessionsForShine");
         SdkActivitySessionGroup result = new SdkActivitySessionGroup();
 
         List<SdkSleepSession> sleepSessions = SdkSleepSessionBuilder.buildSdkSleepSessions(activityShineVect, settingsChangesSinceLasySync);
@@ -87,9 +91,11 @@ public class DailyUserDataBuilder {
         return result;
     }
 
-    public void buildDailyUserDataForFlash(SyncResult syncResult, SyncCalculationCallback syncCalculationCallback) {
-        ActivityShineVect activityShineVect = AlgorithmUtils.convertSdkActivityToShineActivityForFlash(
-            syncResult.mActivities, syncResult.mSessionEvents);
+    public SdkActivitySessionGroup buildUserSessionsForFlash(SyncResult syncResult, SyncCalculationCallback syncCalculationCallback) {
+        SdkActivitySessionGroup result = new SdkActivitySessionGroup();
+        ActivityShineVect activityShineVect = AlgorithmUtils.convertSdkActivityToShineActivityForFlash(syncResult.mActivities,
+            syncResult.mSessionEvents);
+        return result;
     }
 
     /**

@@ -201,7 +201,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     MLog.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
                     syncResult.mSessionEvents.clear();
                 }
-                DailyUserDataBuilder.getInstance().buildDailyUserDataForFlash(syncResult, mTaskSharedData.getSyncCalculationCallback());
+                DailyUserDataBuilder.getInstance().buildUserSessionsForFlash(syncResult, mTaskSharedData.getSyncCalculationCallback());
             } else {
                 if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {

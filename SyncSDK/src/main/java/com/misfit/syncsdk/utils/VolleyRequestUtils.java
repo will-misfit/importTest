@@ -39,7 +39,7 @@ public class VolleyRequestUtils {
 
     public static VolleyRequestUtils getInstance() {
         if (instance == null) {
-            instance = new VolleyRequestUtils(ContextUtils.getInstance().getContext());
+            instance = new VolleyRequestUtils(ContextManager.getInstance().getContext());
         }
         return instance;
     }

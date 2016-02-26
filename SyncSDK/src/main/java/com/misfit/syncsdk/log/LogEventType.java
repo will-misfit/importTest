@@ -69,8 +69,8 @@ public class LogEventType {
         "Connect",             // 4
         "GetCachedDevice",     // 5
         "GetConnectedDevice",  // 6
-        "DiscoverCharacteristics", // 7
-        "Prepare",             // 8
+        "DiscoverCharacteristics", // 7, for iOS
+        "Prepare",             // 8, for iOS
         "Handshake",           // 9
 
         "SwitchTrackerMode",   // 10

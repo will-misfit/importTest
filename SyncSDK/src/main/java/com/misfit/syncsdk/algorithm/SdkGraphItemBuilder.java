@@ -40,133 +40,6 @@ public class SdkGraphItemBuilder {
     }
 
     /**
-     * Build graph items from the activity sessions, all the sessions should be in the same day.
-     *
-     * @param activitySessions the activity sessions from which to build graph items
-     * @param appendLastIncompleteGraph whether we should append the last incomplete graph if exists
-     *
-     * @return the built graph items
-     *
-     * NOTE: this method will not be used in SyncSDK v1.0
-     * FIXME: SyncCalculationCallback is removed from startSync() API parameters, so that the SyncCalculationCallback cannot be called in SyncSyncParams now
-     */
-    public static List<SdkGraphItem> buildGraphItemsForGoogleFit(@NonNull List<SdkActivitySession> activitySessions,
-                                                                 @NonNull SdkDayRange dayRange,
-                                                                 boolean appendLastIncompleteGraph,
-                                                                 @NonNull SyncCalculationCallback calculationCallback) {
-        List<SdkGraphItem> graphItems = new ArrayList<>();
-
-        if (activitySessions.isEmpty()) {
-            return graphItems;
-        }
-
-        int sessionStartTimeInDay = (int) (activitySessions.get(0).getStartTime() - dayRange.startTime);
-        //int SECONDS_OF_QUARTER = 900; // 900s is one quarter.
-        int graphStartTime = (int) dayRange.startTime
-            + (sessionStartTimeInDay - (sessionStartTimeInDay % GRAPH_ITEM_RESOLUTION));
-        int graphEndTime = graphStartTime + GRAPH_ITEM_RESOLUTION - 1;
-        SdkGraphItem graphItem = new SdkGraphItem();
-        graphItem.setTimestamp(graphStartTime);
-        graphItem.setStartTime(graphStartTime);
-        graphItem.setEndTime(graphEndTime);
-        graphItems.add(graphItem);
-
-        // Append the value of last uncompleted graph item.
-        if (appendLastIncompleteGraph) {
-            MLog.d(TAG, "incomplete graph item timestamp " + graphStartTime);
-            SdkGraphDay graphDay = calculationCallback.getSdkGraphDayByDate(dayRange.day);
-            GraphItemShineVect incompleteGraphItemShineVect = getIncompleteGraphItemShine(graphDay, graphStartTime);
-            if (!incompleteGraphItemShineVect.isEmpty()) {
-                graphItem.setValue(incompleteGraphItemShineVect.get(0).getAveragePoint());
-            }
-        }
-
-        for (int i = 0, N = activitySessions.size(); i < N; i++) {
-            SdkActivitySession activitySession = activitySessions.get(i);
-            int sessionStartTime = (int) activitySession.getStartTime();
-            int sessionDuration = activitySession.getDuration();
-            // For Google Fit, startTime + duration = endTime.
-            int sessionEndTime = sessionStartTime + sessionDuration;
-            float sessionPoints = activitySession.getPoints();
-            if (sessionEndTime <= graphEndTime + 1) {
-                // Graph:   |________|
-                // Session: |||____|||
-                // This session is totally in this quarter, let's add the point.
-                graphItem.setValue((graphItem.getValue() * GRAPH_ITEM_RESOLUTION + sessionPoints) / GRAPH_ITEM_RESOLUTION);
-            } else if (sessionStartTime <= graphEndTime) {
-                // Graph:   |________|
-                // Session:       |||______|
-                // Should separate this session to multiple graph items.
-
-                // Step 1: Add the points within current graph item.
-                float pointsInCurrentGraph = (sessionPoints / sessionDuration * (graphEndTime + 1 - sessionStartTime));
-                graphItem.setValue((graphItem.getValue() * GRAPH_ITEM_RESOLUTION + pointsInCurrentGraph) / GRAPH_ITEM_RESOLUTION);
-
-                // Step 2: Start a new graph item.
-                graphStartTime = graphEndTime + 1;
-                graphEndTime = graphStartTime + GRAPH_ITEM_RESOLUTION - 1;
-                graphItem = new SdkGraphItem();
-                graphItem.setTimestamp(graphStartTime);
-                graphItem.setStartTime(graphStartTime);
-                graphItem.setEndTime(graphEndTime);
-                graphItems.add(graphItem);
-
-                // Step 3: Slim the temp session.
-                sessionPoints -= pointsInCurrentGraph;
-                sessionDuration = sessionEndTime - graphStartTime;
-
-                // Step 4: Add the points within new graph item.
-                while (sessionEndTime > graphEndTime + 1) {
-                    pointsInCurrentGraph = (sessionPoints / sessionDuration * GRAPH_ITEM_RESOLUTION);
-                    graphItem.setValue((graphItem.getValue() * GRAPH_ITEM_RESOLUTION + pointsInCurrentGraph) / GRAPH_ITEM_RESOLUTION);
-
-                    // Start a new graph item.
-                    graphStartTime = graphEndTime + 1;
-                    graphEndTime = graphStartTime + GRAPH_ITEM_RESOLUTION - 1;
-                    graphItem = new SdkGraphItem();
-                    graphItem.setTimestamp(graphStartTime);
-                    graphItem.setStartTime(graphStartTime);
-                    graphItem.setEndTime(graphEndTime);
-                    graphItems.add(graphItem);
-
-                    // Slim the temp session.
-                    sessionPoints -= pointsInCurrentGraph;
-                    sessionStartTime = graphStartTime;
-                    sessionDuration = sessionEndTime - sessionStartTime;
-                }
-                // Save the end session if needed.
-                if (sessionEndTime > graphStartTime) {
-                    graphItem.setValue((graphItem.getValue() * GRAPH_ITEM_RESOLUTION + sessionPoints) / GRAPH_ITEM_RESOLUTION);
-                }
-            } else {
-                // Graph:   |________|
-                // Session:          |||______|
-                // This session occur after current graph item, let's create the target graph item.
-                sessionStartTimeInDay = sessionStartTime - (int) dayRange.startTime;
-                graphStartTime = (int) dayRange.startTime
-                    + (sessionStartTimeInDay - (sessionStartTimeInDay % GRAPH_ITEM_RESOLUTION));
-                graphEndTime = graphStartTime + GRAPH_ITEM_RESOLUTION - 1;
-                graphItem = new SdkGraphItem();
-                graphItem.setTimestamp(graphStartTime);
-                graphItem.setStartTime(graphStartTime);
-                graphItem.setEndTime(graphEndTime);
-                graphItems.add(graphItem);
-
-                // Redirect to this session in next loop.
-                i--;
-            }
-        }
-
-        // Adjust the latest graph item's end time, in case the graph is incomplete.
-        SdkGraphItem lastGraphItem = graphItems.get(graphItems.size() - 1);
-        SdkActivitySession lastActivitySession = activitySessions.get(activitySessions.size() - 1);
-        long activitySessionEndTime = lastActivitySession.getStartTime() + lastActivitySession.getDuration();
-        lastGraphItem.setEndTime(Math.min(lastGraphItem.getEndTime(), activitySessionEndTime));
-
-        return graphItems;
-    }
-
-    /**
      * among a list of SdkGraphItem, find the one which start time equals to given timestamp
      * */
     private static GraphItemShineVect getIncompleteGraphItemShine(SdkGraphDay graphDay, int inGraphItemTimestamp) {
@@ -202,12 +75,11 @@ public class SdkGraphItemBuilder {
     private static SdkGraphItem convertGraphItemShine2SdkGraphItem(GraphItemShine graphItemShine) {
         MLog.d(TAG, "convertGraphItemShine2SdkGraphItem");
         SdkGraphItem graphItem = new SdkGraphItem();
-        graphItem.setTimestamp((int) graphItemShine.getStartTime());
         graphItem.setValue(graphItemShine.getAveragePoint());
         graphItem.setStartTime(graphItemShine.getStartTime());
         graphItem.setEndTime(graphItemShine.getEndTime());
-        MLog.d(TAG, String.format("timestamp: %d, startTime: %d, endTime: %d, value: %f",
-            graphItem.getTimestamp(), graphItem.getStartTime(), graphItem.getEndTime(), graphItem.getValue()));
+        MLog.d(TAG, String.format("startTime: %d, endTime: %d, value: %f", graphItem.getStartTime(),
+            graphItem.getEndTime(), graphItem.getValue()));
         return graphItem;
     }
 

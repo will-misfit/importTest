@@ -59,7 +59,7 @@ public class LogEvent {
     }
 
     public void start() {
-        start("");
+        start("no parameter");
     }
 
     public void start(String parameter) {

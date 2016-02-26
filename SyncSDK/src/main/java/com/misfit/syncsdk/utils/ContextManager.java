@@ -5,20 +5,20 @@ import android.content.Context;
 /**
  * Class to save the Context object from App
  */
-public class ContextUtils {
+public class ContextManager {
 
     private Context mContext;
 
     private String mUserAuthToken;
 
-    private static ContextUtils mInstance;
+    private static ContextManager mInstance;
 
-    private ContextUtils() {
+    private ContextManager() {
     }
 
-    public static ContextUtils getInstance() {
+    public static ContextManager getInstance() {
         if (mInstance == null) {
-            mInstance = new ContextUtils();
+            mInstance = new ContextManager();
         }
         return mInstance;
     }

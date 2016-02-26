@@ -42,7 +42,6 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
 
     @Override
     public void onStop() {
-
     }
 
     @Override
@@ -65,7 +64,9 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
                 retry();
             }
         } else {
-            MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);
+            String msg = String.format("unexpected actionID is %d, resultCode is %d", actionID, resultCode);
+            mLogEvent.end(LogEvent.RESULT_FAILURE, msg);
+            MLog.d(TAG, msg);
         }
     }
 }

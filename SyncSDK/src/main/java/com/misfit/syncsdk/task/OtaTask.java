@@ -9,7 +9,7 @@ import com.misfit.syncsdk.FirmwareManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.LocalFileUtils;
 import com.misfit.syncsdk.utils.MLog;
 
@@ -312,7 +312,7 @@ public class OtaTask extends Task {
             }, TIMEOUT_CONNECT);
 
             proxy.subscribeConnectionStateChanged(this);
-            proxy.connectProfile(device, ContextUtils.getInstance().getContext());
+            proxy.connectProfile(device, ContextManager.getInstance().getContext());
         }
 
         private void cleanup() {

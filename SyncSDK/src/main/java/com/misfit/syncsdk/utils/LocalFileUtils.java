@@ -9,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Util class to process local file read/write
@@ -18,7 +16,7 @@ import java.util.List;
 public class LocalFileUtils {
 
     public static Context getContext() {
-        return ContextUtils.getInstance().getContext();
+        return ContextManager.getInstance().getContext();
     }
 
     public static FileOutputStream openFileOutput(String dirName, String fileName) {
@@ -138,7 +136,7 @@ public class LocalFileUtils {
     }
 
     public static File[] getFiles(String directoryName) {
-        File directory = ContextUtils.getInstance().getContext().getDir(directoryName, Context.MODE_PRIVATE);
+        File directory = ContextManager.getInstance().getContext().getDir(directoryName, Context.MODE_PRIVATE);
         return directory.exists() ? directory.listFiles() : null;
     }
 }

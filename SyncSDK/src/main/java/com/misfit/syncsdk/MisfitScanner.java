@@ -13,7 +13,7 @@ import com.misfit.syncsdk.device.SyncRayDevice;
 import com.misfit.syncsdk.device.SyncShine2Device;
 import com.misfit.syncsdk.device.SyncShineDevice;
 import com.misfit.syncsdk.device.SyncSwarovskiDevice;
-import com.misfit.syncsdk.utils.ContextUtils;
+import com.misfit.syncsdk.utils.ContextManager;
 
 /**
  * class to scan devices, via ShineSdkAdapterProxy
@@ -34,7 +34,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
 
     public static MisfitScanner getInstance() {
         if (sharedInstance == null) {
-            sharedInstance = new MisfitScanner(ContextUtils.getInstance().getContext());
+            sharedInstance = new MisfitScanner(ContextManager.getInstance().getContext());
         }
         return sharedInstance;
     }
