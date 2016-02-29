@@ -14,6 +14,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.misfit.ble.shine.ShineProfile;
+import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncdemo.util.LogView;
 import com.misfit.syncsdk.DeviceType;
@@ -25,6 +26,8 @@ import com.misfit.syncsdk.callback.SyncOnTagInUserInputListener;
 import com.misfit.syncsdk.callback.SyncOperationResultCallback;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
+import com.misfit.syncsdk.enums.SdkGender;
+import com.misfit.syncsdk.model.PostCalculateData;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SyncParams;
 import com.misfit.syncsdk.utils.MLog;
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity
 
     private SyncResult mShineSdkSyncResult = new SyncResult();
 
-    SyncOnTagInStateListener tagInStateListener = new SyncOnTagInStateListener() {
+    SyncOnTagInStateListener mTagInStateListener = new SyncOnTagInStateListener() {
         @Override
         public void onDeviceTaggingIn(int deviceType, SyncOnTagInUserInputListener inputCallback) {
             inputCallback.onUserInputForTaggingIn(mSwitchTaggingResponse.isChecked());
@@ -119,6 +122,7 @@ public class MainActivity extends AppCompatActivity
         mSpinnerDeviceType.setAdapter(adapter);
         mSpinnerDeviceType.setSelection(0);
 
+        // from then now, MLog.d() can print the log string on the TextView for log
         MLog.registerLogNode(mLogTextView);
 
         mSyncSdkAdapter = SyncSdkAdapter.getInstance();
@@ -168,9 +172,8 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.btn_sync)
     void sync() {
-        SyncParams syncParams = new SyncParams();
-        syncParams.firstSync = mSwitchFirstSync.isChecked();
-        syncParams.tagInStateListener = tagInStateListener;
+        SyncParams syncParams = createSyncParams();
+
         mSyncCommonDevice.startSync(this, this, this, this, syncParams);
         mLogTextView.clear();
         setOperationPanelEnabled(false);
@@ -258,13 +261,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDataCalculateCompleted(final SdkActivitySessionGroup sdkActivitySessionGroup) {
+    public PostCalculateData onDataCalculateCompleted(final SdkActivitySessionGroup sdkActivitySessionGroup) {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
                 handleOnSyncAndCalculationCompleted(sdkActivitySessionGroup);
             }
         });
+
+        PostCalculateData result = new PostCalculateData();
+        int newPoints = OperationUtils.getActivityPointSum(sdkActivitySessionGroup.activitySessionList);
+        result.todayPoints = newPoints;
+        return result;
+    }
+
+    @Override
+    public void onGetShineConfigurationCompleted(ConfigurationSession configSession) {
+
     }
 
     /* interface methods of ConnectionStateCallback */
@@ -320,5 +333,30 @@ public class MainActivity extends AppCompatActivity
                 ButterKnife.bind(this, itemView);
             }
         }
+    }
+
+    /**
+     * parameter model class of startSync()
+     * NOTE: SyncParams instance can be created in different methods for different device types
+     * */
+    private SyncParams createSyncParams() {
+        SyncParams syncParams = new SyncParams();
+
+        syncParams.firstSync = true;
+        syncParams.lastSyncTime = DataSourceManager.createLastSyncTime();
+        syncParams.userProfile = DataSourceManager.getSdkProfile(SdkGender.MALE);
+        syncParams.firstSync = mSwitchFirstSync.isChecked();
+        syncParams.tagInStateListener = mTagInStateListener;
+        syncParams.userId = "6d0dbf70-de8a-11e5-b86d-9a79f06e9478";
+        syncParams.appVersion = "v2.8.0";
+        syncParams.settingsChangeListSinceLastSync = DataSourceManager.createSdkResourceSettings(4, 10);
+
+        return syncParams;
+    }
+
+    private SyncParams createSyncParamsForFlashButton() {
+        SyncParams syncParams = new SyncParams();
+
+        return syncParams;
     }
 }

@@ -19,6 +19,10 @@ public class SyncParams {
 
     public boolean firstSync;
 
+    // last successful sync timestamp in sec
+    // TODO:whether dependent on serial number is TBD
+    public long lastSyncTime;
+
     // the priority of shouldClearAlarmSettings is higher than alarmSettings
     public boolean shouldClearAlarmSettings;
 
@@ -36,7 +40,10 @@ public class SyncParams {
 
     public String appVersion;
 
-    // TODO: StreamingCallback should not be here
+    /**
+     * StreamingCallback is unnecessary for each device type, so it is better to be in SyncParams
+     * than in public API(startSync() ) as parameter
+     * */
     public ShineProfile.StreamingCallback streamingCallback;
 
     /**
@@ -51,5 +58,8 @@ public class SyncParams {
      * */
     public SdkProfile userProfile;
 
+    /**
+     * ShineConfiguration from App invoker to update in Device
+     * */
     public ShineConfiguration shineConfiguration;
 }

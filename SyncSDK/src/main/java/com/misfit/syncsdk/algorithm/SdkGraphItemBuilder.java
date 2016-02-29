@@ -1,14 +1,9 @@
 package com.misfit.syncsdk.algorithm;
 
-import android.support.annotation.NonNull;
-
 import com.misfit.cloud.algorithm.algos.GraphItemShineAlgorithm;
 import com.misfit.cloud.algorithm.models.ActivityShineVect;
 import com.misfit.cloud.algorithm.models.GraphItemShine;
 import com.misfit.cloud.algorithm.models.GraphItemShineVect;
-import com.misfit.syncsdk.callback.SyncCalculationCallback;
-import com.misfit.syncsdk.model.SdkActivitySession;
-import com.misfit.syncsdk.model.SdkDayRange;
 import com.misfit.syncsdk.model.SdkGraphDay;
 import com.misfit.syncsdk.model.SdkGraphItem;
 import com.misfit.syncsdk.utils.MLog;

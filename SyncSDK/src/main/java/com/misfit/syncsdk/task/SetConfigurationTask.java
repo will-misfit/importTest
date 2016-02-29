@@ -10,6 +10,7 @@ import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.model.PostCalculateData;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -18,7 +19,6 @@ import java.util.Hashtable;
 
 /**
  * Task to set configuration
- * TODO: ShineSDKProvider.setConfigurationSession?
  */
 public class SetConfigurationTask extends Task implements ShineProfile.ConfigurationCallback {
     private static final String TAG = "SetConfigurationTask";
@@ -28,6 +28,15 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
         mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_CONFIGURATION);
     }
 
+    /**
+     * ShineConfiguraiton fields:
+     *   ClockState     - from Pedometer in App
+     *   TripleTapState - from Pedometer in App
+     *   ActivityTaggingState - from App
+     *   ActivityPoint - from App, post calculation, dependent on ActivityDay in App
+     *   GoalValue     - from Settings in App
+     *   BatteryLevel  - from getShineConfiguration result
+     * */
     @Override
     protected void execute() {
         mLogEvent.start();
@@ -38,11 +47,25 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
             return;
         }
 
+        ShineConfiguration shineConfiguration = mTaskSharedData.getSyncParams().shineConfiguration;
+        // if App does not send ShineConfiguraiton, use the one saved in getShineConfiguration
+        if (shineConfiguration == null) {
+            ConfigurationSession configSession = mTaskSharedData.getConfigurationSession();
+            if (configSession != null) {
+                shineConfiguration = configSession.mShineConfiguration;
+            }
+        }
+
+        // set ShineConfiguraiton.ActivityPoint by the todayPoints by App
+        PostCalculateData postCalculateData = mTaskSharedData.getPostCalculateDate();
+        if (postCalculateData != null) {
+            shineConfiguration.mActivityPoint = postCalculateData.todayPoints;
+        }
+
         cancelCurrentTimerTask();
         mCurrTimerTask = createTimeoutTask();
         TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
 
-        // FIXME: the ShineConfiguration needs to update after sync
         ShineConfiguration shineConfig = mTaskSharedData.getSyncParams().shineConfiguration;
         proxy.setDeviceConfiguration(shineConfig, this);
         taskSucceed();

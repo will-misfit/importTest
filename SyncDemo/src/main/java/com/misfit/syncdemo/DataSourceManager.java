@@ -5,8 +5,10 @@ import com.misfit.syncsdk.enums.SdkGender;
 import com.misfit.syncsdk.enums.SdkUnit;
 import com.misfit.syncsdk.model.SdkActivityTagChange;
 import com.misfit.syncsdk.model.SdkProfile;
+import com.misfit.syncsdk.model.SdkResourceSettings;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -55,4 +57,32 @@ public class DataSourceManager {
 
     public static final int Timezone_Offset_East_Eight = 28800;
 
+    public static List<SdkResourceSettings> createSdkResourceSettings(int count, int durationHours) {
+        List<SdkResourceSettings> result = new ArrayList<>();
+
+        if (count == 0) {
+            count = 1;
+        }
+
+        if (durationHours <= 0) {
+            durationHours = 2;
+        }
+
+        long currTime = Calendar.getInstance().getTimeInMillis() / 1000;
+        int duration = 60 * 60 * durationHours;  // review backwards 10 hours
+        long startTime = currTime - duration;
+        for(int i = 0; i < count; i++) {
+            long time = startTime + (duration / count) * i;
+            SdkResourceSettings settings = new SdkResourceSettings(time, true, SdkActivityType.RUNNING_TYPE,
+                Timezone_Offset_East_Eight);
+            result.add(settings);
+        }
+        return result;
+    }
+
+    public static long createLastSyncTime() {
+        long currTime = Calendar.getInstance().getTimeInMillis() / 1000;
+        int pastHours = 2;
+        return currTime - 60 * 60 * pastHours;
+    }
 }

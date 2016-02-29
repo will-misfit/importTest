@@ -10,6 +10,8 @@ import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SdkSleepSession;
 
+import java.util.List;
+
 /**
  * support some utility methods for operations on SyncDemo
  */
@@ -84,5 +86,14 @@ public class OperationUtils {
         strBuilder.append("==============================\n");
 
         return strBuilder.toString();
+    }
+
+    public static int getActivityPointSum(List<SdkActivitySession> sdkActivitySessions) {
+        int points = 0;
+        for (SdkActivitySession sdkActivitySession : sdkActivitySessions) {
+            // FIXME: does GapSession count for daily ActivityPoints?
+            points += sdkActivitySession.getPoints();
+        }
+        return points;
     }
 }

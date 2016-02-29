@@ -16,6 +16,7 @@ import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
 import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.model.PostCalculateData;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SettingsElement;
 import com.misfit.syncsdk.utils.CheckUtils;
@@ -175,7 +176,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
          */
         private void filterRawData() {
             MLog.d(TAG, "filterRawData()");
-            long lastSyncTime = getLastSyncTime();
+            long lastSyncTime = mTaskSharedData.getSyncParams().lastSyncTime;
 
             if (syncResult.mActivities.isEmpty())
                 return;  // if no data in syncResult.mActivities, nothing to filter
@@ -219,7 +220,8 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
                     mTaskSharedData.getSyncParams().userProfile);
                 if (mTaskSharedData.getReadDataCallback() != null) {
-                    mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                    PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                    mTaskSharedData.setPostCalculateData(postCalculateData);
                 }
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
                 taskSucceed();
@@ -236,18 +238,12 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     mTaskSharedData.getSyncParams().userProfile);
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 if (mTaskSharedData.getReadDataCallback() != null) {
-                    mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                    PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                    mTaskSharedData.setPostCalculateData(postCalculateData);
                 }
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
                 taskSucceed();
             }
         }
-    }
-
-    /**
-     * FIXME: lastSyncTime must be utilized in SyncSDK to filter per minute raw data
-     */
-    private long getLastSyncTime() {
-        return 0l;
     }
 }

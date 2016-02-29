@@ -1,12 +1,14 @@
 package com.misfit.syncsdk.task;
 
 import com.misfit.ble.shine.ActionID;
+import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
@@ -55,13 +57,22 @@ public class GetConfigurationTask extends Task implements ShineProfile.Configura
         mLogEvent = null;
     }
 
+    /**
+     * NOTE: the ShineConfiguration returned by Device needs to send to App invoker
+     * */
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
         MLog.d(TAG, String.format("onConfigCompleted() actionId=%s, result=%s", actionID, resultCode));
         if (actionID == ActionID.GET_CONFIGURATION) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                // TODO: check the object got from Hashtable data with key of Shine_Configuration_Session
-                mTaskSharedData.setConfigurationSession((ConfigurationSession) data.get(ShineProperty.SHINE_CONFIGURATION_SESSION));
+                ConfigurationSession configSession = (ConfigurationSession)data.get(ShineProperty.SHINE_CONFIGURATION_SESSION);
+                mTaskSharedData.setConfigurationSession(configSession);
+
+                ReadDataCallback readDataCallback = mTaskSharedData.getReadDataCallback();
+                if (readDataCallback != null) {
+                    readDataCallback.onGetShineConfigurationCompleted(configSession);
+                }
+
                 MLog.d(TAG, "config: " + mTaskSharedData.getConfigurationSession().mShineConfiguration.toString());
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 taskSucceed();
