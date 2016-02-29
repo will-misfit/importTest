@@ -9,6 +9,7 @@ import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
 
@@ -30,8 +31,12 @@ public class DisconnectTask extends Task implements ConnectionStateCallback {
             taskSucceed();
             return;
         }
+
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DISCONNECT_TIMEOUT);
+
         proxy.subscribeConnectionStateChanged(this);
-        TimerManager.getInstance().addTimerTask(createTimeoutTimerTask(), 2000);
         proxy.close();
     }
 
@@ -51,16 +56,15 @@ public class DisconnectTask extends Task implements ConnectionStateCallback {
         mLogEvent = null;
     }
 
-    TimerTask createTimeoutTimerTask() {
-        cancelCurrentTimerTask();
-        mCurrTimerTask = new TimerTask() {
+    @Override
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
             @Override
             public void run() {
                 MLog.d(TAG, "time out");
                 retryAndIgnored();
             }
         };
-        return mCurrTimerTask;
     }
 
 

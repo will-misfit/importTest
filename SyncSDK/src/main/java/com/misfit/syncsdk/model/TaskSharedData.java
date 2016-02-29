@@ -56,7 +56,7 @@ public class TaskSharedData {
         @Override
         public void onConnectionStateChanged(ShineProfile.State newState) {
             if (newState == ShineProfile.State.DISCONNECTED) {
-                setFailureReason(FailedReason.DISCONNECTED_UNEXPECTEDLY);
+                setFailureReasonInLogSession(FailedReason.DISCONNECTED_UNEXPECTEDLY);
             } else {
                 // when the Sync process runs after connect, we don't care other State except Disconnected
                 LogEvent logEvent = GeneralUtils.createLogEvent(LogEventType.UNEXPECTED_CONNECTION_STATE);
@@ -204,7 +204,7 @@ public class TaskSharedData {
         return mConnectionStateCallbackPostConnect;
     }
 
-    public void setFailureReason(int failureReasonId) {
+    public void setFailureReasonInLogSession(int failureReasonId) {
         if (mLogSession != null) {
             mLogSession.setFailureReason(failureReasonId);
             mLogSession.save();

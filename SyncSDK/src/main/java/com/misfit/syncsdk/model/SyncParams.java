@@ -19,6 +19,7 @@ public class SyncParams {
 
     public boolean firstSync;
 
+    // the priority of shouldClearAlarmSettings is higher than alarmSettings
     public boolean shouldClearAlarmSettings;
 
     public AlarmSettings alarmSettings;

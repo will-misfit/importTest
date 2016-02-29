@@ -11,6 +11,7 @@ import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
 
@@ -22,7 +23,6 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
 
     private final static String TAG = "ConnectTask";
 
-    private final static long CONNECT_TASK_TIMEOUT = 45000;
 
     /* inherited interface API of Task */
     @Override
@@ -54,8 +54,9 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
         }
 
         //set timeout
-        mCurrTimerTask = createTimerTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, CONNECT_TASK_TIMEOUT);
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.CONNECT_TIMEOUT);
 
         //connect
         proxy.subscribeConnectionStateChanged(this);
@@ -120,7 +121,8 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
     /*
     * TimerTask to monitor if the task is not completed successfully in time
     * */
-    private TimerTask createTimerTask() {
+    @Override
+    protected TimerTask createTimeoutTask() {
         return new TimerTask() {
             @Override
             public void run() {

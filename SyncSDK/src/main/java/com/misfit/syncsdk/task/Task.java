@@ -2,15 +2,17 @@ package com.misfit.syncsdk.task;
 
 import android.util.Log;
 
+import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.TaskSharedData;
+import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
 
 /**
- * Created by Will Hou on 1/11/16.
+ * base class for all the detailed task in operation
  */
 public abstract class Task {
     private final static String TAG = "Task";
@@ -22,12 +24,14 @@ public abstract class Task {
     }
 
     protected TaskResultCallback mTaskResultCallback;
+
+    // subclass need to define its own remaining retry count
     protected int mRemainingRetry = 0;
+
     protected TaskSharedData mTaskSharedData;
     protected boolean mIsFinished = false;
 
     protected LogEvent mLogEvent;
-
     protected LogSession mLogSession;
 
     // Timer to monitor whether the Task execution timeout
@@ -107,7 +111,7 @@ public abstract class Task {
     }
 
     /**
-     * will be called in start()
+     * methods to be called in start()
      */
     protected abstract void prepare();
 
@@ -116,9 +120,21 @@ public abstract class Task {
     protected abstract void onStop();
 
     /**
-     * will be called in succeed/ failed/ stop/ retry
+     * to be called in succeed/ failed/ stop/ retry
      */
     protected abstract void cleanup();
+
+    // default TimerTask to monitor in each Task subclass, no retry
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                MLog.d(TAG, "Task instance timeout timer ticks!");
+                mTaskSharedData.setFailureReasonInLogSession(FailedReason.TIMEOUT);
+                taskFailed("timeout");
+            }
+        };
+    }
 
     public void setCallback(TaskResultCallback mCallback) {
         this.mTaskResultCallback = mCallback;

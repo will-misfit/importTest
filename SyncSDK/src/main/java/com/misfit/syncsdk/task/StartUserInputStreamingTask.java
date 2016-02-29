@@ -3,11 +3,13 @@ package com.misfit.syncsdk.task;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.model.SyncParams;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 /**
  * start user input streaming
@@ -43,6 +45,11 @@ public class StartUserInputStreamingTask extends Task implements ShineProfile.St
             taskSucceed();
             return;
         }
+
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+
         proxy.startStreamingUserInputEvents(this);
     }
 
@@ -53,6 +60,7 @@ public class StartUserInputStreamingTask extends Task implements ShineProfile.St
 
     @Override
     protected void cleanup() {
+        cancelCurrentTimerTask();
         mLogSession.appendEvent(mLogEvent);
         mLogEvent = null;
     }

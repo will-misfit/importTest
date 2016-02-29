@@ -22,17 +22,16 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
     private final static String TAG = "ScanTask";
 
-    private TimerTask createTimeoutTask() {
-        cancelCurrentTimerTask();
-        mCurrTimerTask = new TimerTask() {
+    @Override
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
             @Override
             public void run() {
                 MLog.d(TAG, "scan time out, required device is not found yet");
-                mTaskSharedData.setFailureReason(FailedReason.NO_DEVICE_WITH_SERIAL_NUMBER_FOUND);
+                mTaskSharedData.setFailureReasonInLogSession(FailedReason.NO_DEVICE_WITH_SERIAL_NUMBER_FOUND);
                 taskFailed("scan timeout");
             }
         };
-        return mCurrTimerTask;
     }
 
     /**
@@ -54,7 +53,10 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             return;
         }
 
-        TimerManager.getInstance().addTimerTask(createTimeoutTask(), SdkConstants.SCAN_ONE_DEVICE_TIMEOUT);
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.SCAN_ONE_DEVICE_TIMEOUT);
+
         MisfitScanner.getInstance().startScan(this);
         mLogEvent.end(LogEvent.RESULT_SUCCESS, "scan cmd is started");
 
@@ -70,6 +72,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
+
         mLogSession.appendEvent(mLogEvent);
 
         mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_SCANNING);

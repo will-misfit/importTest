@@ -5,10 +5,12 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.Hashtable;
 
@@ -28,6 +30,11 @@ public class PlayAnimationTask extends Task implements ShineProfile.Configuratio
     @Override
     protected void execute() {
         mLogEvent.start();
+
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy not ready");
@@ -43,6 +50,7 @@ public class PlayAnimationTask extends Task implements ShineProfile.Configuratio
 
     @Override
     protected void cleanup() {
+        cancelCurrentTimerTask();
         mLogSession.appendEvent(mLogEvent);
         mLogEvent = null;
     }

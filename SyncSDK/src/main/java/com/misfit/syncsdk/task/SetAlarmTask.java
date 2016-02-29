@@ -5,10 +5,12 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.Hashtable;
 
@@ -31,6 +33,10 @@ public class SetAlarmTask extends Task implements ShineProfile.ConfigurationCall
             return;
         }
 
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+
         if (mTaskSharedData.getSyncParams().shouldClearAlarmSettings) {
             proxy.clearAllAlarms(this);
         } else if (mTaskSharedData.getSyncParams().alarmSettings != null) {
@@ -46,6 +52,7 @@ public class SetAlarmTask extends Task implements ShineProfile.ConfigurationCall
 
     @Override
     protected void cleanup() {
+        cancelCurrentTimerTask();
         mLogSession.appendEvent(mLogEvent);
         mLogEvent = null;
     }

@@ -5,10 +5,12 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.Hashtable;
 
@@ -35,6 +37,11 @@ public class SetInactivityNudgeTask extends Task implements ShineProfile.Configu
             taskIgnored("InactivityNudge settings is null");
             return;
         }
+
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+
         proxy.setInactivityNudge(mTaskSharedData.getSyncParams().inactivityNudgeSettings, this);
     }
 
@@ -45,6 +52,7 @@ public class SetInactivityNudgeTask extends Task implements ShineProfile.Configu
 
     @Override
     protected void cleanup() {
+        cancelCurrentTimerTask();
         mLogSession.appendEvent(mLogEvent);
         mLogEvent = null;
     }

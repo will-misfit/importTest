@@ -8,9 +8,11 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.Hashtable;
 
@@ -41,6 +43,11 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
             taskFailed("proxy not prepared");
             return;
         }
+
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+
         proxy.startSettingConnectionParams(mParameters, this);
     }
 
@@ -50,6 +57,7 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
     @Override
     protected void cleanup() {
+        cancelCurrentTimerTask();
         mLogSession.appendEvent(mLogEvent);
         mLogEvent = null;
     }
