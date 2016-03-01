@@ -10,6 +10,7 @@ import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.PostCalculateData;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
@@ -48,7 +49,7 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
         }
 
         ShineConfiguration shineConfiguration = mTaskSharedData.getSyncParams().shineConfiguration;
-        // if App does not send ShineConfiguraiton, use the one saved in getShineConfiguration
+        // if App does not send ShineConfiguraiton, use the saved one when getShineConfiguration
         if (shineConfiguration == null) {
             ConfigurationSession configSession = mTaskSharedData.getConfigurationSession();
             if (configSession != null) {
@@ -62,13 +63,14 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
             shineConfiguration.mActivityPoint = postCalculateData.todayPoints;
         }
 
+        updateLogSessionFields(mTaskSharedData.getConfigurationSession());
+
         cancelCurrentTimerTask();
         mCurrTimerTask = createTimeoutTask();
         TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
 
         ShineConfiguration shineConfig = mTaskSharedData.getSyncParams().shineConfiguration;
         proxy.setDeviceConfiguration(shineConfig, this);
-        taskSucceed();
     }
 
     @Override
@@ -100,5 +102,20 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
             mLogEvent.end(LogEvent.RESULT_FAILURE, msg);
             MLog.d(TAG, msg);
         }
+    }
+
+    private void updateLogSessionFields(ConfigurationSession configSession) {
+        if (configSession == null || configSession.mShineConfiguration == null) {
+            return;
+        }
+
+        LogSession logSession = mTaskSharedData.getLogSession();
+        logSession.setPostSyncTimezone(configSession.mTimeZoneOffset);
+        logSession.setPostClockState(configSession.mShineConfiguration.mClockState);
+        logSession.setPostSyncGoal(configSession.mShineConfiguration.mGoalValue);
+        logSession.setPostSyncActivityPoint(configSession.mShineConfiguration.mActivityPoint);
+        logSession.setActivityTaggingState(configSession.mShineConfiguration.mActivityTaggingState);
+
+        logSession.save();
     }
 }

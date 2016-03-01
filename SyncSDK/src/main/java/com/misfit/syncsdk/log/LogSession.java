@@ -105,6 +105,7 @@ public class LogSession {
     @SerializedName("failureReason")
     private int mFailureReason = FailedReason.DEFAULT;
 
+    // FIXME: unique identifier ID of mobile phone, uncertain it is necessary or not
     @Expose
     @SerializedName("deviceIdentifier")
     private final String mDeviceIdentifier;
