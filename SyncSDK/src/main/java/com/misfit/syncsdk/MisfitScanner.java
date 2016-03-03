@@ -9,9 +9,11 @@ import com.misfit.syncsdk.callback.SyncScanCallback;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.device.SyncFlashDevice;
 import com.misfit.syncsdk.device.SyncIwcDevice;
+import com.misfit.syncsdk.device.SyncMKIIDevice;
 import com.misfit.syncsdk.device.SyncRayDevice;
 import com.misfit.syncsdk.device.SyncShine2Device;
 import com.misfit.syncsdk.device.SyncShineDevice;
+import com.misfit.syncsdk.device.SyncSpeedoDevice;
 import com.misfit.syncsdk.device.SyncSwarovskiDevice;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogSession;
@@ -24,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * class to scan devices, via ShineSdkAdapterProxy
+ * it implements ShineScanCallback for ShineSDK, and invoke SyncScanCallback from Client
  *
  * it is used to scan an expected device type, it must be monitored by timer management
  */
@@ -32,7 +35,9 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
     private final static String TAG = "MisfitScanner";
 
     ShineSdkAdapterProxy mShineSDKAdapter;
-    SyncScanCallback mCallback;
+
+    SyncScanCallback mClientScanCallback;
+
     int mExpectedDeviceType;
 
     // current architecture which put scan with given device type
@@ -64,13 +69,8 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
         mShineSDKAdapter.mShineAdapter.enableBluetooth();
     }
 
-    private TimerTask mScanTimerTask = new TimerTask() {
-        @Override
-        public void run() {
-            MLog.d(TAG, "Scanning for given device type is timeout");
-            // if there is LogSession, write the FailureReason of LogSession
-        }
-    };
+    private TimerTask mScanTimerTask;
+
 
     /**
      * support invoke from external - App
@@ -85,11 +85,13 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
 
         isScanning.set(true);
         Log.d(TAG, String.format("startScan, expected device type of %s", DeviceType.getDeviceTypeText(expectedDeviceType)));
-        mCallback = callback;
+        mClientScanCallback = callback;
         mExpectedDeviceType = expectedDeviceType;
+
+        mScanTimerTask = createTimerTask();
         TimerManager.getInstance().addTimerTask(mScanTimerTask, SdkConstants.SCAN_DEVICE_TYPE_TIMEOUT);
-        boolean result = mShineSDKAdapter.startScanning(this);
-        return result;
+
+        return mShineSDKAdapter.startScanning(this);
     }
 
     /**
@@ -107,31 +109,43 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
     public void stopScan() {
         Log.d(TAG, "stop scan");
         mShineSDKAdapter.stopScanning();
+
+        isScanning.set(false);
+        mScanTimerTask.cancel();
+        mScanTimerTask = null;
     }
 
     @Override
     public void onScanResult(ShineDevice device, int rssi) {
-        if (mCallback == null) {
+        if (mClientScanCallback == null) {
             return;
         }
 
         int deviceType = DeviceType.getDeviceType(device.getSerialNumber());
-        Log.d(TAG, String.format("onScanResult, serialNumber %s, MAC Addr %s, device type %s",
-            device.getSerialNumber(), device.getAddress(), DeviceType.getDeviceTypeText(deviceType)));
-        if (deviceType != mExpectedDeviceType) {
+        if (mExpectedDeviceType != DeviceType.UNKNOWN && deviceType != mExpectedDeviceType) {
             return;
         }
 
+        Log.d(TAG, String.format("onScanResult, serialNumber %s, MAC Addr %s, device type %s, while expected %s",
+            device.getSerialNumber(), device.getAddress(),
+            DeviceType.getDeviceTypeText(deviceType),
+            DeviceType.getDeviceTypeText(mExpectedDeviceType)));
+
         ConnectionManager.getInstance().saveShineDevice(device.getSerialNumber(), device);
 
-        //TODO:wait to implement-different device
         SyncCommonDevice commonDevice;
         switch (deviceType) {
+            case DeviceType.SHINE:
+                commonDevice = new SyncShineDevice(device.getSerialNumber());
+                break;
             case DeviceType.SWAROVSKI_SHINE:
                 commonDevice = new SyncSwarovskiDevice(device.getSerialNumber());
                 break;
-            case DeviceType.SHINE:
-                commonDevice = new SyncShineDevice(device.getSerialNumber());
+            case DeviceType.SPEEDO_SHINE:
+                commonDevice = new SyncSpeedoDevice(device.getSerialNumber());
+                break;
+            case DeviceType.SHINE_MK_II:
+                commonDevice = new SyncMKIIDevice(device.getSerialNumber());
                 break;
             case DeviceType.BMW:
                 commonDevice = new SyncRayDevice(device.getSerialNumber());
@@ -150,6 +164,16 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
                 break;
         }
 
-        mCallback.onScanResultFiltered(commonDevice, rssi);
+        mClientScanCallback.onScanResultFiltered(commonDevice, rssi);
+    }
+
+    private TimerTask createTimerTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                MLog.d(TAG, "Scanning for given device type is timeout");
+                // if there is LogSession, write the FailureReason of LogSession
+            }
+        };
     }
 }

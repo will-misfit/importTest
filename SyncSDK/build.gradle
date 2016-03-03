@@ -8,7 +8,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 22
         versionCode 2
-        versionName "0.4.0"
+        versionName "0.4.0.0"
         buildConfigField "String", "ALGORITHM_LIB_VERSION", "\"1.8.0.0\"";
     }
     buildTypes {

@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.misfit.syncsdk.utils.CheckUtils;
 
 /**
- * Created by Will Hou on 1/11/16.
+ * DeviceType option
  */
 public class DeviceType {
     public final static int UNKNOWN = 0;
@@ -39,8 +39,6 @@ public class DeviceType {
             result = DeviceType.UNKNOWN;
         } else if (serialNumber.startsWith("SH")) {
             result = DeviceType.SHINE;
-        } else if (serialNumber.startsWith("F")) {
-            result = DeviceType.FLASH;
         }else if (serialNumber.startsWith("SC")) {
             result = DeviceType.SWAROVSKI_SHINE;
         } else if (serialNumber.startsWith("B0")) {
@@ -53,6 +51,8 @@ public class DeviceType {
             result = DeviceType.SPEEDO_SHINE;
         } else if (serialNumber.startsWith("SV")) {
             result = DeviceType.SHINE_MK_II;
+        } else if (serialNumber.startsWith("F")) {
+            result = DeviceType.FLASH;
         }
 
         if (result == DeviceType.FLASH) {
@@ -61,7 +61,6 @@ public class DeviceType {
             }
         }
         return result;
-
     }
 
     public static String getDeviceTypeText(int deviceType) {
@@ -80,6 +79,8 @@ public class DeviceType {
                 return "shine_mk_ii";
             case PLUTO:
                 return "pluto";
+            case FLASH_LINK:
+                return "flash_link";
             case SILVRETTA:
                 return "silvretta";
             case BMW:

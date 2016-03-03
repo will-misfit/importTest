@@ -126,13 +126,6 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="test" />
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -140,10 +133,24 @@
         android:layout_marginTop="4dp"
         android:background="#999" />
 
-    <com.misfit.syncdemo.util.LogView
-        android:id="@+id/tv_log"
+    <ScrollView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" >
+
+        <com.misfit.syncdemo.util.LogView
+            android:id="@+id/tv_log"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="12sp" />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/sdk_version"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textAlignment="center"
+        android:layout_alignParentBottom="true"/>
 
 </LinearLayout>

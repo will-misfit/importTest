@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp">
 
     <TextView
@@ -16,9 +16,9 @@
         android:id="@+id/text_serial_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/text_name"
+        android:layout_centerHorizontal="true"
         android:text="SH90982"
-        android:textSize="16sp" />
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/text_rssi"
@@ -27,5 +27,5 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:text="89"
-        android:textSize="16sp" />
+        android:textSize="18sp" />
 </RelativeLayout>

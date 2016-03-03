@@ -25,6 +25,18 @@ public class LogView extends TextView implements MLog.LogNode {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        MLog.registerLogNode(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        MLog.unregisterLogNode(this);
+    }
+
+    @Override
     public void printLog(int priority, String tag, final String msg) {
         ((Activity) getContext()).runOnUiThread((new Thread(new Runnable() {
             @Override
@@ -32,9 +44,9 @@ public class LogView extends TextView implements MLog.LogNode {
                 // Display the text we just generated within the LogView.
                 append("\n");
                 append(msg);
-                int offset=getLineCount()*getLineHeight();
-                if(offset>getHeight()){
-                    scrollTo(0,offset-getHeight());
+                int offset = getLineCount() * getLineHeight();
+                if(offset > getHeight()){
+                    scrollTo(0, offset - getHeight());
                 }
             }
         })));

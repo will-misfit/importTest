@@ -4,7 +4,7 @@ import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.enums.ScanFailedReason;
 
 /**
- * Created by Will-Hou on 1/11/16.
+ * callback of scan used by SyncSDK to notify App invoker
  */
 public interface SyncScanCallback {
     void onScanResultFiltered(SyncCommonDevice device, int rssi);

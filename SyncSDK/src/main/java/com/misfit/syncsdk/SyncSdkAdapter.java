@@ -1,6 +1,9 @@
 package com.misfit.syncsdk;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.MainThread;
 
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.syncsdk.callback.SyncScanCallback;
@@ -40,6 +43,8 @@ public class SyncSdkAdapter {
      * @param expectedDeviceType
      * @param scanCallback
      * @return true if scanning started, false for else.
+     *
+     * FIXME: does it need to start a LogSession within startScanning?
      */
     public void startScanning(int expectedDeviceType, SyncScanCallback scanCallback) {
         //FIXME: check if should stop current scanning
@@ -48,6 +53,7 @@ public class SyncSdkAdapter {
             scanCallback.onScanFailed(ScanFailedReason.NO_BLUETOOTH);
             return;
         }
+
         boolean result = MisfitScanner.getInstance().startScan(expectedDeviceType, scanCallback);
         if (result == false) {
             scanCallback.onScanFailed(ScanFailedReason.INTERNAL_ERROR);

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -17,8 +18,7 @@ import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncdemo.util.LogView;
-import com.misfit.syncsdk.DeviceType;
-import com.misfit.syncsdk.SyncSdkAdapter;
+import com.misfit.syncsdk.*;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
 import com.misfit.syncsdk.callback.SyncOnTagInStateListener;
@@ -51,13 +51,16 @@ public class MainActivity extends AppCompatActivity
 
     @Bind(R.id.spinner_device_type)
     Spinner mSpinnerDeviceType;
+
     @Bind(R.id.text_serial_number)
     TextView mTextSerialNumber;
+
     @Bind(R.id.text_device_name)
     TextView mTextDeviceName;
 
     @Bind(R.id.btn_show_scan_panel)
     Button mShowScanPanelButton;
+
     @Bind(R.id.ll_scan)
     View mScanPanel;
 
@@ -67,15 +70,17 @@ public class MainActivity extends AppCompatActivity
 
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    Integer[] mDeviceTypes = new Integer[]{
-            DeviceType.SHINE,
-            DeviceType.FLASH,
-            DeviceType.PLUTO,
-            DeviceType.SWAROVSKI_SHINE,
-            DeviceType.SPEEDO_SHINE,
-            DeviceType.SILVRETTA,
-            DeviceType.BMW,
-            DeviceType.SHINE_MK_II
+    Integer[] mDeviceTypeInts = new Integer[]{
+        DeviceType.UNKNOWN,  // UNKNOWN means no device type filter
+        DeviceType.SHINE,
+        DeviceType.FLASH,
+        DeviceType.SWAROVSKI_SHINE,
+        DeviceType.SPEEDO_SHINE,
+        DeviceType.SHINE_MK_II,
+        DeviceType.PLUTO,
+        DeviceType.FLASH_LINK,
+        DeviceType.SILVRETTA,
+        DeviceType.BMW
     };
 
     List<Integer> mSpinnerData;
@@ -84,14 +89,22 @@ public class MainActivity extends AppCompatActivity
 
     @Bind(R.id.btn_sync)
     Button mSyncButton;
+
     @Bind(R.id.switch_should_force_ota)
     Switch mSwitchShouldForceOta;
+
     @Bind(R.id.switch_first_sync)
     Switch mSwitchFirstSync;
+
     @Bind(R.id.switch_tagging_response)
     Switch mSwitchTaggingResponse;
+
+    // LogView implements MLog.LogNode
     @Bind(R.id.tv_log)
     LogView mLogTextView;
+
+    @Bind(R.id.sdk_version)
+    TextView mSdkVersionView;
 
     @Bind({R.id.btn_sync,
             R.id.switch_first_sync,
@@ -113,31 +126,30 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        initSpinnerData();
 
         setShouldShowScanPanel(true);
         setOperationPanelEnabled(false);
 
+        initSpinnerData();
         SpinnerAdapter adapter = new SpinnerAdapter(this, mSpinnerData);
         mSpinnerDeviceType.setAdapter(adapter);
         mSpinnerDeviceType.setSelection(0);
 
-        // from then now, MLog.d() can print the log string on the TextView for log
-        MLog.registerLogNode(mLogTextView);
-
         mSyncSdkAdapter = SyncSdkAdapter.getInstance();
         mSyncSdkAdapter.init(this.getApplicationContext(), "will-misfit", "5c203ef8-d62a-11e5-ab30-625662870761");
+
+        String versionStr = String.format("SyncSDK-%s, SyncDemo-%s", getSdkVersion(), getDemoVersion());
+        mSdkVersionView.setText(versionStr);
     }
 
     private void initSpinnerData() {
         mSpinnerData = new ArrayList<>();
-        mSpinnerData.addAll(Arrays.asList(mDeviceTypes));
+        mSpinnerData.addAll(Arrays.asList(mDeviceTypeInts));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MLog.unregisterLogNode(mLogTextView);
     }
 
     @OnTouch(R.id.ll_scan)
@@ -157,14 +169,10 @@ public class MainActivity extends AppCompatActivity
         setShouldShowScanPanel(true);
     }
 
-    @OnClick(R.id.btn_test)
-    void test() {
-    }
-
     @OnClick(R.id.btn_scan)
     void scan() {
         Intent intent = new Intent(this, ScanListActivity.class);
-        int selectedDeviceType = mDeviceTypes[mSpinnerDeviceType.getSelectedItemPosition()];
+        int selectedDeviceType = mDeviceTypeInts[mSpinnerDeviceType.getSelectedItemPosition()];
         intent.putExtra(Const.EXT_DEVICE_TYPE, selectedDeviceType);
         MLog.i(TAG, String.format("start scan, device type is %s ", DeviceType.getDeviceTypeText(selectedDeviceType)));
         startActivityForResult(intent, REQ_SCAN);
@@ -183,7 +191,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) {
-            MLog.d(TAG, String.format("result not ok, req=%d, result=%d", requestCode, resultCode));
+            MLog.d(TAG, String.format("result not ok, req = %d, result = %d", requestCode, resultCode));
             return;
         }
         switch (requestCode) {
@@ -206,7 +214,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateDevice(String serialNumber) {
-        MLog.d(TAG, "updated device, serialNumber=" + serialNumber);
+        Log.d(TAG, "updated device, serialNumber=" + serialNumber);
         mSyncCommonDevice = SyncSdkAdapter.getInstance().getDevice(serialNumber);
         mTextSerialNumber.setText(serialNumber);
         mTextDeviceName.setText(DeviceType.getDeviceTypeText(serialNumber));
@@ -358,5 +366,13 @@ public class MainActivity extends AppCompatActivity
         SyncParams syncParams = new SyncParams();
 
         return syncParams;
+    }
+
+    private String getSdkVersion() {
+        return com.misfit.syncsdk.BuildConfig.VERSION_NAME;
+    }
+
+    private String getDemoVersion() {
+        return com.misfit.syncdemo.BuildConfig.VERSION_NAME;
     }
 }

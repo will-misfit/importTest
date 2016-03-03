@@ -3,6 +3,8 @@ package com.misfit.syncdemo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +32,8 @@ public class ScanListActivity extends AppCompatActivity implements SyncScanCallb
     @Bind(R.id.list_device)
     ListView mListDevice;
 
+    private Handler mMainHandler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,14 +56,24 @@ public class ScanListActivity extends AppCompatActivity implements SyncScanCallb
     }
 
     @Override
-    public void onScanResultFiltered(SyncCommonDevice device, int rssi) {
-        Log.w("will", "found dev=" + device.getSerialNumber());
-        mAdapter.updateDevice(device, rssi);
+    public void onScanResultFiltered(final SyncCommonDevice device, final int rssi) {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Log.w("will", "found dev=" + device.getSerialNumber());
+                mAdapter.updateDevice(device, rssi);
+            }
+        });
     }
 
     @Override
-    public void onScanFailed(@ScanFailedReason.ScanFailedReasonValue int reason) {
-        Log.w("will", "scan failed, reason : " + reason);
+    public void onScanFailed(@ScanFailedReason.ScanFailedReasonValue final int reason) {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Log.w("will", "scan failed, reason : " + reason);
+            }
+        });
     }
 
     @OnItemClick(R.id.list_device)
