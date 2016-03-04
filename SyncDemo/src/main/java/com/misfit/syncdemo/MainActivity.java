@@ -10,10 +10,12 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Checkable;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.ble.shine.result.SyncResult;
@@ -63,6 +65,8 @@ public class MainActivity extends AppCompatActivity
 
     @Bind(R.id.ll_scan)
     View mScanPanel;
+
+    private boolean mFirstSync;
 
     private long mLastTimeTapScanPanel;
 
@@ -140,6 +144,13 @@ public class MainActivity extends AppCompatActivity
 
         String versionStr = String.format("SyncSDK-%s, SyncDemo-%s", getSdkVersion(), getDemoVersion());
         mSdkVersionView.setText(versionStr);
+
+        mSwitchFirstSync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mFirstSync = ((Switch)v).isChecked();
+            }
+        });
     }
 
     private void initSpinnerData() {
@@ -296,7 +307,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onGetShineConfigurationCompleted(ConfigurationSession configSession) {
+    public void onGetShineConfigurationCompleted(final ConfigurationSession configSession) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                String configStr = getConfiguraitonStr(configSession.mShineConfiguration);
+                StringBuilder builder = new StringBuilder(configStr);
+                builder.append(String.format("Timezone Offset %d\n", configSession.mTimeZoneOffset));
+                MLog.d(TAG, builder.toString());
+            }
+        });
     }
 
     /* interface methods of ConnectionStateCallback */
@@ -361,7 +381,7 @@ public class MainActivity extends AppCompatActivity
     private SyncParams createSyncParams() {
         SyncParams syncParams = new SyncParams();
 
-        syncParams.firstSync = true;
+        syncParams.firstSync = mFirstSync;
         syncParams.lastSyncTime = DataSourceManager.createLastSyncTime();
         syncParams.userProfile = DataSourceManager.getSdkProfile(SdkGender.MALE);
         syncParams.firstSync = mSwitchFirstSync.isChecked();
@@ -374,9 +394,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     private SyncParams createSyncParamsForFlashButton() {
-        SyncParams syncParams = new SyncParams();
-
+        SyncParams syncParams = createSyncParams();
+        syncParams.firstSync = true;
         return syncParams;
+    }
+
+    private String getConfiguraitonStr(ShineConfiguration config) {
+        StringBuilder builder = new StringBuilder("getShineConfig result:\n");
+        if (config == null) {
+            builder.append("null\n");
+        } else {
+            builder.append(String.format("ClockState %s\n", config.mClockState));
+            builder.append(String.format("TripleTapState %s\n", config.mTripleTapState));
+            builder.append(String.format("ActivityTaggingState %s\n", config.mActivityTaggingState));
+            builder.append(String.format("ActivityPoint %d\n", config.mActivityPoint));
+            builder.append(String.format("GoalValue %d\n", config.mGoalValue));
+            builder.append(String.format("Battery level %d\n", config.mBatteryLevel));
+        }
+        return builder.toString();
     }
 
     private String getSdkVersion() {

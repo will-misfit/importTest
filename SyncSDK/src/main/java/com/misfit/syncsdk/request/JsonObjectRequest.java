@@ -132,6 +132,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
     }
 
     public void execute() {
+        Log.d(TAG, "execute(), send request via Volley");
         setTag(getRequestTag());
         VolleyRequestUtils.getInstance().getRequestQueue().add(this);
     }

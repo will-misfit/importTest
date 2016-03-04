@@ -2,6 +2,7 @@ package com.misfit.syncsdk.device;
 
 import android.support.annotation.NonNull;
 
+import com.misfit.syncsdk.ConnectionParameterManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.SyncOperationResult;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
@@ -20,6 +21,7 @@ import com.misfit.syncsdk.task.GetConfigurationTask;
 import com.misfit.syncsdk.task.OtaTask;
 import com.misfit.syncsdk.task.PlayAnimationTask;
 import com.misfit.syncsdk.task.SetConfigurationTask;
+import com.misfit.syncsdk.task.SetConnectionParameterTask;
 import com.misfit.syncsdk.task.SwitchTrackerModeTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
@@ -65,6 +67,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
         }
         tasks.add(new GetConfigurationTask());
         tasks.add(new CheckOnTagStatusTaskUserInput());
+        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
         tasks.add(new SyncAndCalculateTask());
         tasks.add(new OtaTask());
         tasks.add(new GetConfigurationTask());

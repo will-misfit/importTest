@@ -61,4 +61,13 @@ public class FirmwareRequest extends JsonObjectRequest<FirmwareRequest>{
         changeLog       = request.changeLog;
         modelNumber     = request.modelNumber;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("versionNumber %s\n", versionNumber));
+        builder.append(String.format("modelNumber %s\n", modelNumber));
+        builder.append(String.format("downloadUrl %s\n", downloadUrl));
+        return builder.toString();
+    }
 }

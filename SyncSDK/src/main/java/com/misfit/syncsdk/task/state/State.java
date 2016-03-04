@@ -1,4 +1,4 @@
-package com.misfit.syncsdk.task;
+package com.misfit.syncsdk.task.state;
 
 import com.misfit.syncsdk.TimerManager;
 
@@ -24,7 +24,7 @@ public abstract class State {
         }
     }
 
-    abstract void execute();
+    public abstract void execute();
 
-    abstract void stop();
+    public abstract void stop();
 }

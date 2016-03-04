@@ -9,6 +9,7 @@ import com.misfit.syncsdk.request.FirmwareRequest;
 import com.misfit.syncsdk.request.RequestListener;
 import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
+import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.io.BufferedInputStream;
@@ -80,6 +81,7 @@ public class FirmwareManager {
      * No callback to tell the result
      */
     public void checkLatestFirmware(String modelName, String firmwareVersionNumber) {
+        Log.d(TAG, String.format("checkLatestFirmware() enters, mCheckingFirmware %s", Boolean.toString(mCheckingFirmware.get())));
         if (!mCheckingFirmware.get()) {
             mCurrentModelName = modelName;
             mCurrentFirmwareVersion = firmwareVersionNumber;
@@ -131,13 +133,14 @@ public class FirmwareManager {
 
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.d(TAG, "Network error when checking firmware version");
+            Log.d(TAG, String.format("FirmwareRequest onErrorResponse(), %s", error.getMessage()));
             mCheckingFirmware.set(false);
             handleOnCheckFirmwareFailed(error);
         }
 
         @Override
         public void onResponse(FirmwareRequest request) {
+            Log.d(TAG, String.format("FirmwareRequest onResponse(), %s", request.exportFirmwareInfo().toString()));
             FirmwareInfo newFirmwareInfo = request.exportFirmwareInfo();
             String newFwModelName = newFirmwareInfo.getModelName();
             String oldFwModelName = mCurrentModelName;
