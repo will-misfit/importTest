@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * class type to send to Misfit flagship app
  */
-public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleaseCallback{
+public abstract class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleaseCallback{
     private final static String TAG = "SyncCommonDevice";
 
     protected String mSerialNumber;
@@ -60,12 +60,11 @@ public class SyncCommonDevice implements DeviceBehavior, Operator.OperatorReleas
         return mCurrOperator != null;
     }
 
-    public void startSync(SyncOperationResultCallback resultCallback,
+    public abstract void startSync(SyncOperationResultCallback resultCallback,
                           ReadDataCallback syncCallback,
                           SyncOtaCallback otaCallback,
                           ConnectionStateCallback postSyncConnectionStateCallback,
-                          @NonNull SyncParams syncParams) {
-    }
+                          @NonNull SyncParams syncParams);
 
     protected void startOperator(Operator operator) {
         Log.d(TAG, "start " + operator.getClass().getSimpleName());

@@ -71,7 +71,7 @@ public class DisconnectTask extends Task implements ConnectionStateCallback {
     @Override
     public void onConnectionStateChanged(ShineProfile.State newState) {
         MLog.d(TAG, "connectionStateChanged() newState=" + newState);
-        if (mIsFinished) {
+        if (mIsFinished.get()) {
             return;
         }
         if (newState == ShineProfile.State.CLOSED) {

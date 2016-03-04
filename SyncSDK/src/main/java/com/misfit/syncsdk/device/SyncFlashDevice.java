@@ -28,6 +28,9 @@ import java.util.List;
 
 /**
  * SyncCommonDevice for Flash
+ *
+ * as SyncCommonDevice instance is created before model name is known in connect task,
+ * SyncFlashDevice supports Device type update to FlashLink after connect
  */
 public class SyncFlashDevice extends SyncCommonDevice {
     public SyncFlashDevice(@NonNull String serialNumber) {

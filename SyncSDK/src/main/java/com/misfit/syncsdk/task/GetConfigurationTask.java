@@ -40,6 +40,7 @@ public class GetConfigurationTask extends Task implements ShineProfile.Configura
             return;
         }
 
+        MLog.d(TAG, "execute()");
         cancelCurrentTimerTask();
         mCurrTimerTask = createTimeoutTask();
         TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
@@ -75,7 +76,6 @@ public class GetConfigurationTask extends Task implements ShineProfile.Configura
                     readDataCallback.onGetShineConfigurationCompleted(configSession);
                 }
 
-                MLog.d(TAG, "config: " + mTaskSharedData.getConfigurationSession().mShineConfiguration.toString());
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 taskSucceed();
             } else {

@@ -130,7 +130,7 @@ public class SyncPhaseController extends PhaseController {
 			mSyncSession.mNumberOfActivityFilesRead = mSyncSession.mNumberOfActivityFilesErased = 0; 
 			mSyncSession.mTotalFilesSize = response.totalFileSize;
 			mSyncSession.syncResults = new ArrayList<>();
-			
+
 			if (mSyncSession.mNumberOfActivityFiles > 0) {
 				sendRequest(buildRequest(FileGetActivityRequest.class));
 			} else {
@@ -159,7 +159,7 @@ public class SyncPhaseController extends PhaseController {
 			boolean isLastFile = (mSyncSession.mNumberOfActivityFilesRead >= mSyncSession.mNumberOfActivityFiles - 1);
 
 			SyncResult syncResult = parseShineData(response.fileFormat, response.fileTimestamp, response.rawData, isLastFile);
-			
+
 			if (syncResult == null) {
 				// FIXME: record the event, then discard the data.
 				postProcessing(RESULT_PARSE_ERROR);

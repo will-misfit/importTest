@@ -334,7 +334,7 @@ public class OtaTask extends Task {
     }
 
     private void gotoState(State state) {
-        if (mIsFinished) {
+        if (mIsFinished.get()) {
             return;
         }
         MLog.d(TAG, "go to state=" + state.getClass().getSimpleName());

@@ -5,11 +5,12 @@ package com.misfit.syncsdk.utils;
  */
 public class SdkConstants {
 
-	public final static int OPERATOR_RETRY_TIMES = 3;
+	public final static int OPERATOR_RETRY_TIMES = 0;
 
 	/* timeout values, in MilliSeconds */
 	public final static long DEFAULT_TIMEOUT = 10 * 1000;
-	public final static long READ_DATA_TIMEOUT = 20 * 1000;  // in theory, this value should be dependent on activity file count
+    public final static long SET_CONNECTION_PARAM_TIMEOUT = 11 * 1000;
+	public final static long READ_DATA_TIMEOUT = 30 * 1000;  // in theory, this value should be dependent on activity file count
 	public final static long ERASE_DATA_TIMEOUT = 30 * 1000; // same to above, this value should be dependent on activity file count
 	public final static long CONNECT_TIMEOUT = 45 * 1000;
 	public final static long SCAN_ONE_DEVICE_TIMEOUT = 20 * 1000;

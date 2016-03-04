@@ -194,7 +194,7 @@ public class LogManager {
     private void writeEventToFile(LogEvent event) {
         BufferedWriter bufferedWriter = null;
         try {
-            MLog.d(TAG, String.format("writing event to file, eventId = %s, sessionId = %s", event.id, event.sessionId));
+            Log.d(TAG, String.format("writing event to file, eventId = %s, sessionId = %s", event.id, event.sessionId));
             String fileName = getLogFileName(SdkConstants.EVENTS_PREFIX, event.sessionId);
             FileOutputStream stream = LocalFileUtils.openFileOutput(LOG_FOLDER, fileName,
                 Context.MODE_APPEND | Context.MODE_PRIVATE);

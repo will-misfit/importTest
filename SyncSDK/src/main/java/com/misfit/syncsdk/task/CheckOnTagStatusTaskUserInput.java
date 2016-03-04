@@ -45,7 +45,7 @@ public class CheckOnTagStatusTaskUserInput extends Task implements SyncOnTagInUs
 
     @Override
     public void onUserInputForTaggingIn(boolean shouldContinueSync) {
-        if (mIsFinished) {
+        if (mIsFinished.get()) {
             return;
         }
         if (shouldContinueSync) {

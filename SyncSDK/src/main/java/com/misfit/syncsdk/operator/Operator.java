@@ -100,10 +100,13 @@ public class Operator implements Task.TaskResultCallback {
         if (mReleaseCallback != null) {
             mReleaseCallback.onOperatorRelease();
         }
-        mTaskSharedData.cleanUp();
-        mTaskSharedData = null;
+        if (mTaskSharedData != null) {
+            mTaskSharedData.cleanUp();
+            mTaskSharedData = null;
+        }
     }
 
+    /* interface API of TaskResultCallback */
     @Override
     public void onTaskFinished() {
         gotoNext();
@@ -119,6 +122,9 @@ public class Operator implements Task.TaskResultCallback {
         }
     }
 
+    /**
+     * retry at Operator level
+     * */
     private void retry() {
         Log.d(TAG, String.format("remaining retry = %d", mTaskSharedData.getRemainingRetryCount()));
         if (mTaskSharedData.consumeRetryCount() < 0) {

@@ -12,9 +12,11 @@ import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.Hashtable;
+import java.util.TimerTask;
 
 /**
  * Task to set connection parameter
@@ -36,7 +38,9 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
     @Override
     protected void execute() {
+        MLog.d(TAG, "execute()");
         mLogEvent.start();
+
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
@@ -46,7 +50,7 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
         cancelCurrentTimerTask();
         mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.SET_CONNECTION_PARAM_TIMEOUT);
 
         proxy.startSettingConnectionParams(mParameters, this);
     }
@@ -64,16 +68,34 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
+        MLog.d(TAG, String.format("actionID %s, resultCode %s", actionID, resultCode));
+        // as the timeout value of ShineProfile method differs with the one of Task, this callback may be invoked
+        // when this Task finishes (succeed/fail/ignore)
+        if (mIsFinished.get()) {
+            return;
+        }
+
         if (actionID == ActionID.SET_CONNECTION_PARAMETERS) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 taskSucceed();
             } else {
-                mLogEvent.end(LogEvent.RESULT_FAILURE, "result code is " + resultCode);
+                if (mLogEvent != null) {
+                    mLogEvent.end(LogEvent.RESULT_FAILURE, String.format("resultCode %s", resultCode));
+                }
                 retryAndIgnored();
             }
-        } else {
-            Log.d(TAG, "unexpected action = " + actionID + ", result=" + resultCode);
         }
+    }
+
+    @Override
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                MLog.d(TAG, "Task instance timeout timer ticks!");
+                taskIgnored("timeout");
+            }
+        };
     }
 }

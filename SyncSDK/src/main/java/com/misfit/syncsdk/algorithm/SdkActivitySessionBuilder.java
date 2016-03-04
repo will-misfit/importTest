@@ -20,7 +20,6 @@ import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.utils.CheckUtils;
-import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class SdkActivitySessionBuilder {
                                                                             SWLEntryVect swlEntryVect,
                                                                             List<SdkResourceSettings> settingsSinceLastSync,
                                                                             SdkProfile sdkUserProfile) {
-        MLog.d(TAG, "buildSdkActivitySessionsForShine()");
+        Log.d(TAG, "buildSdkActivitySessionsForShine()");
         ActivitySessionsShineAlgorithm activitySessionsShineAlgorithm = new ActivitySessionsShineAlgorithm();
         ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect gapSessionShineVect = new GapSessionShineVect();
@@ -74,13 +73,13 @@ public class SdkActivitySessionBuilder {
     public static List<SdkActivitySession> buildSdkActivitySessionsForFlash(ActivityShineVect activityShineVect,
                                                                             List<SdkResourceSettings> settingsSinceLastSync,
                                                                             SdkProfile sdkUserProfile) {
-        MLog.d(TAG, "buildSdkActivitySessionsForFlash");
+        Log.d(TAG, "buildSdkActivitySessionsForFlash");
         ActivitySessionsFlashAlgorithm activitySessionsFlashAlgorithm = new ActivitySessionsFlashAlgorithm();
         ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect gapSessionShineVect = new GapSessionShineVect();
         activitySessionsFlashAlgorithm.buildActivitySession(activityShineVect, activitySessionShineVect, gapSessionShineVect);
         if (activitySessionShineVect == null && gapSessionShineVect == null) {
-            MLog.d(TAG, "buildSdkActivitySessionsForFlash(), no session build");
+            Log.d(TAG, "buildSdkActivitySessionsForFlash(), no session build");
             return new ArrayList<>();
         }
 

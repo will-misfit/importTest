@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         setShouldShowScanPanel(true);
-        setOperationPanelEnabled(false);
+        setSyncPanelEnabled(false);
 
         initSpinnerData();
         SpinnerAdapter adapter = new SpinnerAdapter(this, mSpinnerData);
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity
 
         mSyncCommonDevice.startSync(this, this, this, this, syncParams);
         mLogTextView.clear();
-        setOperationPanelEnabled(false);
+        setSyncPanelEnabled(false);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity
             case REQ_SCAN:
                 updateDevice(data.getStringExtra(Const.EXT_SERIAL_NUNBER));
                 setShouldShowScanPanel(false);
-                setOperationPanelEnabled(true);
+                setSyncPanelEnabled(true);
                 break;
         }
     }
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity
         mSwitchTaggingResponse.setVisibility(DeviceType.getDeviceType(serialNumber) == DeviceType.FLASH ? View.VISIBLE : View.GONE);
     }
 
-    private void setOperationPanelEnabled(boolean enabled) {
+    private void setSyncPanelEnabled(boolean enabled) {
         for (View view : syncPanel) {
             view.setEnabled(enabled);
         }
@@ -246,12 +246,24 @@ public class MainActivity extends AppCompatActivity
     /* interface methods of SyncOperationResultCallback */
     @Override
     public void onSucceed() {
-        MLog.d(TAG, "operation finished");
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                MLog.d(TAG, "operation finished");
+                setSyncPanelEnabled(true);
+            }
+        });
     }
 
     @Override
-    public void onFailed(int reason) {
-        MLog.d(TAG, "operation failed, reason=" + reason);
+    public void onFailed(final int reason) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                MLog.d(TAG, String.format("operation failed, reason = %d", reason));
+                setSyncPanelEnabled(true);
+            }
+        });
     }
 
     /* interface methods of ReadDataCallback */
@@ -285,7 +297,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onGetShineConfigurationCompleted(ConfigurationSession configSession) {
-
     }
 
     /* interface methods of ConnectionStateCallback */

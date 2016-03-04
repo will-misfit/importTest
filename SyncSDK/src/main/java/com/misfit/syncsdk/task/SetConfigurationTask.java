@@ -65,6 +65,7 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
 
         updateLogSessionFields(mTaskSharedData.getConfigurationSession());
 
+        MLog.d(TAG, "execute()");
         cancelCurrentTimerTask();
         mCurrTimerTask = createTimeoutTask();
         TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);

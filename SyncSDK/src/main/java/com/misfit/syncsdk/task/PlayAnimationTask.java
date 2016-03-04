@@ -31,16 +31,19 @@ public class PlayAnimationTask extends Task implements ShineProfile.Configuratio
     protected void execute() {
         mLogEvent.start();
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
+            MLog.d(TAG, "execute(), ShineSdkProfileProxy not ready");
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy not ready");
             taskFailed("proxy not prepared");
             return;
         }
+
+        MLog.d(TAG, "execute()");
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+
         proxy.playAnimation(this);
     }
 
@@ -57,6 +60,8 @@ public class PlayAnimationTask extends Task implements ShineProfile.Configuratio
 
     @Override
     public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
+        MLog.d(TAG, String.format("actionID %s, resultCode %s", actionID, resultCode));
+
         if (actionID == ActionID.ANIMATE) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
@@ -64,8 +69,6 @@ public class PlayAnimationTask extends Task implements ShineProfile.Configuratio
             } else {
                 retry();
             }
-        } else {
-            MLog.d(TAG, "unexpected action=" + actionID + ", result=" + resultCode);
         }
     }
 }

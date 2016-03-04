@@ -111,8 +111,7 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
         mShineSDKAdapter.stopScanning();
 
         isScanning.set(false);
-        mScanTimerTask.cancel();
-        mScanTimerTask = null;
+        cancelTimerTask();
     }
 
     @Override
@@ -175,5 +174,12 @@ public class MisfitScanner implements ShineAdapter.ShineScanCallback {
                 // if there is LogSession, write the FailureReason of LogSession
             }
         };
+    }
+
+    private void cancelTimerTask() {
+        if (mScanTimerTask != null) {
+            mScanTimerTask.cancel();
+            mScanTimerTask = null;
+        }
     }
 }

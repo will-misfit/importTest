@@ -86,9 +86,11 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
     @Override
     public void onScanResult(ShineDevice device, int rssi) {
-        if (mIsFinished) {
+        if (mIsFinished.get()) {
             return;
         }
+
+        MLog.d(TAG, String.format("onScanResult(), serial number %s, rssi %d", device.getSerialNumber(), rssi));
 
         mLogEvent = GeneralUtils.createLogEvent(LogEventType.SCANNED_DEVICE);
         mLogEvent.start();
@@ -97,6 +99,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
         mLogEvent = null;
 
         if (mTaskSharedData.getSerialNumber().equals(device.getSerialNumber())) {
+            MLog.d(TAG, "onScanResult(), required device is found, scan task succeed");
             cancelCurrentTimerTask();
             ConnectionManager.getInstance().saveShineDevice(device.getSerialNumber(), device);
             taskSucceed();

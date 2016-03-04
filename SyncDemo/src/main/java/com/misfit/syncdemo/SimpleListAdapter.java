@@ -9,7 +9,7 @@ import android.widget.BaseAdapter;
 import java.util.List;
 
 /**
- * Created by Will Hou on 1/20/16.
+ * wrapper of BaseAdapter for List view
  */
 public abstract class SimpleListAdapter<T,VH extends SimpleListAdapter.ViewHolder> extends BaseAdapter {
     protected List<T> mData;
@@ -18,7 +18,7 @@ public abstract class SimpleListAdapter<T,VH extends SimpleListAdapter.ViewHolde
 
     public SimpleListAdapter(Context context, List<T> data, int layoutID) {
         super();
-        mData = data;
+        mData = data;   // here must be the assignment instead of copy data
         mLayoutId = layoutID;
         mInflater = LayoutInflater.from(context);
     }

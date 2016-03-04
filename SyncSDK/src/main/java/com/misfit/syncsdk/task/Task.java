@@ -10,6 +10,7 @@ import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * base class for all the detailed task in operation
@@ -29,7 +30,7 @@ public abstract class Task {
     protected int mRemainingRetry = 0;
 
     protected TaskSharedData mTaskSharedData;
-    protected boolean mIsFinished = false;
+    protected AtomicBoolean mIsFinished = new AtomicBoolean(false);
 
     protected LogEvent mLogEvent;
     protected LogSession mLogSession;
@@ -43,7 +44,7 @@ public abstract class Task {
 
     public void start(TaskSharedData sharedData) {
         mTaskSharedData = sharedData;
-        mIsFinished = false;
+        mIsFinished.set(false);
         Log.d(TAG, this.getClass().getSimpleName() + " start");
         mLogSession = mTaskSharedData.getLogSession();
         prepare();
@@ -51,11 +52,14 @@ public abstract class Task {
     }
 
     public void stop() {
-        mIsFinished = true;
+        mIsFinished.set(true);
         onStop();
         cleanup();
     }
 
+    /**
+     * retry at single Task level
+     * */
     protected void retry() {
         mRemainingRetry--;
         Log.d(TAG, this.getClass().getSimpleName() + " retry, remaining retry=" + mRemainingRetry);
@@ -67,25 +71,23 @@ public abstract class Task {
         }
     }
 
-    protected boolean canbeIgnored(){
-        return false;
-    }
-
     protected void retryAndIgnored() {
-        mRemainingRetry--;
-        Log.d(TAG, this.getClass().getSimpleName() + " retry, remaining retry=" + mRemainingRetry);
-        if (mRemainingRetry <= 0) {
-            taskIgnored("retry out");
-        } else {
+        MLog.d(TAG, String.format("retryAndIgnored(), remaining retry %d", mRemainingRetry));
+
+        if (mRemainingRetry > 0){
+            mRemainingRetry--;
             cleanup();
             start(mTaskSharedData);
+        } else {
+            taskIgnored("retry out");
         }
     }
 
     protected void taskFailed(String reason) {
-        mIsFinished = true;
+        MLog.d(TAG, this.getClass().getSimpleName() + " failed by " + reason);
+
+        mIsFinished.set(true);
         cleanup();
-        Log.d(TAG, this.getClass().getSimpleName() + "ended by " + reason);
         if (mTaskResultCallback != null) {
             //FIXME:use enum
             mTaskResultCallback.onTaskFailed(this, -1);
@@ -93,7 +95,7 @@ public abstract class Task {
     }
 
     protected void taskSucceed() {
-        mIsFinished = true;
+        mIsFinished.set(true);
         cleanup();
         Log.d(TAG, this.getClass().getSimpleName() + " completed");
         if (mTaskResultCallback != null) {
@@ -102,9 +104,9 @@ public abstract class Task {
     }
 
     protected void taskIgnored(String reason) {
-        mIsFinished = true;
+        mIsFinished.set(true);
         cleanup();
-        Log.d(TAG, this.getClass().getSimpleName() + " was skipped by" + reason);
+        Log.d(TAG, this.getClass().getSimpleName() + " was skipped by " + reason);
         if (mTaskResultCallback != null) {
             mTaskResultCallback.onTaskFinished();
         }
@@ -146,5 +148,4 @@ public abstract class Task {
             mCurrTimerTask = null;
         }
     }
-
 }

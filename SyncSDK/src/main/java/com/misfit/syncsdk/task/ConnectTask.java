@@ -40,6 +40,7 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
             proxy = connectionManager.createShineProfileProxy(mTaskSharedData.getSerialNumber());
         }
         if (proxy.isConnected()) {
+            MLog.d(TAG, "execute(), ShineProfile connected already, connect task succeed");
             mLogEvent.end(LogEvent.RESULT_SUCCESS, "connected already, no need to start connect");
             taskSucceed();
             return;
@@ -48,6 +49,7 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
         //get device
         ShineDevice device = connectionManager.getShineDevice(mTaskSharedData.getSerialNumber());
         if (device == null) {
+            MLog.d(TAG, "execute(), device not ready");
             mLogEvent.end(LogEvent.RESULT_FAILURE, "device not ready");
             taskFailed("device not ready");
             return;
@@ -91,9 +93,11 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
      * */
     @Override
     public void onConnectionStateChanged(ShineProfile.State state) {
-        if (mIsFinished) {
+        if (mIsFinished.get()) {
             return;
         }
+
+        MLog.d(TAG, String.format("onConnectionStateChanged(), newState %s", state));
         if (state == ShineProfile.State.CONNECTED) {
             updateDeviceInfo();
             mLogEvent.end(LogEvent.RESULT_SUCCESS, "connected");
@@ -116,6 +120,7 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
         ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         mTaskSharedData.setFirmwareVersion(profileProxy.getFirmwareVersion());
         mTaskSharedData.setModelName(profileProxy.getModelNumber());
+        // TODO: for SyncFlashDevice, it is optional to update DeviceType to FlashLink now
     }
 
     /*

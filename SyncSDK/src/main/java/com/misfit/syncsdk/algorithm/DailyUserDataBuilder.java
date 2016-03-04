@@ -75,7 +75,7 @@ public class DailyUserDataBuilder {
                                                               SWLEntryVect swlEntryVect,
                                                               List<SdkResourceSettings> settingsChangesSinceLasySync,
                                                               SdkProfile userProfile) {
-        MLog.d(TAG, "buildUserSessionsForShine");
+        Log.d(TAG, "buildUserSessionsForShine");
         SdkActivitySessionGroup result = new SdkActivitySessionGroup();
 
         List<SdkSleepSession> sleepSessions = SdkSleepSessionBuilder.buildSdkSleepSessions(activityShineVect, settingsChangesSinceLasySync);

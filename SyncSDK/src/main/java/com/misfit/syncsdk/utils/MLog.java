@@ -10,7 +10,9 @@ import java.util.Map;
 
 public class MLog {
 
-    private final static boolean OPEN_LOG = BuildConfig.DEBUG;
+    // initially this value is from BuildConfig.DEBUG. But within SyncDemo,
+    // SyncSDK build type is RELEASE, so set it true to display the log on UI
+    private final static boolean OPEN_LOG = true;
 
     public interface LogNode {
         void printLog(int priority, String tag, String msg);

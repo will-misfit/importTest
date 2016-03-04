@@ -5,9 +5,11 @@ import android.support.annotation.NonNull;
 import com.misfit.syncsdk.device.SyncCommonDevice;
 import com.misfit.syncsdk.device.SyncFlashDevice;
 import com.misfit.syncsdk.device.SyncIwcDevice;
+import com.misfit.syncsdk.device.SyncMKIIDevice;
 import com.misfit.syncsdk.device.SyncRayDevice;
 import com.misfit.syncsdk.device.SyncShine2Device;
 import com.misfit.syncsdk.device.SyncShineDevice;
+import com.misfit.syncsdk.device.SyncSpeedoDevice;
 import com.misfit.syncsdk.device.SyncSwarovskiDevice;
 
 import java.util.HashMap;
@@ -52,8 +54,10 @@ public class MisfitDeviceManager {
                 result = new SyncFlashDevice(serialNumber);
                 break;
             case DeviceType.SPEEDO_SHINE:
+                result = new SyncSpeedoDevice(serialNumber);
+                break;
             case DeviceType.SHINE_MK_II:
-                result = new SyncShineDevice(serialNumber);
+                result = new SyncMKIIDevice(serialNumber);
                 break;
             case DeviceType.BMW:
                 result = new SyncRayDevice(serialNumber);

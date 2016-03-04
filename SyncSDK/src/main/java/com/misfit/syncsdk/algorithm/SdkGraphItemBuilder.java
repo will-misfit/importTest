@@ -1,5 +1,7 @@
 package com.misfit.syncsdk.algorithm;
 
+import android.util.Log;
+
 import com.misfit.cloud.algorithm.algos.GraphItemShineAlgorithm;
 import com.misfit.cloud.algorithm.models.ActivityShineVect;
 import com.misfit.cloud.algorithm.models.GraphItemShine;
@@ -26,7 +28,7 @@ public class SdkGraphItemBuilder {
         GraphItemShineAlgorithm graphItemShineAlgorithm = new GraphItemShineAlgorithm();
         int activityStartTime = activityShineVect.get(0).getStartTime();
         int inGraphItemTimestamp = activityStartTime - activityStartTime % GRAPH_ITEM_RESOLUTION; // start from a timestamp aligned with 15 min
-        MLog.d(TAG, "incomplete graph item timestamp " + inGraphItemTimestamp);
+        Log.d(TAG, "incomplete graph item timestamp " + inGraphItemTimestamp);
 
         GraphItemShineVect inGraphItemShineVect = new GraphItemShineVect();
         GraphItemShineVect outGraphItemShineVect = new GraphItemShineVect();
@@ -45,7 +47,7 @@ public class SdkGraphItemBuilder {
         List<SdkGraphItem> graphItems = graphDay.getItems();
         for (SdkGraphItem item : graphItems) {
             if(item.getStartTime() == inGraphItemTimestamp && !isCompleteSdkGraphItem(item)) {
-                MLog.d(TAG, "find incomplete graph item " + item.getStartTime());
+                Log.d(TAG, "find incomplete graph item " + item.getStartTime());
                 GraphItemShine graphItemShine = new GraphItemShine();
                 graphItemShine.setEndTime(item.getEndTime());
                 graphItemShine.setStartTime(item.getStartTime());
@@ -58,7 +60,6 @@ public class SdkGraphItemBuilder {
     }
 
     private static List<SdkGraphItem> convertGraphItemShineVect2List(GraphItemShineVect graphItemShineVect) {
-        MLog.d(TAG, "convertGraphItemShineVect2List: " + graphItemShineVect.size());
         List<SdkGraphItem> graphItems = new ArrayList<>();
         for (int i = 0; i < graphItemShineVect.size(); i ++) {
             SdkGraphItem graphItem = convertGraphItemShine2SdkGraphItem(graphItemShineVect.get(i));
@@ -68,13 +69,10 @@ public class SdkGraphItemBuilder {
     }
 
     private static SdkGraphItem convertGraphItemShine2SdkGraphItem(GraphItemShine graphItemShine) {
-        MLog.d(TAG, "convertGraphItemShine2SdkGraphItem");
         SdkGraphItem graphItem = new SdkGraphItem();
         graphItem.setValue(graphItemShine.getAveragePoint());
         graphItem.setStartTime(graphItemShine.getStartTime());
         graphItem.setEndTime(graphItemShine.getEndTime());
-        MLog.d(TAG, String.format("startTime: %d, endTime: %d, value: %f", graphItem.getStartTime(),
-            graphItem.getEndTime(), graphItem.getValue()));
         return graphItem;
     }
 
