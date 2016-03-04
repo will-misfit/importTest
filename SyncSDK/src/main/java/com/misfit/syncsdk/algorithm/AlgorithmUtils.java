@@ -76,7 +76,9 @@ public class AlgorithmUtils {
     public static ActivityShineVect convertSdkActivityToShineActivityForFlash(List<Activity> activities, List<SessionEvent> sessionEvents) {
         ActivityShineVect activityShineVect = new ActivityShineVect();
         List<TagEvent> tagEvents = importTaginTagoutBookmarks(sessionEvents, activities);
-        Collections.sort(tagEvents, new TagEventComparator());
+        if (!CheckUtils.isCollectionEmpty(tagEvents)) {
+            Collections.sort(tagEvents, new TagEventComparator());
+        }
 
         final int COUNT = tagEvents.size();
         int tagIndex = 0;
@@ -119,7 +121,7 @@ public class AlgorithmUtils {
     public static List<TagEvent> importTaginTagoutBookmarks(List<SessionEvent> sessionEvents, List<Activity> activities) {
         Log.d(TAG, "importTaginTagoutBookmarks");
         if (sessionEvents == null || sessionEvents.size() == 0) {
-            return null;
+            return new ArrayList<>();
         }
         tagEvents = new ArrayList<TagEvent>();
         for (SessionEvent sessionEvent : sessionEvents) {

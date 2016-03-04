@@ -67,6 +67,7 @@ public class SyncFlashDevice extends SyncCommonDevice {
         tasks.add(new CheckOnTagStatusTaskUserInput());
         tasks.add(new SyncAndCalculateTask());
         tasks.add(new OtaTask());
+        tasks.add(new GetConfigurationTask());
         tasks.add(new SetConfigurationTask());
         tasks.add(new DisconnectTask());
 
