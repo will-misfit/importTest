@@ -33,10 +33,7 @@ public class StopAnimationTask extends Task implements ShineProfile.Configuratio
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.stopAnimation(this);
     }
 

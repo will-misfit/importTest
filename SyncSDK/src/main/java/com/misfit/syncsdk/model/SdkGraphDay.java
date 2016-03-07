@@ -2,6 +2,7 @@ package com.misfit.syncsdk.model;
 
 import com.google.gson.reflect.TypeToken;
 import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.GsonUtils;
 import com.misfit.syncsdk.utils.VolleyRequestUtils;
 
 import java.lang.reflect.Type;
@@ -71,7 +72,7 @@ public class SdkGraphDay {
     public void buildObj() {
         if (!CheckUtils.isStringEmpty(this.itemsJson)) {
             Type listType = new TypeToken<ArrayList<SdkGraphItem>>() {}.getType();
-            this.items = VolleyRequestUtils.getInstance().gson.fromJson(this.itemsJson, listType);
+            this.items = GsonUtils.getInstance().getGson().fromJson(this.itemsJson, listType);
         } else {
             this.items = new ArrayList<SdkGraphItem>();
         }
@@ -79,7 +80,7 @@ public class SdkGraphDay {
 
     public void buildJson() {
         if (this.items != null) {
-            this.itemsJson = VolleyRequestUtils.getInstance().gson.toJson(this.items);
+            this.itemsJson = GsonUtils.getInstance().getGson().toJson(this.items);
         } else {
             this.itemsJson = "";
         }

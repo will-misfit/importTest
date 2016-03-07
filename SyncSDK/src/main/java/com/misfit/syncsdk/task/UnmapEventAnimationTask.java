@@ -37,10 +37,7 @@ public class UnmapEventAnimationTask extends Task implements ShineProfile.Config
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.unmapAllEventAnimation(this);
     }
 

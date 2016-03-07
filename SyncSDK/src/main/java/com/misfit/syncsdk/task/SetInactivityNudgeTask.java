@@ -38,10 +38,7 @@ public class SetInactivityNudgeTask extends Task implements ShineProfile.Configu
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.setInactivityNudge(mTaskSharedData.getSyncParams().inactivityNudgeSettings, this);
     }
 

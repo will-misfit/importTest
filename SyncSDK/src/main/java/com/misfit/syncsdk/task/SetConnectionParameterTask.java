@@ -48,10 +48,7 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.SET_CONNECTION_PARAM_TIMEOUT);
-
+        updateExecuteTimer(SdkConstants.SET_CONNECTION_PARAM_TIMEOUT);
         proxy.startSettingConnectionParams(mParameters, this);
     }
 

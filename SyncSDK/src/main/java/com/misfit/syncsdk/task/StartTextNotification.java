@@ -35,10 +35,7 @@ public class StartTextNotification extends Task implements ShineProfile.Configur
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.sendTextNotification(this);
     }
 

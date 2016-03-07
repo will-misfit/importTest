@@ -2,12 +2,14 @@ package com.misfit.syncsdk.task;
 
 import android.util.Log;
 
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -147,5 +149,15 @@ public abstract class Task {
             mCurrTimerTask.cancel();
             mCurrTimerTask = null;
         }
+    }
+
+    protected void updateExecuteTimer() {
+        updateExecuteTimer(SdkConstants.DEFAULT_TIMEOUT);
+    }
+
+    protected void updateExecuteTimer(long timeout) {
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, timeout);
     }
 }

@@ -35,10 +35,7 @@ public class StopNotificationTask extends Task implements ShineProfile.Configura
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.stopNotification(this);
     }
 

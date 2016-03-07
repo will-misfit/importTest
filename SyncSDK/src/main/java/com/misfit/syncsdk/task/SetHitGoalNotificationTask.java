@@ -43,10 +43,7 @@ public class SetHitGoalNotificationTask extends Task implements ShineProfile.Con
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.setHitGoalNotification(goalHitNotificationSettings, this);
     }
 

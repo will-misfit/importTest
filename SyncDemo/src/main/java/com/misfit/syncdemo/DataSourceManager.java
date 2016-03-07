@@ -68,14 +68,16 @@ public class DataSourceManager {
             durationHours = 2;
         }
 
-        long currTime = Calendar.getInstance().getTimeInMillis() / 1000;
         int duration = 60 * 60 * durationHours;  // review backwards 10 hours
-        long startTime = currTime - duration;
+        int delta = duration / count;
+
+        long currTime = Calendar.getInstance().getTimeInMillis() / 1000;
+        long timestamp = currTime - duration;
         for(int i = 0; i < count; i++) {
-            long time = startTime + (duration / count) * i;
-            SdkResourceSettings settings = new SdkResourceSettings(time, true, SdkActivityType.RUNNING_TYPE,
+            SdkResourceSettings settings = new SdkResourceSettings(timestamp, true, SdkActivityType.RUNNING_TYPE,
                 Timezone_Offset_East_Eight);
             result.add(settings);
+            timestamp += delta;
         }
         return result;
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.MainThread;
+import android.support.annotation.NonNull;
 
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.syncsdk.callback.SyncScanCallback;
@@ -31,7 +32,7 @@ public class SyncSdkAdapter {
     }
 
     //FIXME: need double check
-    public void init(Context context, String userId, String authToken) {
+    public void init(@NonNull Context context, String userId, String authToken) {
         mContext = context.getApplicationContext();
         ContextManager.getInstance().setContext(mContext);
         ContextManager.getInstance().setUserAuthToken(authToken);

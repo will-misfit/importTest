@@ -56,11 +56,11 @@ public class SyncSpeedoDevice extends SyncCommonDevice {
         taskSharedData.setSyncParams(syncParams);
 
         List<Task> syncTasks = prepareTasks();
-        //syncTasks.add(new CheckFirmwareTask());
+        syncTasks.add(new CheckFirmwareTask());
         syncTasks.add(new PlayAnimationTask());
         syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
         syncTasks.add(new SyncAndCalculateTask());
-        //syncTasks.add(new OtaTask());
+        syncTasks.add(new OtaTask());
         syncTasks.add(new GetConfigurationTask());
         syncTasks.add(new SetConfigurationTask());
 

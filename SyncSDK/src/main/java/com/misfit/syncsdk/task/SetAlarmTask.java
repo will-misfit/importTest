@@ -33,9 +33,7 @@ public class SetAlarmTask extends Task implements ShineProfile.ConfigurationCall
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        updateExecuteTimer();
 
         if (mTaskSharedData.getSyncParams().shouldClearAlarmSettings) {
             proxy.clearAllAlarms(this);

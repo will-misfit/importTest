@@ -60,11 +60,11 @@ public class OperationUtils {
      * one SdkActivitySessionGroup includes all activity session and all sleep session in one day,
      * */
     public static String buildSyncCalculationResult(SdkActivitySessionGroup sdkActivitySessionGroup) {
-        StringBuilder strBuilder = new StringBuilder();
         if (sdkActivitySessionGroup == null) {
-            return strBuilder.toString();
+            return new String();
         }
 
+        StringBuilder strBuilder = new StringBuilder();
         for (SdkActivitySession sdkActSession: sdkActivitySessionGroup.activitySessionList) {
             strBuilder.append(String.format("Activity Session, activity type %s, Is Gap Session: %s, starts at %d, duration seconds %d, points %d, steps %d, calories %.2f\n",
                 SdkActivityType.getActivityTypeString(sdkActSession.getActivityType()),

@@ -32,9 +32,7 @@ public class DisconnectTask extends Task implements ConnectionStateCallback {
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DISCONNECT_TIMEOUT);
+        updateExecuteTimer(SdkConstants.DISCONNECT_TIMEOUT);
 
         proxy.subscribeConnectionStateChanged(this);
         proxy.close();

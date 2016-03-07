@@ -38,9 +38,7 @@ public class SetCallTextNotificationTask extends Task implements ShineProfile.Co
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        updateExecuteTimer();
 
         proxy.setCallTextNotification(mTaskSharedData.getSyncParams().notificationsSettings, this);
     }

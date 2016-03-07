@@ -53,10 +53,7 @@ public class SwitchTrackerModeTask extends Task implements ShineProfile.Configur
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.setFlashButtonMode(FlashButtonMode.TRACKER, this);
     }
 

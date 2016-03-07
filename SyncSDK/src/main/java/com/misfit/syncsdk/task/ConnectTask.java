@@ -55,10 +55,7 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
             return;
         }
 
-        //set timeout
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.CONNECT_TIMEOUT);
+        updateExecuteTimer(SdkConstants.CONNECT_TIMEOUT);
 
         //connect
         proxy.subscribeConnectionStateChanged(this);

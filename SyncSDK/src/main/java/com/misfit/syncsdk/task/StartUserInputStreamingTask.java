@@ -46,10 +46,7 @@ public class StartUserInputStreamingTask extends Task implements ShineProfile.St
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
-
+        updateExecuteTimer();
         proxy.startStreamingUserInputEvents(this);
     }
 

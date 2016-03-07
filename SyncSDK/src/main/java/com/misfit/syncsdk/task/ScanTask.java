@@ -53,9 +53,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.SCAN_ONE_DEVICE_TIMEOUT);
+        updateExecuteTimer(SdkConstants.SCAN_ONE_DEVICE_TIMEOUT);
 
         MisfitScanner.getInstance().startScan(this);
         mLogEvent.end(LogEvent.RESULT_SUCCESS, "scan cmd is started");

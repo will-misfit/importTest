@@ -17,6 +17,7 @@ import com.misfit.syncsdk.model.MetaMessage;
 import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.GsonUtils;
 import com.misfit.syncsdk.utils.SdkConstants;
 import com.misfit.syncsdk.utils.VolleyRequestUtils;
 
@@ -111,7 +112,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
             Log.d(TAG, String.format("%d:%s", response.statusCode, jsonString));
 
             if (!CheckUtils.isStringEmpty(jsonString)) {
-                Object result = VolleyRequestUtils.getInstance().gson.fromJson(jsonString, super.getClass());
+                Object result = GsonUtils.getInstance().getGson().fromJson(jsonString, super.getClass());
                 metaMessage = ((JsonObjectRequest) result).metaMessage;
                 buildResult(result);
             }

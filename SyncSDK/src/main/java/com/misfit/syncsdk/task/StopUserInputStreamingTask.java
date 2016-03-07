@@ -39,9 +39,7 @@ public class StopUserInputStreamingTask extends Task {
             taskSucceed();
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        updateExecuteTimer();
 
         // TODO: StreamingCallback is set during startUserInputStreaming(), so the callback of onStreamingStopped() cannot be caught here
         proxy.interruptCurrentAction();

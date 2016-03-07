@@ -40,9 +40,7 @@ public class PlayAnimationTask extends Task implements ShineProfile.Configuratio
         }
 
         MLog.d(TAG, "execute()");
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        updateExecuteTimer();
 
         proxy.playAnimation(this);
     }

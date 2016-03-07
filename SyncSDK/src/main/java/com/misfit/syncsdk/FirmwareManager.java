@@ -80,11 +80,12 @@ public class FirmwareManager {
      * 2. download firmware if there is new firmware available
      * No callback to tell the result
      */
-    public void checkLatestFirmware(String modelName, String firmwareVersionNumber) {
-        Log.d(TAG, String.format("checkLatestFirmware() enters, mCheckingFirmware %s", Boolean.toString(mCheckingFirmware.get())));
+    public void checkLatestFirmware(String modelName, String firmwareVersion) {
+        Log.d(TAG, String.format("checkLatestFirmware() enters, modeleName %s, firmwareVer %s, mCheckingFirmware %s",
+            modelName, firmwareVersion, Boolean.toString(mCheckingFirmware.get())));
         if (!mCheckingFirmware.get()) {
             mCurrentModelName = modelName;
-            mCurrentFirmwareVersion = firmwareVersionNumber;
+            mCurrentFirmwareVersion = firmwareVersion;
             mCheckingFirmware.set(true);
             FirmwareRequest.getLatestRequest(latestFirmwareRequestListener, modelName).execute();
         }
@@ -138,9 +139,12 @@ public class FirmwareManager {
             handleOnCheckFirmwareFailed(error);
         }
 
+        /*
+        * actually, here FirmwareRequest behaves like @response
+        * */
         @Override
         public void onResponse(FirmwareRequest request) {
-            Log.d(TAG, String.format("FirmwareRequest onResponse(), %s", request.exportFirmwareInfo().toString()));
+            Log.d(TAG, String.format("FirmwareRequest onResponse(), %s", request.toString()));
             FirmwareInfo newFirmwareInfo = request.exportFirmwareInfo();
             String newFwModelName = newFirmwareInfo.getModelName();
             String oldFwModelName = mCurrentModelName;

@@ -35,9 +35,7 @@ public class DisableAllCallTextNotification extends Task implements ShineProfile
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        updateExecuteTimer();
 
         proxy.disableAllCallTextNotification(this);
     }

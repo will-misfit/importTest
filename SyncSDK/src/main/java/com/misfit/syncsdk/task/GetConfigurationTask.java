@@ -41,9 +41,7 @@ public class GetConfigurationTask extends Task implements ShineProfile.Configura
         }
 
         MLog.d(TAG, "execute()");
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.DEFAULT_TIMEOUT);
+        updateExecuteTimer();
 
         proxy.gettingDeviceConfiguration(this);
     }

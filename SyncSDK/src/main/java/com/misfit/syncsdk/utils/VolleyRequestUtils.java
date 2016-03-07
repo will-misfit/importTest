@@ -24,17 +24,12 @@ public class VolleyRequestUtils {
     private static VolleyRequestUtils instance;
 
     private RequestQueue volleyQueue;
-    public Gson gson;
-    private GsonBuilder gsonBuilder;
 
     // TODO: API_Server is varied for staging and production, it will be moved to build config later
     protected static String API_SERVER_V8_STAGING = "https://api.int.misfit.com/shine/v8/";
 
     protected VolleyRequestUtils(@NonNull Context context) {
         this.volleyQueue = Volley.newRequestQueue(context);
-        this.gsonBuilder = new GsonBuilder();
-        this.gson  = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
-                .excludeFieldsWithoutExposeAnnotation().create();
     }
 
     public static VolleyRequestUtils getInstance() {

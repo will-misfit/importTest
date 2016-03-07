@@ -70,10 +70,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
             return;
         }
 
-        cancelCurrentTimerTask();
-        mCurrTimerTask = createTimeoutTask();
-        TimerManager.getInstance().addTimerTask(mCurrTimerTask, SdkConstants.READ_DATA_TIMEOUT);
-
+        updateExecuteTimer(SdkConstants.READ_DATA_TIMEOUT);
         proxy.startSyncing(this);
     }
 
