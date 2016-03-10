@@ -114,6 +114,11 @@ public final class ShineProfile {
 		void onSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shouldStop);
 
         /**
+         * Called when the hardware log was read.
+         * @param hwLog
+         */
+        void onHardwareLogRead(byte[] hwLog);
+        /**
          * Called when sync procedure was finished, whether success or failure.
          * @param resultCode result of procedure
          */
@@ -1903,6 +1908,13 @@ public final class ShineProfile {
             mLogSession.stop();
             submitLogSession();
             mLogSession.start();
+        }
+
+        @Override
+        public void onHWLogRead(byte[] hwLog, SyncCallback syncCallback) {
+            if (syncCallback != null) {
+                syncCallback.onHardwareLogRead(hwLog);
+            }
         }
     };
 

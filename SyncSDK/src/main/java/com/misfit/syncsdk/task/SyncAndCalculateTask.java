@@ -13,7 +13,6 @@ import com.misfit.ble.util.MutableBoolean;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
-import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
 import com.misfit.syncsdk.enums.FailedReason;
@@ -108,6 +107,18 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                 // if test the ShineSDK ShineProfile SyncCallback result
                 if (mTaskSharedData.getReadDataCallback() != null) {
                     mTaskSharedData.getReadDataCallback().onRawDataReadCompleted(syncResults);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onHardwareLogRead(final byte[] hwLog) {
+        mMainHander.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    mTaskSharedData.getReadDataCallback().onHardwareLogRead(hwLog);
                 }
             }
         });
