@@ -28,4 +28,10 @@ public interface ReadDataCallback {
      * */
     void onGetShineConfigurationCompleted(ConfigurationSession configSession);
 
+    /**
+     * Called when hardware log was read.
+     * @param hwLog
+     */
+    void onHardwareLogRead(byte[] hwLog);
+
 }

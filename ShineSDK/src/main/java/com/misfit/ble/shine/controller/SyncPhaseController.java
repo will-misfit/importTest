@@ -38,6 +38,7 @@ public class SyncPhaseController extends PhaseController {
 				MutableBoolean shouldStop,
 				ShineProfile.SyncCallback syncCallback);
 		void onGetActivityDataFinished();
+		void onHWLogRead(byte[] hwLog, ShineProfile.SyncCallback syncCallback);
 	}
 	
 	public class SyncSession {
@@ -202,6 +203,11 @@ public class SyncPhaseController extends PhaseController {
 				postProcessing(RESULT_REQUEST_ERROR);
 				return;
 			}
+
+			if(mSyncPhaseCallback!=null){
+				mSyncPhaseCallback.onHWLogRead(response.data, mSyncCallback);
+			}
+
 			sendRequest(buildRequest(FileEraseHardwareLogRequest.class));
 			
 		} else if (request instanceof FileEraseHardwareLogRequest) {

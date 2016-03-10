@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Checkable;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -317,6 +316,11 @@ public class MainActivity extends AppCompatActivity
                 MLog.d(TAG, builder.toString());
             }
         });
+    }
+
+    @Override
+    public void onHardwareLogRead(byte[] hwLog) {
+
     }
 
     /* interface methods of ConnectionStateCallback */
