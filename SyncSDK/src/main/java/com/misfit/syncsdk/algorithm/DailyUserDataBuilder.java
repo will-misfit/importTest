@@ -15,7 +15,7 @@ import com.misfit.syncsdk.model.SdkGraphItem;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.model.SdkSleepSession;
-import com.misfit.syncsdk.model.SdkTimezoneOffset;
+import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.utils.DateUtils;
 import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.TimeZoneUtils;
@@ -129,8 +129,8 @@ public class DailyUserDataBuilder {
      * group per minute ActivityShine to day by day list with consideration of timezone changes
      * */
     private Map<Long, DailyActivityGroup> groupDailyActivities(ActivityShineVect activities,
-                                                               SdkTimezoneOffset timeZoneBefore,
-                                                               List<SdkTimezoneOffset> timeZoneListAfter) {
+                                                               SdkTimeZoneOffset timeZoneBefore,
+                                                               List<SdkTimeZoneOffset> timeZoneListAfter) {
         Log.d(TAG, String.format("groupDailyActivities(), @param ActivityShineVect size %d", activities.size()));
         Map<Long, DailyActivityGroup> result = new HashMap<>();
         if (activities == null || activities.size() <= 0) {

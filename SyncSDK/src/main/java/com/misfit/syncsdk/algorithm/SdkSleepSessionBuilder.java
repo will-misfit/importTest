@@ -19,7 +19,7 @@ import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.model.SdkSleepSession;
 import com.misfit.syncsdk.enums.SdkSleepState;
-import com.misfit.syncsdk.model.SdkTimezoneOffset;
+import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.utils.CheckUtils;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class SdkSleepSessionBuilder {
         }
 
         List<SdkAutoSleepStateChangeTag> autoSleepChangeTags = getSdkAutoSleepStateChangeList(settingsSinceLastSync);
-        SdkTimezoneOffset timezoneOffset = getCurrentTimzoneOffset(settingsSinceLastSync);
+        SdkTimeZoneOffset timezoneOffset = getCurrentTimzoneOffset(settingsSinceLastSync);
 
         sleepSessionsShineAlgorithm.buildUserSleepSession(autoSleepSessions,
             manualSleepSessions,
@@ -127,14 +127,14 @@ public class SdkSleepSessionBuilder {
         return startEndTime;
     }
 
-    private static TimezoneChangeShineVect buildTimezoneChangeShineVectByCurrentTimezone(SdkTimezoneOffset sdkTimezoneOffset) {
+    private static TimezoneChangeShineVect buildTimezoneChangeShineVectByCurrentTimezone(SdkTimeZoneOffset sdkTimeZoneOffset) {
         TimezoneChangeShineVect timezoneChangeShineVect = new TimezoneChangeShineVect();
-        TimezoneChangeShine timezoneChangeShine = getTimezoneChangeShineFromSettings(sdkTimezoneOffset);
+        TimezoneChangeShine timezoneChangeShine = getTimezoneChangeShineFromSettings(sdkTimeZoneOffset);
         timezoneChangeShineVect.add(timezoneChangeShine);
         return timezoneChangeShineVect;
     }
 
-    private static TimezoneChangeShine getTimezoneChangeShineFromSettings(SdkTimezoneOffset sdkTimezoneOffset) {
+    private static TimezoneChangeShine getTimezoneChangeShineFromSettings(SdkTimeZoneOffset sdkTimezoneOffset) {
         TimezoneChangeShine timezoneChangeShine = new TimezoneChangeShine();
         timezoneChangeShine.setTimestamp((int) sdkTimezoneOffset.getTimestamp());
         timezoneChangeShine.setTimezoneOffsetInSecond(sdkTimezoneOffset.getTimezoneOffsetInSecond());
@@ -172,14 +172,14 @@ public class SdkSleepSessionBuilder {
         return result;
     }
 
-    private static SdkTimezoneOffset getCurrentTimzoneOffset(List<SdkResourceSettings> settingsList) {
+    private static SdkTimeZoneOffset getCurrentTimzoneOffset(List<SdkResourceSettings> settingsList) {
         if (CheckUtils.isCollectionEmpty(settingsList)) {
             long currTimestamp = Calendar.getInstance().getTimeInMillis() / 1000;
-            int currTimezonOffset = Calendar.getInstance().getTimeZone().getRawOffset() / 1000;
-            return new SdkTimezoneOffset(currTimestamp, currTimezonOffset);
+            int currTimeZoneOffset = Calendar.getInstance().getTimeZone().getRawOffset() / 1000;
+            return new SdkTimeZoneOffset(currTimestamp, currTimeZoneOffset);
         }
         int n = settingsList.size();
         SdkResourceSettings currSettings = settingsList.get(n - 1);
-        return new SdkTimezoneOffset(currSettings.getTimestamp(), currSettings.getTimezoneOffset());
+        return new SdkTimeZoneOffset(currSettings.getTimestamp(), currSettings.getTimezoneOffset());
     }
 }
