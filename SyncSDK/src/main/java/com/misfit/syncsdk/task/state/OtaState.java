@@ -61,6 +61,7 @@ public class OtaState extends State implements ShineProfile.OTACallback {
             otaTask.onFailed("proxy not ready");
             return;
         }
+
         setNewTimeOutTask(new TimerTask() {
             @Override
             public void run() {
@@ -97,7 +98,7 @@ public class OtaState extends State implements ShineProfile.OTACallback {
 
     @Override
     public void onOTAProgressChanged(float progress) {
-        MLog.d(TAG, "ota progress=" + progress);
+        MLog.d(TAG, "ota progress = " + progress);
         if (mIsStateFinished) {
             MLog.d(TAG, "state already finished");
             return;

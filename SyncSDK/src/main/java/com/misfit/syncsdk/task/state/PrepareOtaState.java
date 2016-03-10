@@ -8,7 +8,7 @@ import com.misfit.syncsdk.utils.MLog;
  * get to confirm whether latest firmware is ready or not
  * if it is not ready yet while unnecessary to OTA, skip OTA
  * */
-public class PrepareOtaState extends State implements FirmwareManager.DownloadLatestFirmwareListener {
+public class PrepareOtaState extends State implements FirmwareManager.DownloadFirmwareListener {
 
     private static final String TAG = "PrepareOtaState";
 

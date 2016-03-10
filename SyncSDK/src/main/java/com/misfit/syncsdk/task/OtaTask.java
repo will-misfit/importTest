@@ -4,7 +4,7 @@ import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
 import com.misfit.syncsdk.log.LogEventType;
-import com.misfit.syncsdk.task.state.CheckLatestFirmwareState;
+import com.misfit.syncsdk.task.state.CheckFirmwareServerState;
 import com.misfit.syncsdk.task.state.PrepareOtaState;
 import com.misfit.syncsdk.task.state.State;
 import com.misfit.syncsdk.utils.GeneralUtils;
@@ -42,7 +42,7 @@ public class OtaTask extends Task {
         if (mRetryOta) {
             gotoState(new PrepareOtaState(this));
         } else {
-            gotoState(new CheckLatestFirmwareState(this, mTaskSharedData.getModelName(), mTaskSharedData.getFirmwareVersion()));
+            gotoState(new CheckFirmwareServerState(this, mTaskSharedData.getModelName(), mTaskSharedData.getFirmwareVersion()));
         }
     }
 
