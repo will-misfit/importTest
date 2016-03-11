@@ -34,7 +34,7 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         int rslt = timestampCorrector.correctTimestamp(data, syncTime);
 
         assertEquals(rslt, 0);
-        assertEquals(data.get(0).getLatestActEndTime(), syncTime);
+        assertEquals(data.get(0).getTailEndTime(), syncTime);
     }
 
     public void testOnlyCorrect() throws Exception {
@@ -45,7 +45,7 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         int rslt = timestampCorrector.correctTimestamp(data, syncTime);
 
         assertEquals(TimestampCorrectorNew.OK, rslt);
-        assertEquals(syncTime, data.get(0).getLatestActEndTime());
+        assertEquals(syncTime, data.get(0).getTailEndTime());
     }
 
     public void testOnlyUnderTheEdge() throws Exception {
@@ -56,7 +56,7 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         int rslt = timestampCorrector.correctTimestamp(data, syncTime);
 
         assertEquals(TimestampCorrectorNew.OK, rslt);
-        assertEquals(syncTime - INTERVAL_DURATION, data.get(0).getLatestActEndTime());
+        assertEquals(syncTime - INTERVAL_DURATION, data.get(0).getTailEndTime());
     }
 
     public void testTwoWithFirstCorrectSecondOver() throws Exception {
@@ -68,8 +68,22 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         int rslt = timestampCorrector.correctTimestamp(data, syncTime);
 
         assertEquals(TimestampCorrectorNew.OK, rslt);
-        assertEquals(syncTime - 60 * 2, data.get(0).getLatestActEndTime());
-        assertEquals(syncTime, data.get(1).getLatestActEndTime());
+        assertEquals(syncTime - 60 * 2, data.get(0).getTailEndTime());
+        assertEquals(syncTime, data.get(1).getTailEndTime());
+    }
+
+    public void test14() throws Exception {
+        long tailTime = 1448209400;
+        long syncTime = 1448209580;
+        List<SyncResult> data = new ArrayList<>();
+        data.add(getSyncResultByEnd(tailTime + INTERVAL_DURATION - 60 * 2 + 1, 2));
+        data.add(getSyncResultByEnd(tailTime, 2));
+
+        int rslt = timestampCorrector.correctTimestamp(data, syncTime);
+
+        assertEquals(TimestampCorrectorNew.OK, rslt);
+        assertEquals(syncTime - 60 * 2, data.get(0).getTailEndTime());
+        assertEquals(syncTime, data.get(1).getTailEndTime());
     }
 
     public void testTwoWithFirstCorrectSecondLessThanMAGIC() throws Exception {
@@ -119,8 +133,8 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         int rslt = timestampCorrector.correctTimestamp(data, syncTime);
 
         assertEquals(TimestampCorrectorNew.OK, rslt);
-        assertEquals(syncTime + INTERVAL_DURATION - 60 * 2 + 3, data.get(0).getLatestActEndTime());
-        assertEquals(syncTime, data.get(1).getLatestActEndTime());
+        assertEquals(syncTime + INTERVAL_DURATION - 60 * 2 + 3, data.get(0).getTailEndTime());
+        assertEquals(syncTime, data.get(1).getTailEndTime());
     }
 
     public void testTwoWithFirstOverSecondOver() throws Exception {
@@ -132,8 +146,8 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         int rslt = timestampCorrector.correctTimestamp(data, syncTime);
 
         assertEquals(TimestampCorrectorNew.OK, rslt);
-        assertEquals(syncTime + INTERVAL_DURATION, data.get(0).getLatestActEndTime());
-        assertEquals(syncTime, data.get(1).getLatestActEndTime());
+        assertEquals(syncTime + INTERVAL_DURATION, data.get(0).getTailEndTime());
+        assertEquals(syncTime, data.get(1).getTailEndTime());
     }
 
     public void testCaseOne() throws Exception {
@@ -169,12 +183,11 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
         }
     }
 
-
     private SyncResult getSyncResultByEnd(long end, int cnt) {
         SyncResult result = new SyncResult();
         for (int i = 0; i < cnt; i++) {
             long startTime = end;
-            startTime -= i == 0 ? 59 : 60 * i + 59;
+            startTime -= (60 * i + 59);
             result.mActivities.add(0, getActivity(startTime, end - i * 60));
         }
         return result;
@@ -211,10 +224,10 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
 
         for (int i = 0; i < data.size(); i++) {
             SyncResult result = data.get(i);
-            builder.append(result.getEarliestStartTime())
+            builder.append(result.getHeadStartTime())
                     .append(" - ")
-                    .append(result.getLatestActEndTime())
-                    .append("(").append(result.getTotalMinOfActivities()).append(")")
+                    .append(result.getTailEndTime())
+                    .append("(").append(result.getTotalMinutes()).append(")")
                     .append(" || ");
         }
         Log.w(TAG, builder.toString());
@@ -233,7 +246,7 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
                         .append(String.format("(%d)", activity.mEndTimestamp - activity.mStartTimestamp + 1))
                         .append(", ");
             }
-            builder.append("[").append(result.getTotalMinOfActivities()).append("]")
+            builder.append("[").append(result.getTotalMinutes()).append("]")
                     .append(" || ");
         }
         Log.w(TAG, builder.toString());
@@ -241,7 +254,7 @@ public class TimestampCorrectorTest extends InstrumentationTestCase {
 
     private void assertHasCorrectSecond(long syncTime, List<SyncResult> data, int rslt) {
         assertEquals(TimestampCorrectorNew.OK, rslt);
-        assertEquals(syncTime - 60 * 2, data.get(0).getLatestActEndTime());
-        assertEquals(syncTime, data.get(1).getLatestActEndTime());
+        assertEquals(syncTime - 60 * 2, data.get(0).getTailEndTime());
+        assertEquals(syncTime, data.get(1).getTailEndTime());
     }
 }

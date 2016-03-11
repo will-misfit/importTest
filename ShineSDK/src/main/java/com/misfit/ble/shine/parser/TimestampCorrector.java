@@ -24,15 +24,16 @@ public class TimestampCorrector {
     }
 
     private boolean mHasTimeReset = false;
-    private ArrayList<SyncDataTimestampInfo> mPendingSyncDataInfo = new ArrayList<SyncDataTimestampInfo>();
+    private ArrayList<SyncDataTimestampInfo> mPendingSyncDataInfo = new ArrayList<>();
 
     public static boolean shouldCorrectTimestamp(long timestamp) {
         return timestamp <= THE_MAGIC_TIMESTAMP;
     }
 
     public SyncResult processSyncData(SyncResult syncData, long fileTimestamp, boolean isLastFile) {
-        if (!mHasTimeReset && !shouldCorrectTimestamp(fileTimestamp))
+        if (!mHasTimeReset && !shouldCorrectTimestamp(fileTimestamp)) {
             return syncData;
+        }
 
         mHasTimeReset = true;
 
@@ -57,9 +58,9 @@ public class TimestampCorrector {
         long previousFileTimestamp = DEFAULT_FILE_TIMESTAMP;
         long previousFileTimestampCorrected = System.currentTimeMillis() / 1000;
 
-        ArrayList<SyncResult> syncResults = new ArrayList<SyncResult>();
+        ArrayList<SyncResult> syncResults = new ArrayList<>();
 
-        // NOTE: syncData must be processed in the reserved order (from the most-recent to older ones)
+        // NOTE: syncData must be processed in the reserved order (from the later to earlier ones)
         for (int i = mPendingSyncDataInfo.size() - 1; i >= 0; --i) {
             SyncDataTimestampInfo info = mPendingSyncDataInfo.get(i);
             SyncResult syncData = info.mSyncData;

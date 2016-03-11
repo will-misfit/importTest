@@ -9,7 +9,6 @@ import com.misfit.ble.shine.core.Constants;
 import com.misfit.ble.shine.log.LogEventItem;
 import com.misfit.ble.shine.parser.ActivityDataParser;
 import com.misfit.ble.shine.parser.ActivityDataParserFactory;
-import com.misfit.ble.shine.parser.TimestampCorrector;
 import com.misfit.ble.shine.parser.TimestampCorrectorNew;
 import com.misfit.ble.shine.parser.swim.SwimSessionPostProcessor;
 import com.misfit.ble.shine.request.FileEraseActivityRequest;
@@ -22,6 +21,7 @@ import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.util.MutableBoolean;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class SyncPhaseController extends PhaseController {
@@ -48,7 +48,7 @@ public class SyncPhaseController extends PhaseController {
         private List<SyncResult> syncResults = new ArrayList<>();
     }
 
-    private TimestampCorrector mTimestampCorrector;
+    private TimestampCorrectorNew mTimestampCorrector;
     private SwimSessionPostProcessor mSwimLapPostProcessor;
     private SyncSession mSyncSession;
     private SyncPhaseControllerCallback mSyncPhaseCallback;
@@ -73,7 +73,7 @@ public class SyncPhaseController extends PhaseController {
         super.start();
 
         mSyncSession = new SyncSession();
-        mTimestampCorrector = new TimestampCorrector();
+        mTimestampCorrector = new TimestampCorrectorNew();
         mSwimLapPostProcessor = new SwimSessionPostProcessor();
         sendRequest(buildRequest(FileListRequest.class));
     }
@@ -165,10 +165,7 @@ public class SyncPhaseController extends PhaseController {
                 postProcessing(RESULT_PARSE_ERROR);
                 return;
             } else {
-                SyncResult processedSyncResult = correctTimestamp(syncResult, response.fileTimestamp, isLastFile);
-                if (processedSyncResult != null) {
-                    mSyncSession.syncResults.add(processedSyncResult); // add sync result to list
-                }
+                mSyncSession.syncResults.add(syncResult); // add sync result to list
 
                 Bundle bundle = new Bundle();
                 bundle.putFloat(ShineProfile.SYNC_PROGRESS_KEY, syncProgress);
@@ -250,6 +247,9 @@ public class SyncPhaseController extends PhaseController {
             sendRequest(buildRequest(FileGetActivityRequest.class));
         }
         else {
+            long currTime = Calendar.getInstance().getTimeInMillis() / 1000;
+            mTimestampCorrector.correctTimestamp(mSyncSession.syncResults, currTime);
+
             //invoke callback
             if (notifyActivityReadCompletedAndShouldStop()){
                 return;
@@ -317,11 +317,6 @@ public class SyncPhaseController extends PhaseController {
             mPhaseControllerCallback.onPhaseControllerFailed(this);
             mSyncCallback.onSyncCompleted(ShineProfile.ActionResult.FAILED);
         }
-    }
-
-    private SyncResult correctTimestamp(SyncResult syncData, long fileTimestamp, boolean isLastFile) {
-        SyncResult syncResult = mTimestampCorrector.processSyncData(syncData, fileTimestamp, isLastFile);
-        return syncResult;
     }
 
     @Override
