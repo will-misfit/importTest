@@ -25,7 +25,7 @@ public class TimestampCorrectorNew {
         //calculate every file's timestamp offset
         long[] activityTimeOffsets;
         try {
-            activityTimeOffsets = calculateNumMinSum(syncResults);
+            activityTimeOffsets = calculateNumMin(syncResults);
         } catch (Exception e) {
             e.printStackTrace();
             return NO_ACTIVITY_IN_FILE;
@@ -37,24 +37,29 @@ public class TimestampCorrectorNew {
         long syncTimeOrNextGroupStartTime = syncTimestamp;    //init with sync time
         long prevGroupEndTime = 0;
 
+        // iterate backwards to correct the Timestamp of each SyncResult
         for (int i = groups.size() - 1; i >= 0; i--) {
             if (i > 0) {
                 prevGroupEndTime = syncResults.get(groups.get(i - 1)[END]).getTailEndTime(); // here 'prev' means the previous in collection order as well
             } else {
-                //for last processed one
                 prevGroupEndTime = 0;
             }
 
             long currGroupStartTime = getMinimumHeadStartTime(syncResults, groups.get(i)[BEGIN], groups.get(i)[END]);
             long currGroupEndTime = getMaxmumTailEndTime(syncResults, groups.get(i)[BEGIN], groups.get(i)[END]);
             boolean isSyncTime = i == (groups.size() - 1);
+
             if (shouldCorrectGroupTimestamp(currGroupStartTime, currGroupEndTime, syncTimeOrNextGroupStartTime, prevGroupEndTime, isSyncTime)) {
-                for (int j = groups.get(i)[BEGIN]; j <= groups.get(i)[END]; j++) {
-                    long correctTimeStamp = syncTimestamp - activityTimeOffsets[j] * 60 + 1;
-                    long delta = correctTimeStamp - syncResults.get(j).getHeadStartTime();
+                long postSyncResultStart = syncTimeOrNextGroupStartTime;
+                // among one SyncResult group, all of the SyncResult keep the interval of 1 sec
+                for (int j = groups.get(i)[END]; j >= groups.get(i)[BEGIN]; j--) {
+                    long correctHeadStartTime = postSyncResultStart - activityTimeOffsets[j] * 60;
+                    long delta = correctHeadStartTime - syncResults.get(j).getHeadStartTime();
                     syncResults.get(j).correctSyncDataTimestamp(delta);
+                    postSyncResultStart -= activityTimeOffsets[j] * 60;
                 }
             }
+            // all SyncResult in groups[i] have been corrected already or it does not need at all
             syncTimeOrNextGroupStartTime = syncResults.get(groups.get(i)[BEGIN]).getHeadStartTime();
         }
         return OK;
@@ -98,7 +103,7 @@ public class TimestampCorrectorNew {
 
         for (int i = size - 1; i >= 0; i--) {
             if (prevStartTime != -1) {
-                if (Math.abs(prevStartTime - syncResults.get(i).getTailEndTime()) > INTERVAL_DURATION) {
+                if (prevStartTime - syncResults.get(i).getTailEndTime() > INTERVAL_DURATION) {
                     groups.add(0, currGroup);
                     currGroup = new int[]{i, i};
                 } else {
@@ -126,6 +131,22 @@ public class TimestampCorrectorNew {
             syncRsltTimeOffsets[i] = sum;
         }
         return syncRsltTimeOffsets;
+    }
+
+    /**
+     * for each SyncResult, get each minutes length
+     * */
+    public long[] calculateNumMin(List<SyncResult> syncResults) {
+        final int N = syncResults.size();
+        long[] resultTimeOffsets = new long[N];
+        for (int i = 0; i < N; i++) {
+            long minutes = syncResults.get(i).getTotalMinutes();
+            if (minutes == -1) {
+                minutes = 0;
+            }
+            resultTimeOffsets[i] = minutes;
+        }
+        return resultTimeOffsets;
     }
 
     /*
