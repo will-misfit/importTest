@@ -1,0 +1,252 @@
+THIS SDK IS PROPRIETARY TO MISFIT AND ITS LEGAL PARTNERS. IF YOU HAVE A COPY OF SDK BY ACCIDENT, PLEASE CONTACT MISFIT BY SENDING AN EMAIL TO MINH@MISFIT.COM.
+
+SYSTEM REQUIREMENT
+-----------------
+Android device with BLE (BT 4.0) capability
+Android OS 4.3 (Jelly Bean)
+
+HOW TO USE
+----------
+1 Please put misfit-ble-android-sdk.jar and armeabi folder into android libs folder, and import them into your project.
+2 For detail usage of API, please read SDK document under Doc\ folder. 
+3 For a complete example regarding how to use SDK, please goto ShineSample\ folder and open the sample project there.
+
+UPDATE
+------
+VER 2.3.0 for Misfit flagship app - 20/01/2016
+1. use new timestamp corrector.
+
+VER 2.2.9 for Misfit flagship app - 12/28/2015
+1. use previous timestamp corrector.
+2. fix the bug of internal retry connect.
+3. fix the bug of streaming state.
+
+VER 2.2.8 for Misfit flagship app - 12/25/2015
+1. add new method to correct timestamp of activity raw data during sync
+2. add Silvretta support including quadruple tap support
+3. add Swarovski support 
+4. add BMW support
+5. add new file chooser in ShineSample to fix bug of OTA file 
+6. fix bug of connect disconnect timer will interrupt next time reconnect
+7. send DC log as soon as connect process completes, no matter succeed or fail 
+
+VER 2.2.7 for Misfit flagship app - 12/11/2015
+1. apply new reconnect design to solve connect failure issues
+
+VER 2.2.6 for Misfit flagship app - 12/09/2015
+1. add separate error code for Bluetooth Gatt connection and following handshake sub steps
+2. modify the ShineSample to support N*Connect performance test
+3. support enableBluetooth, disableBluetooth operation
+
+VER 2.2.5.1 for Misfit flagship app - 12/04/2015
+1. during scan, add DC log for scanned device and retrieved connected device
+2. in scan callback, move all the log process to external thread
+3. delay a while after each close, currently it is 1.5 sec 
+
+VER 2.2.4 for Misfit flagship app - 11/25/2015
+1. fix bug of scan nothing while open App while Bluetooth is OFF then turned on
+2. add SDKSettings#isBleSupported() for flagship app
+
+VER 2.2.3 for Misfit flagship app - 11/16/2015
+1. in OTAPhaseController, support retry in case of transferData does not transfer required length of data, fix bug of EOFTimer fired when each block transfer completes
+
+VER 2.2.2 for Misfit flagship app - 11/08/2015
+1. send sync DC log as soon as all FileGetActivityRequest finish.
+2. open ShineProfile#notifySessionStop() for app to send DC log in need
+
+VER 2.2.1 for Misfit flagship app - 10/20/2015
+1. merge VER 1.9.1.3 code change
+2. add logging in sync steps
+3. Added support for call/text notification commands. 
+
+VER 2.2 - 10/15/2015
+1 Added StopAnimation support.
+2 Support Streaming with AppId on Flash Link and new heartbeat 0xfe.
+3 SDK now cache serial number base on mac address.
+4 Support browsing firmware on sample app.
+
+VER 2.1 - 09/28/2015
+1 Added Flash's CustomMode support.
+2 Added Flash's Bolt control APIs.
+3 Workaround OperationInProgress error when start streaming.
+
+VER 2.0 - 09/04/2015
+1 Implemented Pluto APIs.
+2 Revamped SDK public interface.
+
+VER 1.9.2.0 - 09/27/2015
+1. Since Android LOLLIPOP, use startScan() instead of startLeScan()
+2. BluetoothDevice#connectGatt(), set 2nd param autoConnect to false to connect fast
+
+VER 1.9.1.3 - 09/05/2015
+1 Fixed NPE due to BluetoothManager not exists on Android version lower than 4.3.
+2 Fixed NPE due to system bluetooth not able to get bluetooth name.
+
+VER 1.9.1.2 - 09/04/2015
+1 Workaround: DC Characteristic is stuck at "InProgress" on first time connected, by automatically sending FileList at the end of the connecting phase.
+2 Fixed unexpected events does not show any details info.
+
+VER 1.9.1.1 - 09/03/2015
+1 Generate SwimSessionEndBySDK at file's end timestamp instead of mobile time.
+2 Set minSDKVersion to 17.
+
+VER 1.9.1 - 08/28/2015
+1 Support new fileFormat 0x0013. Details: https://misfit.jira.com/wiki/display/HAR/BtleFileType.
+2 Updated sync flow.
+	+ SDK now reads activity files from the oldest to newer ones AND start erasing one by one in reversed order after every file has been read.
+	+ Depending on the result of the stability testing, we might consider adding an option for skipping files.
+3 Automatically adding SwimSessionEndBySDK Marker to the last file.
+
+VER 1.9 - 08/25/2015
+1 Added ShineAdapter.getGattConnectedShines().
+2 Added ShineAdapter.getConnectedShines().
+3 Added HID monitoring.
+4 Added workaround for "Bluetooth Reset" issue by delaying the disconnect by 2 seconds on readSN failure.
+
+VER 1.8-beta - 08/07/2015
+1 Added new API to retrieve HID connected devices: ShineAdapter.getConnectedShines().
+2 Added new deviceFamily: DEVICE_FAMILY_BUTTON (only available after connected).
+3 Added API SDKSetting.getSDKVersion().
+
+VER 1.8.2 - 08/06/2015
+1 Pump version number to 1.8.2 for SC.
+
+VER 1.8.1.1-misfit - 06/23/2015
+1 Updated version number to enable SC.
+
+VER 1.8.1-misfit - 06/17/2015
+1 Updated version number to enable SC.
+
+VER 1.8.0.2-misfit - 05/20/2015
+1 Fixed crash when pushing log to DC while there is not network connection
+
+VER 1.8.0.1-misfit - 04/17/2015
+1 Updated DC urls.
+
+VER 1.8-misfit - 04/02/2015
+1 Pushing data collection logs in a button streaming session incrementally.
+2 Added rawData, originalEpoch and correctedEpoch to extraInfo of onSyncDataRead.
+3 Moved syncProgress into extraInfo of onSyncDataRead.
+4 Updated internal data collection endpoint.
+
+VER 1.7.2.1-misfit - 03/23/2015
+1 Added workaround for Syncing issue on Android 5.0, where BluetoothGatt's onCharacteristicChanged is often fired before the corresponding onCharacteristicWrite.
+
+VER 1.7.2.1-misfit - 02/04/2014 (develop)
+1 Improved entry APIs in SDKSettings, ShineAdapter and ShineProfile.
+
+VER 1.7.2.buttonFL2.1.7 - 03/10/2014
+1 Added Venus Button support.
+2 Updated Button mapping to 0x28, which is compatible with FL2.1.7r.
+
+VER 1.7.2-misfit - 10/06/2014
+1 Added initializing serial number for Shine and Flash.
+
+VER 1.7.1.2-misfit - 10/06/2014
+1 Fixed a deadlock issue when ShineProfile.close() and BluetoothGattCallback.onConnectionStateChange() fire at the same time.
+
+VER 1.7.1.1-misfit - 09/25/2014
+1 Updated compatibility check for ActivityTaggingState requests.
+
+VER 1.7.1-misfit - 09/19/2014
+1 Added Venus activity tagging state to configuration.
+2 Added Venus start/end session events.
+3 Updated some data collection entries.
+
+VER 1.7-misfit - 09/11/2014
+1 Added Venus support (added model number, changed serial number parsing, added activation requests, bypass unknown entries and file format).
+2 Changed OTA flow to support both Shine and Venus.
+
+VER 1.6.6 - 08/15/2014
+1 Sync data is now returned in multiple batches.
+2 Added syncing progress.
+3 Added compatibility with new entry types and file format.
+
+VER 1.6.5 - 08/11/2014
+1 Removed sleep tracking.
+
+VER 1.6.4.1 - 07/31/2014
+1 Fixed threading issues.
+
+VER 1.6.4 - 07/29/2014
+1 Improved SDK stability.
+2 Specifying userId is now MANDATORY.
+3 Fixed async task blocking issue.
+4 Added timeout for post requests.
+5 Fixed NPE closing data file.
+
+VER 1.6.3 - 05/22/2014
+1 Added userId validation check.
+2 Data collection log is now encrypted.
+
+VER 1.6.2.3-misfit - 05/24/2014
+1 Updated maximumSleepLengthInMinutes from 100 to 120.
+
+VER 1.6.2.2-misfit - 03/19/2014
+1 Added sleepStateChanges to auto-sleep sessions.
+2 Changed Data Collection endpoint to /v3/events.
+
+VER 1.6.2.1-misfit - 03/18/2014
+1 Added auto sleep detection.
+
+VER 1.6.2-misfit - 03/13/2014
+1 Optimized network usage by posting data in gzip format.
+2 Added new API for changing BLE connection interval.
+3 Removed custom HostNameVerifier.
+
+VER 1.6.1.1-internal - 02/20/2014
+1 Fixed Bluetooth's internal buffer overflows when lose connection during OTA.
+
+VER 1.6.1-internal - 02/20/2014
+1 Fixed connection is closed automatically after a normal disconnect.
+2 Added support for Serial Number Extended requests.
+
+VER 1.5.1.1-internal - 01/20/2014
+1 Fix activity data timestamp correcting doesn't work.
+
+VER 1.5.1-internal - 01/20/2014
+1 Added CONNECTION_STATE_CLOSED
+2 Fixed the connection bug when leaving the connection idle for 3 minutes by closing the connection when it is unexpectedly dropped.
+3 Fixed the time out bug when getting big hardware log on devices with slow ble speed.
+4 Fixed an UI state bug in ShineSample.
+
+VER 1.4.3-internal - 01/06/2014
+1 Fixed bug of returning playAnimation successfully even though it failed.
+2 Fixed potential NPE in BluetoothGatt callbacks.
+3 Fixed a multi-thread issue which caused missing onOTAFailed callback on some devices (e.g. Nexus 5).
+4 Added data transfer event to SDK log.
+5 Added phase completed/failed event to SDK log.
+6 Fixed OTA issue on some android devices. (e.g. Nexus 7, Samsung Galaxy S3).
+
+VER 1.4.2-internal - 12/30/2013
+1 Improved SDK log.
+2 Increased default request timeout from 1 second to 3 seconds.
+3 Added battery level in ShineConfiguration.
+
+VER 1.4.1-internal - 12/24/2013
+1 ShineDevice.connectProfile will return null if it fail to start the connecting attempt.
+
+VER 1.4 - 12/17/2013
+1 Included battery level in Shine configurations.
+2 Improved performance.
+3 Fixed bug setting wrong timezone to Shine.
+4 Fixed bug OTA get stuck when trying to resume interrupted OTA.
+5 Encapsulated activities from Shine in SyncResult.
+
+VER 1.3 - 11/30/2013
+1 Fix the connection bugs.
+
+VER 1.2 - 11/28/2013
+1 Integrate Samsung BLE SDK to support Samsung Android 4.2 devices. 
+2 Add a new API SetUserId to connect third party app user with Shine. 
+3 Internal bug fixing to improve BLE connection quality.
+
+VER 1.1 - 11/20/2013
+1 Included new APIs that support Shine configurations, see SDK document for more details.
+2 Updated sample project in ShineSample folder to demonstrate how to use SDK to perform Shine configurations.
+3 Added a callback that indicates OTA progress.
+
+VER 1.0 - 11/11/2013
+1 Included new APIs that support OTA (Over-The-Air) upgrade of Shine in the SDK. please check SDK binary and document for detail information.
+2 Updated sample project in ShineSample folder to demonstrate how to use SDK to perform OTA upgrade on Shine device.
+3 Included two shine production firmware files for testing purpose. IMPORTANT: The firmware files are only for internal development and testing purpose. Please ask Misfit for the latest stable fw release.
