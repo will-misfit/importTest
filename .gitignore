@@ -41,10 +41,6 @@ Release/*.jar
 Release/*.so
 Samples/ShineSample/libs
 
-# automation test
-Shine-SDK-for-Android/AutomationTest
-Tools/QCTool
-
 # Mac stuff
 .DS_Store
 
