@@ -1,6 +1,8 @@
 package com.misfit.ble.shine.controller;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProfile;
@@ -11,11 +13,13 @@ import com.misfit.ble.shine.parser.ActivityDataParser;
 import com.misfit.ble.shine.parser.ActivityDataParserFactory;
 import com.misfit.ble.shine.parser.TimestampCorrectorNew;
 import com.misfit.ble.shine.parser.swim.SwimSessionPostProcessor;
+import com.misfit.ble.shine.request.FileAbortRequest;
 import com.misfit.ble.shine.request.FileEraseActivityRequest;
 import com.misfit.ble.shine.request.FileEraseHardwareLogRequest;
 import com.misfit.ble.shine.request.FileGetActivityRequest;
 import com.misfit.ble.shine.request.FileGetHardwareLogRequest;
 import com.misfit.ble.shine.request.FileListRequest;
+import com.misfit.ble.shine.request.OTAResetRequest;
 import com.misfit.ble.shine.request.Request;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.util.MutableBoolean;
@@ -23,6 +27,7 @@ import com.misfit.ble.util.MutableBoolean;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SyncPhaseController extends PhaseController {
 
@@ -55,6 +60,9 @@ public class SyncPhaseController extends PhaseController {
 
     private ShineProfile.SyncCallback mSyncCallback;
 
+    private AtomicInteger mGetFileListIndex;
+    private Handler mainHandler;
+
     public SyncPhaseController(PhaseControllerCallback callback, ShineProfile.SyncCallback syncCallback, SyncPhaseControllerCallback syncPhaseCallback) {
         super(ActionID.SYNC,
                 LogEventItem.EVENT_SYNC,
@@ -62,6 +70,8 @@ public class SyncPhaseController extends PhaseController {
 
         mSyncCallback = syncCallback;
         mSyncPhaseCallback = syncPhaseCallback;
+        mGetFileListIndex = new AtomicInteger(0);
+        mainHandler = new Handler(Looper.getMainLooper());
     }
 
     public SyncSession getSession() {
@@ -122,7 +132,23 @@ public class SyncPhaseController extends PhaseController {
             FileListRequest.Response response = fileListRequest.getResponse();
 
             if (response.result != Constants.RESPONSE_SUCCESS) {
-                postProcessing(RESULT_REQUEST_ERROR);
+                if (mGetFileListIndex.get() == 1) {
+                    if (response.status == Constants.FILE_CONTROL_RESPONSE_OPERATION_IN_PROGRESS) {
+                        sendRequest(buildRequest(FileAbortRequest.class));
+                        mainHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                sendRequest(buildRequest(FileListRequest.class));
+                            }
+                        }, 1000);
+                    } else {
+                        postProcessing(RESULT_REQUEST_ERROR);
+                    }
+                } else {  // now mGetFileListIndex must be greater than 1
+                    sendRequest(buildRequest(OTAResetRequest.class));
+                    // shall we need to post callback to App and disconnect when the FileReset cmd onSend()?
+                    postProcessing(RESULT_REQUEST_ERROR);
+                }
                 return;
             }
 
@@ -220,6 +246,7 @@ public class SyncPhaseController extends PhaseController {
             FileListRequest fileListRequest = new FileListRequest();
             fileListRequest.buildRequest();
             request = fileListRequest;
+            mGetFileListIndex.addAndGet(1);
         } else if (requestType.equals(FileGetActivityRequest.class)) {
             FileGetActivityRequest fileGetRequest = new FileGetActivityRequest();
             fileGetRequest.buildRequest((short)(Constants.FILE_HANDLE_ACTIVITY_FILE + mSyncSession.mNumberOfActivityFilesRead + 1));
