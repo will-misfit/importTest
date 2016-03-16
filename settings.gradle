@@ -1,1 +1,1 @@
-include ':ShineSample', ':ShineSDK', ':SyncSDK', ':SyncSDKSample'
+include ':ShineSDK', 'ShineSample', ':SyncSDK', ':SyncDemo'
