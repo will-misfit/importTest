@@ -7,6 +7,7 @@ public class LogEventItem extends LogItem {
 	
 	public static final String EVENT_START_SCANNING = "startScanning";
 	public static final String EVENT_STOP_SCANNING = "stopScanning";
+	public static final String EVENT_RESTART_SCANNING = "restartScanning";
 	public static final String EVENT_SCAN_RESULT = "scanResult";
 	public static final String EVENT_CONNECTED_DEVICE = "connectedDevice";
 

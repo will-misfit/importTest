@@ -27,6 +27,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.misfit.ble.shine.log.LogUtilHelper.LogEventItemPosition.ResponseFinished;
 
@@ -45,10 +49,12 @@ public final class ShineAdapter {
 	private static ScanLogSession mScanLogSession;
 	private static final Object SCANLogWriteLock = new Object();
 
-	private static final String SHADOW_DEVICE_NAME = "Shadow";
-	private static final String SHADOW_SERIAL_NUMBER = "FOShadow01";
+    private AtomicInteger mRestartScanningIndex = new AtomicInteger(0);
+    private LEScanCallbackWrapper mCurrScanCallbackWrapper;
+    private AtomicBoolean mClientScanningOn = new AtomicBoolean(false);
+    private static Timer mRestartScanningTimer = new Timer("ShineAdapterRestartScanning");
 	
-	public interface ShineScanCallback  {
+	public interface ShineScanCallback {
 		void onScanResult(ShineDevice device, int rssi);
 	}
 
@@ -113,18 +119,6 @@ public final class ShineAdapter {
 				}
 			}
 
-			if (mCallback instanceof ShineScanCallbackForTest && SHADOW_DEVICE_NAME.equals(deviceName)) {
-				String serialNumber = SHADOW_SERIAL_NUMBER;
-				new WriteScanResultInScanLogTask().execute(deviceName, macAddr, serialNumber, scanRecord);
-				isLogged = true;
-				ShineDevice shineDevice = ShineDeviceFactory.getShineDevice(device, serialNumber);
-				if (shineDevice != null) {
-					shineDevice.onDeviceDiscovered();
-					shineDevice.setSerialNumber(serialNumber);
-					mCallback.onScanResult(shineDevice, rssi);
-				}
-			}
-
 			if (!isLogged) {
 				new WriteScanResultInScanLogTask().execute(deviceName, macAddr, null, scanRecord);
 			}
@@ -144,6 +138,7 @@ public final class ShineAdapter {
 			if (mScanLogSession != null) {
 				mScanLogSession.appendScanFailError(errorCode);
 			}
+			sShineAdapter.internalStopScanning();
 		}
 
 		@Override
@@ -225,31 +220,78 @@ public final class ShineAdapter {
 			throw new IllegalStateException("Bluetooth is not enabled!");
 		}
 
+        if (mClientScanningOn.get()) {
+            return false;
+        }
+        mClientScanningOn.set(true);
+
 		if (mScanLogSession == null) {
 			mScanLogSession = new ScanLogSession();
 		}
 		mScanLogSession.start(callback);
 
 		LEScanCallbackWrapper wrapper = LEScanCallbackWrapper.getInstance(callback);
-		// NOTE: scan with filter does not work with Nexus 6/9 on Android 5.1.1.
-//		mBluetoothAdapter.startScanning(Constants.SCAN_SERVICES_UUIDs, wrapper);
+        mCurrScanCallbackWrapper = wrapper;
+		// NOTE: scan with SCAN_SERVICES_UUIDs filter does not work with Nexus 6/9 on Android 5.1.1.
 		return mBluetoothAdapter.startScanning(wrapper);
 	}
+
+    /**
+     * used among internal retry scan scenario, compared to startScanning(),
+     * - without creating a new LogSession
+     * - if Bluetooth is not enabled, not to throw exception
+     * - apply the same callback from startScanning()
+     * */
+    public boolean internalStartScanning() {
+        if (!isEnabled() || mCurrScanCallbackWrapper == null) {
+            return false;
+        }
+        mRestartScanningIndex.addAndGet(1);
+        mScanLogSession.internalStart(mRestartScanningIndex.get());
+        return mBluetoothAdapter.startScanning(mCurrScanCallbackWrapper);
+    }
 	
 	public void stopScanning(final ShineScanCallback callback) {
 		if (!isEnabled()) return;
+        mClientScanningOn.set(false);  // whatever happens, Client don't want scan any more
 
 		LEScanCallbackWrapper wrapper = LEScanCallbackWrapper.getExistingInstance(callback);
 		if (wrapper == null) return;
 
 		mBluetoothAdapter.stopScanning(wrapper);
 		LEScanCallbackWrapper.flushCachedInstance(callback);
-		
+
 		mScanLogSession.stop(callback);
 		LogManager.getDefault().saveAndUploadLog(mScanLogSession);
 		mScanLogSession.clearLogItems();
 		ShineDeviceFactory.saveDevicesCache();
 	}
+
+    /**
+     * used among internal retry scan scenario, compared to stopScanning()
+     * - without end log session
+     * - without removing callback wrapper from cache
+     * */
+    public void internalStopScanning() {
+        if (!isEnabled() || mCurrScanCallbackWrapper == null) {
+            return;
+        }
+        mBluetoothAdapter.stopScanning(mCurrScanCallbackWrapper);
+        mScanLogSession.internalStop();
+
+        if (!mClientScanningOn.get()) {
+            return;
+        }
+
+        mRestartScanningTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (mClientScanningOn.get()) {
+                    internalStartScanning();
+                }
+            }
+        }, Constants.INTERNAL_BEFORE_RESTART_SCAN);
+    }
 
 	private ShineRetrieveCallback mShineRetrieveCallback;
 	public void getConnectedShines(ShineRetrieveCallback callback) {
