@@ -101,6 +101,11 @@ public class SyncPhaseController extends PhaseController {
             return;
         super.onRequestSentResult(request, result);
 
+        // OTAReset cmd is sent after getFileList cmd failed for twice, then invoke App to stop sync session
+        if (request instanceof OTAResetRequest) {
+            postProcessing(RESULT_REQUEST_ERROR);
+        }
+
         if (result == ShineProfileCore.RESULT_FAILURE) {
             postProcessing(RESULT_SENDING_REQUEST_FAILED);
             return;
@@ -141,17 +146,16 @@ public class SyncPhaseController extends PhaseController {
                                 sendRequest(buildRequest(FileListRequest.class));
                             }
                         }, 1000);
-                    } else {
+                    } else {  // currently for other error status, not send FileAbort cmd and getFileList again
                         postProcessing(RESULT_REQUEST_ERROR);
                     }
-                } else {  // now mGetFileListIndex must be greater than 1
+                } else {
                     sendRequest(buildRequest(OTAResetRequest.class));
-                    // shall we need to post callback to App and disconnect when the FileReset cmd onSend()?
-                    postProcessing(RESULT_REQUEST_ERROR);
                 }
                 return;
             }
 
+            mGetFileListIndex.set(0);  // FileList cmd succeed, reset index
             mSyncSession.mNumberOfActivityFiles = response.numberOfFiles;
             mSyncSession.mNumberOfActivityFilesRead = mSyncSession.mNumberOfActivityFilesErased = 0;
             mSyncSession.mTotalFilesSize = response.totalFileSize;
@@ -263,6 +267,14 @@ public class SyncPhaseController extends PhaseController {
             FileEraseHardwareLogRequest fileEraseHardwareLogRequest = new FileEraseHardwareLogRequest();
             fileEraseHardwareLogRequest.buildRequest();
             request = fileEraseHardwareLogRequest;
+        } else if (requestType.equals(FileAbortRequest.class)) {
+            FileAbortRequest abortRequest = new FileAbortRequest();
+            abortRequest.buildRequest(Constants.FILE_HANDLE_OTA);
+            request = abortRequest;
+        } else if (requestType.equals(OTAResetRequest.class)) {
+            OTAResetRequest otaResetRequest = new OTAResetRequest();
+            otaResetRequest.buildRequest();
+            request = otaResetRequest;
         }
         return request;
     }
