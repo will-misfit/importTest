@@ -1,6 +1,7 @@
 package com.misfit.syncsdk;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.misfit.ble.shine.ShineAdapter;
@@ -26,14 +27,12 @@ public class ShineSdkAdapterProxy {
         mContext = context.getApplicationContext();
     }
 
-    public void startScanning(ShineScanCallback scanCallback) {
-        if (scanCallback != null && mShineAdapter != null) {
-            mShineScanCallback = scanCallback;
-            mShineAdapter.startScanning(mShineScanCallback);
-            retrieveConnectedDevices(scanCallback);
-        } else {
-            Log.d(TAG, "Can't start scanning, mShineAdapter = null || mShineScanCallback = null");
-        }
+    public boolean startScanning(@NonNull ShineScanCallback scanCallback) {
+        mShineScanCallback = scanCallback;
+        boolean result = mShineAdapter.startScanning(mShineScanCallback);
+        retrieveConnectedDevices(scanCallback);
+        return result;
+
     }
 
     private void retrieveConnectedDevices(final ShineScanCallback scanCallback) {

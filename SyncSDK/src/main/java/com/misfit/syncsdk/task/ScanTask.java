@@ -1,53 +1,66 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ShineAdapter;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.MisfitScanner;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.enums.FailedReason;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
 
 
 /**
- * Created by Will Hou on 1/12/16.
+ * Task for scan
  */
 public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
     private final static String TAG = "ScanTask";
 
-    private final static long SCAN_TIMEOUT = 30000;
-
-    private TimerTask createTimeoutTask() {
-        cancelCurrentTimerTask();
-        mCurrTimerTask = new TimerTask() {
+    @Override
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "time out, will do retry");
-                onStop();
-                retry();
+                MLog.d(TAG, "scan time out, required device is not found yet");
+                mTaskSharedData.setFailureReasonInLogSession(FailedReason.NO_DEVICE_WITH_SERIAL_NUMBER_FOUND);
+                taskFailed("scan timeout");
             }
         };
-        return mCurrTimerTask;
     }
 
+    /**
+     *  prepare(), execute(), cleanup(), onStop() are invoked in start(TaskSharedData)
+     */
     @Override
     protected void prepare() {
-
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_SCANNING);
     }
 
     @Override
     protected void execute() {
+        mLogEvent.start(mTaskSharedData.getSerialNumber());
         //check if should not scan
         if (ConnectionManager.getInstance().getShineDevice(mTaskSharedData.getSerialNumber()) != null) {
-            Log.d(TAG, "ConnectionManager already has the device, no need to scan");
+            MLog.d(TAG, "ConnectionManager already has the device, no need to scan");
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "no need to scan this device");
             taskSucceed();
             return;
         }
-        TimerManager.getInstance().addTimerTask(createTimeoutTask(), SCAN_TIMEOUT);
+
+        updateExecuteTimer(SdkConstants.SCAN_ONE_DEVICE_TIMEOUT);
+
         MisfitScanner.getInstance().startScan(this);
+        mLogEvent.end(LogEvent.RESULT_SUCCESS, "scan cmd is started");
+
+        // LogEvent of startScanning must be appended immediately as later it turns to be another LogEvent
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
     }
 
     @Override
@@ -57,19 +70,36 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
+
+        mLogSession.appendEvent(mLogEvent);
+
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_SCANNING);
+        mLogEvent.start();
         MisfitScanner.getInstance().stopScan();
+        mLogEvent.end(LogEventType.STOP_SCANNING, "");
+
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
     }
 
     @Override
     public void onScanResult(ShineDevice device, int rssi) {
-        if (mIsFinished) {
+        if (mIsFinished.get()) {
             return;
         }
+
+        MLog.d(TAG, String.format("onScanResult(), serial number %s, rssi %d", device.getSerialNumber(), rssi));
+
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SCANNED_DEVICE);
+        mLogEvent.start();
+        mLogEvent.end(LogEvent.RESULT_SUCCESS, device.getSerialNumber());
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
+
         if (mTaskSharedData.getSerialNumber().equals(device.getSerialNumber())) {
-            //TODO:should add task phase to avoid callback was invoked again.
+            MLog.d(TAG, "onScanResult(), required device is found, scan task succeed");
             cancelCurrentTimerTask();
             ConnectionManager.getInstance().saveShineDevice(device.getSerialNumber(), device);
-            MisfitScanner.getInstance().stopScan();
             taskSucceed();
         }
     }
