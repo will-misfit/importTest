@@ -22,14 +22,14 @@ android:
   components:
     - platform-tools
     - build-tools-22.0.1
+    - build-tools-23.0.2
     - android-22
     - extra-android-m2repository
     - extra-google-m2repository
 
 env:
   matrix:
-    - ANDROID_TARGET=android-22
-    - ANDROID_ABI=armeabi armeabi-v7a
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a
 
   global:
     - ANDROID_MODULE="ShineSDK"
