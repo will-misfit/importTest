@@ -48,11 +48,9 @@ before_install:
 
 script: |
   travis-ext build && \
-  travis-ext lint && \
+  travis-ext lint
 
-  # run test cases
-
-after_script:
+# after_script:
   # - travis-ext coveralls
 
 cache:
