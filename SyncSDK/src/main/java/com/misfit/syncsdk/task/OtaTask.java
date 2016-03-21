@@ -1,136 +1,127 @@
 package com.misfit.syncsdk.task;
 
-import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
-import com.misfit.syncsdk.FirmwareManager;
-import com.misfit.syncsdk.OtaType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.SyncOtaCallback;
-
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.task.state.CheckFirmwareServerState;
+import com.misfit.syncsdk.task.state.PrepareOtaState;
+import com.misfit.syncsdk.task.state.State;
+import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.MLog;
 
 /**
- * Created by Will Hou on 1/13/16.
- */
-public class OtaTask extends Task implements ShineProfile.OTACallback {
+ * OtaTask is composed of several State instances, which works one by one in order as below:
+ *  GetLatestFirmwareState
+ *  AskAppSuggestionState
+ *  PrepareOtaState
+ *  OtaState
+ *  WaitForConnectState
+ *  ReconnectState
+ * */
+public class OtaTask extends Task {
 
-    SyncOtaCallback mSyncOtaCallback;
-    String mLatestFirmwareVersion;
-    String mCurrFirmwareVersion;
-    int mDeviceType;
+    private final static String TAG = "OtaTask";
 
-    FirmwareManager.GetLatestFirmwareListener mGetLatestFirmwareListener = new FirmwareManager.GetLatestFirmwareListener() {
-        @Override
-        public void onReceive(String latestFirmware) {
-            mLatestFirmwareVersion = latestFirmware;
-            getSuggestionFromApp();
-        }
+    private State mCurrState;
 
-        @Override
-        public void onFailed(String reason) {
-            //TODO:failed?
-        }
-    };
+    private String mLatestFirmwareVersion;
 
-    FirmwareManager.DownloadLatestFirmwareListener mDownloadFirmwareListener = new FirmwareManager.DownloadLatestFirmwareListener() {
-        @Override
-        public void onFinished(String filePath) {
-            startOta();
-        }
+    private boolean mRetryOta = false;
 
-        @Override
-        public void onFailed(String reason) {
-            //TODO:force ota failed.
-        }
-    };
+    private boolean mForceOta = false;
 
     @Override
     protected void prepare() {
-
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.OTA);
     }
 
     @Override
     protected void execute() {
-        //TODO:get current firmware version
-
-        //get latest firmware version
-        FirmwareManager.getInstance().checkLatestFirmware(mDeviceType, mGetLatestFirmwareListener);
-    }
-
-    private void getSuggestionFromApp() {
-        //get ota type
-        boolean hasNewFirmware = FirmwareManager.getInstance().shouldUpdate(mDeviceType, mCurrFirmwareVersion, mLatestFirmwareVersion);
-        if (mSyncOtaCallback != null) {
-            int otaType = mSyncOtaCallback.getOtaSuggestion(hasNewFirmware);
-            beforeOta(otaType);
+        mLogEvent.start();
+        if (mRetryOta) {
+            gotoState(new PrepareOtaState(this));
         } else {
-            taskSucceed();
+            gotoState(new CheckFirmwareServerState(this, mTaskSharedData.getModelName(), mTaskSharedData.getFirmwareVersion()));
         }
     }
 
-    private void beforeOta(int otaType) {
-        FirmwareManager firmwareManager = FirmwareManager.getInstance();
-        switch (otaType) {
-            case OtaType.NO_NEED_TO_OTA:
-                taskSucceed();
-                break;
-            case OtaType.NEED_OTA:
-                if (firmwareManager.isFirmwareReady(mLatestFirmwareVersion)) {
-                    startOta();
-                } else {
-                    taskSucceed();  //skip this time
-                }
-                break;
-            case OtaType.FORCE_OTA:
-                firmwareManager.subscribeForDownloadEvent(mLatestFirmwareVersion, mDownloadFirmwareListener);
-                break;
-            default:
-                //TODO:Log as unexpected event
-                break;
+    public void gotoState(State state) {
+        if (mIsFinished.get()) {
+            return;
         }
-    }
-
-    private void startOta() {
-        //get ota file
-        byte[] firmwareData = null;
-        //start ota file
-        ShineSdkProfileProxy profileProxy = null;
-        profileProxy.startOTA(firmwareData, this);
+        MLog.d(TAG, String.format("go to state = %s", state.getClass().getSimpleName()));
+        mCurrState = state;
+        state.execute();
     }
 
     @Override
     public void stop() {
+        mCurrState.stop();
         super.stop();
         ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (profileProxy != null) {
             profileProxy.interruptCurrentAction();
         } else {
-            //TODO:log
+            //TODO:MLog
         }
     }
 
     @Override
     public void onStop() {
-
     }
 
     @Override
     protected void cleanup() {
-        FirmwareManager.getInstance().unsubscriveForDownloadEvent(mDownloadFirmwareListener);
     }
 
-    @Override
-    public void onOTACompleted(ShineProfile.ActionResult resultCode) {
-        //TODO:log
-        if (mSyncOtaCallback != null) {
-            mSyncOtaCallback.onOtaCompleted();
-        }
+    public void setLatestFirmwareVersion(String latestFirmwareVersion) {
+        this.mLatestFirmwareVersion = latestFirmwareVersion;
     }
 
-    @Override
-    public void onOTAProgressChanged(float progress) {
-        //TODO:log
-        if (mSyncOtaCallback != null) {
-            mSyncOtaCallback.onOtaProgress(progress);
-        }
+    public String getLatestFirmwareVersion() {
+        return this.mLatestFirmwareVersion;
     }
+
+    public void shouldForceOta(boolean forceOta) {
+        this.mForceOta = forceOta;
+    }
+
+    public boolean ifForceOta() {
+        return this.mForceOta;
+    }
+
+    /* API open to State subclass to notify the operation result */
+    public void onSucceed() {
+        taskSucceed();
+    }
+
+    public void onFailed(String reason) {
+        taskFailed(reason);
+    }
+
+    public void startRetry() {
+        retry();
+    }
+
+    public SyncOtaCallback getSyncOtaCallback() {
+        return mTaskSharedData.getSyncOtaCallback();
+    }
+
+    public String getSerialNumber() {
+        return mTaskSharedData.getSerialNumber();
+    }
+
+    public void cancelTimerTask() {
+        cancelCurrentTimerTask();
+    }
+
+    public boolean needRetryOta() {
+        return mRetryOta;
+    }
+
+    public void shouldRetryOta(boolean shouldOrNot) {
+        mRetryOta = shouldOrNot;
+    }
+
 }

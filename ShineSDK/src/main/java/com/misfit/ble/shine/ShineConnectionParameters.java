@@ -7,7 +7,6 @@ public class ShineConnectionParameters {
 	private int mConnectionLatency;
 	private int mSupervisionTimeout;
 
-	//FIXME:rename
 	public ShineConnectionParameters(double connectionInterval, int connectionLatency, int supervisionTimeout) {
 		mConnectionInterval = Math.max(connectionInterval, Constants.MINIMUM_CONNECTION_INTERVAL);
 		mConnectionLatency = connectionLatency;

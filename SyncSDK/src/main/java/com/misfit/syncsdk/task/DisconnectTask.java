@@ -1,40 +1,41 @@
 package com.misfit.syncsdk.task;
 
-import android.util.Log;
-
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.callback.ConnectionStateCallback;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
 
-
-/**
- * Created by Will Hou on 1/13/16.
- */
-public class DisconnectTask extends Task implements ConnectionManager.ConnectionStateCallback {
+public class DisconnectTask extends Task implements ConnectionStateCallback {
 
     private final static String TAG = "DisconnectTask";
 
     @Override
-    public boolean couldIgnoreResult() {
-        return true;
-    }
-
-    @Override
     protected void prepare() {
-
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.DISCONNECT);
     }
 
     @Override
     protected void execute() {
+        mLogEvent.start();
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        if (proxy != null && proxy.isConnected()) {
-            ConnectionManager.getInstance().subscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
-            TimerManager.getInstance().addTimerTask(createTimeoutTimerTask(), 2000);
-            proxy.close();
+        if (proxy == null || !proxy.isConnected()) {
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "disconnected already");
+            taskSucceed();
+            return;
         }
+
+        updateExecuteTimer(SdkConstants.DISCONNECT_TIMEOUT);
+
+        proxy.subscribeConnectionStateChanged(this);
+        proxy.close();
     }
 
     @Override
@@ -44,32 +45,35 @@ public class DisconnectTask extends Task implements ConnectionManager.Connection
     @Override
     protected void cleanup() {
         cancelCurrentTimerTask();
-        ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
+        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+        if (proxy != null) {
+            proxy.unsubscribeConnectionStateChanged(this);
+        }
+
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
     }
 
-    TimerTask createTimeoutTimerTask() {
-        cancelCurrentTimerTask();
-        mCurrTimerTask = new TimerTask() {
+    @Override
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "time out");
-                ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), DisconnectTask.this);
-                retry();
+                MLog.d(TAG, "time out");
+                retryAndIgnored();
             }
         };
-        return mCurrTimerTask;
     }
 
 
     @Override
     public void onConnectionStateChanged(ShineProfile.State newState) {
-        Log.d(TAG, "connectionStateChanged() newState=" + newState);
-        if (mIsFinished) {
+        MLog.d(TAG, "connectionStateChanged() newState=" + newState);
+        if (mIsFinished.get()) {
             return;
         }
         if (newState == ShineProfile.State.CLOSED) {
-            ConnectionManager.getInstance().unsubscribeConnectionStateChanged(mTaskSharedData.getSerialNumber(), this);
-            cancelCurrentTimerTask();
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "state is " + newState);
             taskSucceed();
         }
     }

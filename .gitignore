@@ -39,7 +39,7 @@ obj/
 # build script
 Release/*.jar
 Release/*.so
-Samples/ShineSample/libs
+ShineSample/libs
 
 # Mac stuff
 .DS_Store
@@ -58,7 +58,3 @@ proguard/
 
 # Log Files
 *.log
-
-# Xcore...
-XCore/xplatform/djinni
-generated-srcs/
