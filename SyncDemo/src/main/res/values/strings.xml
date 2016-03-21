@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SyncDemo</string>
+    <string name="sdk_version">sdk version</string>
+</resources>

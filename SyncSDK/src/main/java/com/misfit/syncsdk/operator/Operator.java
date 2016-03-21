@@ -3,7 +3,8 @@ package com.misfit.syncsdk.operator;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.misfit.syncsdk.callback.SyncSyncCallback;
+import com.misfit.syncsdk.callback.SyncOperationResultCallback;
+import com.misfit.syncsdk.log.LogManager;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.task.Task;
 
@@ -17,26 +18,33 @@ public class Operator implements Task.TaskResultCallback {
     private final static String TAG = "Operator";
 
     public List<Task> mTaskQueue;
+
     private int mCurrIndex;
 
-    private boolean mRunningOn = false;
-
     private TaskSharedData mTaskSharedData;
-    protected TimerTask mCurrTimerTask;
-    SyncOperationResultCallback mCallback;
 
-    public Operator(@NonNull TaskSharedData taskSharedData, @NonNull List<Task> taskList) {
+    protected TimerTask mCurrTimerTask;
+
+    SyncOperationResultCallback mResultCallback;
+
+    private OperatorReleaseCallback mReleaseCallback;
+
+    public Operator(@NonNull TaskSharedData taskSharedData,
+                    @NonNull List<Task> taskList,
+                    @NonNull SyncOperationResultCallback resultCallback,
+                    OperatorReleaseCallback releaseCallback) {
         mTaskSharedData = taskSharedData;
         mTaskQueue = taskList;
+        mReleaseCallback = releaseCallback;
+        mResultCallback = resultCallback;
     }
 
-    public boolean isRunningOn() {
-        return mRunningOn;
+    public TaskSharedData getTaskSharedData() {
+        return mTaskSharedData;
     }
 
     public void start() {
         Log.d(TAG, this.getClass().getSimpleName() + " start");
-        mRunningOn = true;
         mCurrIndex = -1;
         prepare();
         gotoNext();
@@ -58,42 +66,47 @@ public class Operator implements Task.TaskResultCallback {
 
     public void stop() {
         Log.d(TAG, this.getClass().getSimpleName() + " stop");
-        mRunningOn = false;
         if (mCurrIndex >= 0 && mCurrIndex < mTaskQueue.size()) {
             mTaskQueue.get(mCurrIndex).stop();
         }
-        cleanUp();
+        cleanUpAndRelease();
     }
 
     protected void onFlowCompleted() {
         Log.d(TAG, this.getClass().getSimpleName() + " completed");
-        mRunningOn = false;
-        if (mCallback != null) {
-            mCallback.onFinished();
+        if (mResultCallback != null) {
+            mResultCallback.onSucceed();
         }
-        cleanUp();
+        cleanUpAndRelease();
     }
 
     //FIXME: use enum instead of string
     protected void onFlowEnded(String reason) {
-        Log.d(TAG, this.getClass().getSimpleName() + " ended by+" + reason);
-        mRunningOn = false;
-        if (mCallback != null) {
+        Log.d(TAG, this.getClass().getSimpleName() + " ended by " + reason);
+        if (mResultCallback != null) {
             //FIXME:fix here
-            mCallback.onFailed(-1);
+            mResultCallback.onFailed(-1);
         }
-        cleanUp();
+        cleanUpAndRelease();
     }
 
-    private void cleanUp() {
+    /**
+     * clean up internal resources, and invoke callback to release this Operator instance
+     */
+    private void cleanUpAndRelease() {
         cancelCurrentTimerTask();
-        mTaskSharedData = null;
         mTaskQueue.clear();
+        LogManager.getInstance().uploadAllLog();
+        if (mReleaseCallback != null) {
+            mReleaseCallback.onOperatorRelease();
+        }
+        if (mTaskSharedData != null) {
+            mTaskSharedData.cleanUp();
+            mTaskSharedData = null;
+        }
     }
 
-    protected void submitLog() {
-    }
-
+    /* interface API of TaskResultCallback */
     @Override
     public void onTaskFinished() {
         gotoNext();
@@ -101,19 +114,19 @@ public class Operator implements Task.TaskResultCallback {
 
     @Override
     public void onTaskFailed(Task task, int reason) {
-        Log.d(TAG, task.getClass().getSimpleName() + "failed, reason=" + reason + ", shouldIgnore=" + task.couldIgnoreResult() + ", shouldEndFlow=" + task.shouldEndFlow());
-        if (task.couldIgnoreResult()) {
-            Log.d(TAG, "ignore result");
-            gotoNext();
-        } else if (task.shouldEndFlow()) {
+        Log.d(TAG, task.getClass().getSimpleName() + " failed, reason=" + reason);
+        if (task.shouldEndFlow()) {
             onFlowEnded("task wants end flow");
         } else {
             retry();
         }
     }
 
+    /**
+     * retry at Operator level
+     * */
     private void retry() {
-        Log.d(TAG, String.format("%s retry, remaining retry = %d", mTaskSharedData.getRemainingRetryCount()));
+        Log.d(TAG, String.format("remaining retry = %d", mTaskSharedData.getRemainingRetryCount()));
         if (mTaskSharedData.consumeRetryCount() < 0) {
             onFlowEnded("retry out");
         } else {
@@ -128,5 +141,9 @@ public class Operator implements Task.TaskResultCallback {
         if (mCurrTimerTask != null) {
             mCurrTimerTask.cancel();
         }
+    }
+
+    public interface OperatorReleaseCallback {
+        void onOperatorRelease();
     }
 }
