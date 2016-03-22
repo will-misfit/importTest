@@ -31,17 +31,18 @@ env:
     - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a
 
   global:
-    - ANDROID_MODULE="ShineSDK"
+    - ANDROID_MODULE="ShineSDK", "ShineSample"
     - BUNDLE_DISPLAY_NAME="ShineSDK for Misfit Android App"
     - BUNDLE_IDENTIFIER="com.misfit.ble"
     - ADB_INSTALL_TIMEOUT="15"
     # - ENABLE_INFER=true
 
 before_install:
+  - export NDKVER=r10e
   - export ARCH=$(uname -m)
-  - wget http://dl.google.com/android/repository/android-ndk-r10e-linux-$ARCH.zip
-  - unzip -q android-ndk-r10e-linux-$ARCH.zip
-  - export ANDROID_NDK_HOME=$(pwd)/android-ndk-r10e
+  - wget http://dl.google.com/android/repository/android-ndk-$NDKVER-linux-$ARCH.zip
+  - unzip -q android-ndk-$NDKVER-linux-$ARCH.zip
+  - export ANDROID_NDK_HOME=$(pwd)/android-ndk-$NDKVER
   - export PATH=ANDROID_NDK_HOME:$PATH
   - echo "ndk.dir=$ANDROID_NDK_HOME" >> local.properties
   - curl "https://s3.amazonaws.com/misfit.sw.stg.epd-team/downloads/travis_install.sh" | bash
