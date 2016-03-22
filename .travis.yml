@@ -28,10 +28,8 @@ android:
 
 env:
   matrix:
-    - ANDROID_TARGET=android-22
-    - ANDROID_ABI=armeabi,armeabi-v7a
-    - MODULE=ShineSDK
-    - MODULE=ShineSample
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a  MODULE=ShineSDK
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi-v7a  MODULE=ShineSample
 
   global:
     # - ANDROID_MODULE="ShineSDK"
