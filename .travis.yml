@@ -39,8 +39,8 @@ env:
 
 before_install:
   - export ARCH='uname -m'
-  - wget http://dl.google.com/android/ndk/android-ndk-r10e-linux-${ARCH}.tar.bz2
-  - tar xf android-ndk-r10e-linux-${ARCH}.tar.bz2
+  - wget http://dl.google.com/android/repository/android-ndk-r10e-linux-${ARCH}.zip
+  - unzip android-ndk-r10e-linux-${ARCH}.zip
   - export ANDROID_NDK_HOME='pwd'/android-ndk-r10e
   - export PATH=ANDROID_NDK_HOME:$PATH
   - echo "ndk.dir=$ANDROID_NDK_HOME" >> local.properties
