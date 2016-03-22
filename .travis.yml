@@ -38,6 +38,12 @@ env:
     # - ENABLE_INFER=true
 
 before_install:
+  - export ARCH='uname -m'
+  - wget http://dl.google.com/android/ndk/android-ndk-r10e-linux-${ARCH}.tar.bz2
+  - tar xf android-ndk-r10e-linux-${ARCH}.tar.bz2
+  - export ANDROID_NDK_HOME='pwd'/android-ndk-r10e
+  - export PATH=ANDROID_NDK_HOME:$PATH
+  - echo "ndk.dir=$ANDROID_NDK_HOME" >> local.properties
   - curl "https://s3.amazonaws.com/misfit.sw.stg.epd-team/downloads/travis_install.sh" | bash
   # - travis-ext install_infer
   - travis-ext install_awscli
