@@ -28,10 +28,13 @@ android:
 
 env:
   matrix:
-    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a
+    - ANDROID_TARGET=android-22
+    - ANDROID_ABI=armeabi,armeabi-v7a
+    - MODULE=ShineSDK
+    - MODULE=ShineSample
 
   global:
-    - ANDROID_MODULE="ShineSDK,ShineSample"
+    # - ANDROID_MODULE="ShineSDK"
     - BUNDLE_DISPLAY_NAME="ShineSDK for Misfit Android App"
     - BUNDLE_IDENTIFIER="com.misfit.ble"
     - ADB_INSTALL_TIMEOUT="15"
