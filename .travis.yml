@@ -38,8 +38,7 @@ env:
     # - ENABLE_INFER=true
 
 before_install:
-  - export ARCH='uname -m'
-  - wget http://dl.google.com/android/repository/android-ndk-r10e-linux-${ARCH}.zip
+  - wget http://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip
   - unzip android-ndk-r10e-linux-${ARCH}.zip
   - export ANDROID_NDK_HOME='pwd'/android-ndk-r10e
   - export PATH=ANDROID_NDK_HOME:$PATH
