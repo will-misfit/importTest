@@ -1,0 +1,72 @@
+THIS SDK IS PROPRIETARY TO MISFIT AND ITS LEGAL PARTNERS. IF YOU HAVE A COPY OF SDK BY ACCIDENT, PLEASE CONTACT MISFIT BY SENDING AN EMAIL TO WALLACE@MISFITWEARABLES.COM.
+
+SYSTEM REQUIREMENT
+-----------------
+Android device with BLE (BT 4.0) capability
+Android OS 4.3 (Jelly Bean)
+
+HOW TO USE
+----------
+1 Please put misfit-ble-android-sdk.jar and armeabi folder into android libs folder, and import them into your project.
+2 For detail usage of API, please read SDK document under Doc\ folder. 
+3 For a complete example regarding how to use SDK, please goto ShineSample\ folder and open the sample project there.
+
+
+UPDATE
+------
+VER 1.7.1.2 - 10/24/2014
+1 Sync data is now returned in multiple batches.
+2 Added syncing progress.
+3 Added Venus support.
+
+VER 1.6.4 - 07/29/2014
+1. Improved OTA speed.
+2. Improved SDK stability.
+3. Specifying userId is now MANDATORY.
+4. Fixed OTA progress going backward.
+5. Fixed async task blocking issue.
+6. Added timeout for post requests.
+
+VER 1.6.3 - 05/22/2014
+1. Added userId validation check.
+
+VER 1.6 - 02/07/2014
+1. Fixed activity data timestamp correcting not working.
+2. Fixed automatically close connection after disconnected normally.
+3. Added sleepSession.
+
+VER 1.5.1 - 01/19/2014
+1 Fixed the connection bug when leaving the connection idle for 3 minutes by closing the connection if it is unexpectedly dropped. The new state CONNECTION_STATE_CLOSED will handle this case.
+2 Fixed the time out bug when syncing with Shine that has too many data.
+
+VER 1.5-prerelease - 01/10/2014
+1 Fixed OTA issue on some android devices. (e.g. Nexus 7, Samsung Galaxy S3).
+2 Fixed a multi-thread issue which caused missing onOTAFailed callback on some devices (e.g. Nexus 5).
+3 Improved SDK stability.
+4 Improved SDK log.
+5 Update ShineSample.
+
+VER 1.4 - 12/27/2013
+1 Included battery level in Shine configurations.
+2 Improved performance.
+3 Fixed bug setting wrong timezone to Shine.
+4 Fixed bug OTA get stuck when trying to resume interrupted OTA.
+5 Encapsulated activities from Shine into SyncResult.
+
+VER 1.3 - 11/30/2013
+1 Fix the connection bugs.
+
+VER 1.2 - 11/28/2013
+1 Integrate Samsung BLE SDK to support Samsung Android 4.2 devices. 
+2 Add a new API SetUserId to connect third party app user with Shine. 
+3 Internal bug fixing to improve BLE connection quality.
+
+VER 1.1 - 11/20/2013
+1 Included new APIs that support Shine configurations, see SDK document for more details.
+2 Updated sample project in ShineSample folder to demonstrate how to use SDK to perform Shine configurations.
+3 Added a callback that indicates OTA progress.
+
+VER 1.0 - 11/11/2013
+1 Included new APIs that support OTA (Over-The-Air) upgrade of Shine in the SDK. please check SDK binary and document for detail information.
+2 Updated sample project in ShineSample folder to demonstrate how to use SDK to perform OTA upgrade on Shine device.
+3 Included two shine production firmware files for testing purpose. IMPORTANT: The firmware files are only for internal development and testing purpose. Please ask Misfit for the latest stable fw release.

@@ -41,8 +41,6 @@ Release/*.jar
 Release/*.so
 ShineSample/libs
 
-# automation test
-
 # Mac stuff
 .DS_Store
 

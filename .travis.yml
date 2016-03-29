@@ -1,0 +1,82 @@
+sudo: true
+language: android
+
+addons:
+  apt:
+    packages:
+      - git
+      - openjdk-7-jdk
+      - m4
+      - zlib1g-dev
+      - python-software-properties
+      - build-essential
+      - libgmp-dev
+      - libmpfr-dev
+      - libmpc-dev
+      - unzip
+      - python-pip
+      - python-dev
+      - python-virtualenv
+
+android:
+  components:
+    - platform-tools
+    - build-tools-22.0.1
+    - android-22
+    - extra-android-m2repository
+    - extra-google-m2repository
+
+env:
+  matrix:
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a  ANDROID_MODULE=ShineSDK
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi-v7a  ANDROID_MODULE=ShineSample
+
+  global:
+    - BUNDLE_DISPLAY_NAME="ShineSDK for Misfit Android App"
+    - BUNDLE_IDENTIFIER="com.misfit.ble"
+    - ADB_INSTALL_TIMEOUT="15"
+    # - ENABLE_INFER=true
+
+before_install:
+  - export NDKVER=r10e
+  - export ARCH=$(uname -m)
+  - wget http://dl.google.com/android/repository/android-ndk-$NDKVER-linux-$ARCH.zip
+  - unzip -q android-ndk-$NDKVER-linux-$ARCH.zip
+  - export ANDROID_NDK_HOME=$(pwd)/android-ndk-$NDKVER
+  - export PATH=ANDROID_NDK_HOME:$PATH
+  - echo "ndk.dir=$ANDROID_NDK_HOME" >> local.properties
+  - curl "https://s3.amazonaws.com/misfit.sw.stg.epd-team/downloads/travis_install.sh" | bash
+  # - travis-ext install_infer
+  - travis-ext install_awscli
+  - 'if [[ "$TRAVIS_BRANCH" = "master" ]]; then gradle -q -Penv=prod copyConfiguration; fi'
+  # start emulator
+  # - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
+  # - emulator -avd test -no-skin -no-audio -no-window &
+  # - adb wait-for-device
+
+script: |
+  travis-ext build && \
+  travis-ext lint
+
+# after_script:
+  # - travis-ext coveralls
+
+cache:
+  directories:
+    # cache for gradle
+    - $TRAVIS_BUILD_DIR/.gradle
+    - $HOME/.gradle
+    # - $HOME/infer
+
+branches:
+  only:
+    - master
+    - develop
+    - feature/travis_support
+# - /^feature\/.*/
+# - /^release\/.*/
+# - /^hotfix\/.*/
+
+notifications:
+  email:
+    - bruce@misfit.com
