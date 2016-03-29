@@ -25,7 +25,7 @@ public class SetConnectionParametersPhaseController extends PhaseController {
 	private ShineConnectionParameters mConnectionParameters;
     private double minConnectionInterval = 0f;
 	private double maxConnectionInterval = 0f;
-    private static final int MAX_SET_PARAMS_COUNT = 3;
+    private static final int MAX_SET_PARAMS_COUNT = 2;
 	private int mNumOfSetConnectionIntervalAttempts = 0;
 
     public SetConnectionParametersPhaseController(PhaseControllerCallback callback, ShineProfile.ConfigurationCallback configurationCallback, ShineConnectionParameters connectionParametersRequested) {

@@ -72,7 +72,6 @@ branches:
   only:
     - master
     - develop
-    - feature/travis_support
 # - /^feature\/.*/
 # - /^release\/.*/
 # - /^hotfix\/.*/
