@@ -32,7 +32,6 @@ env:
     - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi-v7a  ANDROID_MODULE=ShineSample
 
   global:
-    # - ANDROID_MODULE="ShineSDK"
     - BUNDLE_DISPLAY_NAME="ShineSDK for Misfit Android App"
     - BUNDLE_IDENTIFIER="com.misfit.ble"
     - ADB_INSTALL_TIMEOUT="15"
@@ -71,8 +70,8 @@ cache:
 
 branches:
   only:
-#    - master
-#    - develop
+    - master
+    - develop
     - feature/travis_support
 # - /^feature\/.*/
 # - /^release\/.*/
