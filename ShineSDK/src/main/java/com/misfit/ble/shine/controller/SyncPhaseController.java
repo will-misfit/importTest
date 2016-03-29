@@ -269,7 +269,7 @@ public class SyncPhaseController extends PhaseController {
             request = fileEraseHardwareLogRequest;
         } else if (requestType.equals(FileAbortRequest.class)) {
             FileAbortRequest abortRequest = new FileAbortRequest();
-            abortRequest.buildRequest(Constants.FILE_HANDLE_OTA);
+            abortRequest.buildRequest(Constants.FILE_HANDLE_ACTIVITY_FILE);
             request = abortRequest;
         } else if (requestType.equals(OTAResetRequest.class)) {
             OTAResetRequest otaResetRequest = new OTAResetRequest();

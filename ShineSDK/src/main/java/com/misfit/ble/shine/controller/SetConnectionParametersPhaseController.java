@@ -164,7 +164,7 @@ public class SetConnectionParametersPhaseController extends PhaseController {
         } else {
             int lhsIntervalBlockIndex = (int)Math.floor(expectedInterval / Constants.CONNECTION_INTERVAL_STEP);
             int rhsIntervalBlockIndex = (int)Math.floor(responseInterval / Constants.CONNECTION_INTERVAL_STEP);
-            return lhsIntervalBlockIndex == rhsIntervalBlockIndex;
+            return Math.abs(lhsIntervalBlockIndex - rhsIntervalBlockIndex) <= 1;
         }
     }
 
