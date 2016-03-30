@@ -22,7 +22,7 @@
     <string name="stop_ota">Stop OTA</string>
     <string name="start_change_serial_number">Change SN</string>
     <string name="stop_change_serial_number">Stop Change SN</string>
-    <string name="connection_parameters">Conn Params</string>
+    <string name="connection_parameters">Conn\nParams</string>
     <string name="flash_button_mode">Button Mode</string>
     <string name="start_set_streaming_configuration">Set StrCfg</string>
     <string name="stop_set_streaming_configuration">Stop StrCfg</string>
@@ -40,8 +40,8 @@
     <string name="map_event_animation_hint">event, animation, repeat</string>
     <string name="event_mapping_system_control_hint">mapping system control bits</string>
     <string name="button_animation_hint">button animation</string>
-    <string name="disable_bluetooth">disable bt</string>
-    <string name="enable_bluetooth">enable bt</string>
+    <string name="disable_bluetooth">bt off</string>
+    <string name="enable_bluetooth">bt on/off</string>
 
     <string name="activate">Activate</string>
     <string name="stop_activating">Stop activating</string>
@@ -50,9 +50,9 @@
     <string name="stream_events">Stream</string>
     <string name="stop_stream_events">Stop Stream</string>
 
-    <string name="hid_connect">HID Connect</string>
-    <string name="hid_disconnect">HID Disconnect</string>
-    <string name="input_method">Input Mtd</string>
+    <string name="hid_connect">HID on</string>
+    <string name="hid_disconnect">HID off</string>
+    <string name="input_method">Input\nMtd</string>
 
     <string name="bond">Bond</string>
     <string name="clear_bond">Clear\nBond</string>

@@ -144,13 +144,6 @@
                     android:text="@string/enable_bluetooth" />
 
                 <Button
-                    android:id="@+id/btn_disable_bt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="onTestBluetooth"
-                    android:text="@string/disable_bluetooth" />
-
-                <Button
                     android:id="@+id/btn_connect_or_disconnect"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

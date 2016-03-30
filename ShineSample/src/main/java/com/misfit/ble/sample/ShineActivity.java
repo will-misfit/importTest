@@ -52,7 +52,7 @@ public class ShineActivity extends BaseActivity {
 	private Button mScanButton, mConnectButton, mCloseButton;
 	private Button mHIDConnectButton, mHIDDisconnectButton, mInputMethodButton;
 	private Button mAnimateButton, mStopAnimationButton, mConfigButton, mSyncButton, mOTAButton;
-	
+
 	private Button mActivateButton, mActivateStateButton, mStreamUserInputEventsButton;
 	private Button mChangeSNButton, mConnectionParametersButton;
 	private EditText mConfigurationEditText, mSerialNumberEditText, mConnectionParamsEditText;
@@ -187,7 +187,7 @@ public class ShineActivity extends BaseActivity {
 		mConnectionParametersButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String parameters = mConnectionParamsEditText.getText().toString();
+				String parameters = mConnectionParamsEditText.getText().toString().trim();
 
 				if (TextUtils.isEmpty(parameters)) {
 					setMessage("GETTING CONNECTION PARAMETERS");
@@ -435,7 +435,7 @@ public class ShineActivity extends BaseActivity {
 				stopCurrentOperation();
 			}
 		});
-		
+
 		mShineToPlutoButton = (Button) findViewById(R.id.btnShineToPluto);
 		mShineToPlutoButton.setOnClickListener(new OnClickListener() {
 			@Override
@@ -498,12 +498,12 @@ public class ShineActivity extends BaseActivity {
 	public void onTestBluetooth(View v) {
 		switch (v.getId()) {
 			case R.id.btn_enable_bt:
-				ShineAdapter.getDefaultAdapter(this).enableBluetooth();
+				if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+					ShineAdapter.getDefaultAdapter(this).disableBluetooth();
+				} else {
+					ShineAdapter.getDefaultAdapter(this).enableBluetooth();
+				}
 				Toast.makeText(this, R.string.enable_bluetooth, Toast.LENGTH_SHORT).show();
-				break;
-			case R.id.btn_disable_bt:
-				ShineAdapter.getDefaultAdapter(this).disableBluetooth();
-				Toast.makeText(this, R.string.disable_bluetooth, Toast.LENGTH_SHORT).show();
 				break;
 		}
 	}
