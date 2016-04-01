@@ -11,13 +11,19 @@ import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 /**
- * OtaTask is composed of several State instances, which works one by one in order as below:
- *  GetLatestFirmwareState
+ * OtaTask is composed of several State instances:
+ *  CheckFirmwareServerState
  *  AskAppSuggestionState
  *  PrepareOtaState
  *  OtaState
  *  WaitForConnectState
  *  ReconnectState
+ *
+ *  basically, involved State instances include two categories:
+ *  1. before OTA, check firmware on remote server, and download firmware to local file
+ *     including CheckFirmwareServerState, AskAppSuggestionState, PrepareOtaState
+ *  2. OTA and reconnect post OTA
+ *     including OtaState, WaitForConnectState, ReconnectState
  * */
 public class OtaTask extends Task {
 
@@ -27,6 +33,7 @@ public class OtaTask extends Task {
 
     private String mLatestFirmwareVersion;
 
+    // retry OTA which transfers firmware binary file to device via BLE
     private boolean mRetryOta = false;
 
     private boolean mForceOta = false;

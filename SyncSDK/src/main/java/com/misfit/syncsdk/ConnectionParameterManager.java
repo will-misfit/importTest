@@ -3,7 +3,7 @@ package com.misfit.syncsdk;
 import com.misfit.ble.shine.ShineConnectionParameters;
 
 /**
- * Created by Will Hou on 1/13/16.
+ * the connection parameters are presented as [ConnectionInterval, ConnectionLatency, SupervisionTimeout]
  */
 public class ConnectionParameterManager {
 

@@ -239,13 +239,8 @@ public class MainActivity extends AppCompatActivity
 
     /* interface methods of SyncOtaCallback */
     @Override
-    public void onOtaProgress(float progress) {
-        MLog.d(TAG, "OTA progress = " + progress);
-    }
-
-    @Override
-    public void onOtaCompleted() {
-        MLog.d(TAG, "OTA Completed");
+    public void onEntireOtaCompleted() {
+        MLog.d(TAG, "entire OTA Completed");
     }
 
     @Override
