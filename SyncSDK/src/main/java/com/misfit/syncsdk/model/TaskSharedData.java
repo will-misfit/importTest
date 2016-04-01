@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.controller.ConfigurationSession;
 import com.misfit.syncsdk.ConnectionManager;
+import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.callback.ReadDataCallback;
@@ -109,6 +110,10 @@ public class TaskSharedData {
 
     public int getDeviceType() {
         return mDeviceType;
+    }
+
+    public void setDeviceType(@DeviceType.DEVICETYPE int deviceType) {
+        mDeviceType = deviceType;
     }
 
     public String getSerialNumber() {
