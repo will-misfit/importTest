@@ -19,7 +19,8 @@ import java.util.TimerTask;
 public class OtaState extends State implements ShineProfile.OTACallback {
     private static final String TAG = "OtaState";
 
-    private final static long TIMEOUT_OTA = 10 * 1000;
+    // this time is for each OTACallback.onOTAProgressChanged() is called
+    private final static long TIMEOUT_OTA_Progress_Tick = 10 * 1000;
 
     private OtaTask otaTask;
 
@@ -67,7 +68,7 @@ public class OtaState extends State implements ShineProfile.OTACallback {
             public void run() {
                 handleOtaCompleted(false);
             }
-        }, TIMEOUT_OTA);
+        }, TIMEOUT_OTA_Progress_Tick);
         profileProxy.startOTA(firmwareData, this);
     }
 
@@ -84,27 +85,35 @@ public class OtaState extends State implements ShineProfile.OTACallback {
     }
 
     synchronized private void handleOtaCompleted(boolean isSucceed) {
+        cancelCurrentTimeoutTask();
+
         if (mIsStateFinished) {
             MLog.d(TAG, "state already finished");
             return;
         }
         mIsStateFinished = true;
         otaTask.shouldRetryOta(!isSucceed);
+
         if (isSucceed && mSyncOtaCallback != null) {
-            mSyncOtaCallback.onOtaCompleted();
+            mSyncOtaCallback.onEntireOtaCompleted();
         }
         otaTask.gotoState(new WaitForConnectState(otaTask));
     }
 
     @Override
     public void onOTAProgressChanged(float progress) {
+        cancelCurrentTimeoutTask();
+        setNewTimeOutTask(new TimerTask() {
+            @Override
+            public void run() {
+                handleOtaCompleted(false);
+            }
+        }, TIMEOUT_OTA_Progress_Tick);
+
         MLog.d(TAG, "ota progress = " + progress);
         if (mIsStateFinished) {
             MLog.d(TAG, "state already finished");
             return;
-        }
-        if (mSyncOtaCallback != null) {
-            mSyncOtaCallback.onOtaProgress(progress);
         }
     }
 }

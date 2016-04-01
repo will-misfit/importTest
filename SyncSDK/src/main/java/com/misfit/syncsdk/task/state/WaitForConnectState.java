@@ -8,7 +8,7 @@ import java.util.TimerTask;
  * wait for a while before reconnect
  * */
 public class WaitForConnectState extends State {
-    private final static int DELAY_BEFORE_CONNECT = 5000;
+    private final static int DELAY_BEFORE_CONNECT = 5 * 1000; // in milli sec
 
     private OtaTask otaTask;
 

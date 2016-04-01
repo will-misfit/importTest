@@ -5,7 +5,8 @@ import com.misfit.syncsdk.task.OtaTask;
 import com.misfit.syncsdk.utils.MLog;
 
 /**
- * check latest firmware version and get to know it should OTA or not
+ * given model name, check latest firmware version on remote server
+ * given current firmware version of device, decide whether need to OTA
  * */
 public class CheckFirmwareServerState extends State implements FirmwareManager.CheckFirmwareServerListener {
 
@@ -25,18 +26,18 @@ public class CheckFirmwareServerState extends State implements FirmwareManager.C
     @Override
     public void execute() {
         mShouldStop = false;
-        //TODO:check modelName & firmwareVersion ready
-        //TODO:handle check latest firmware failed
         FirmwareManager.getInstance().checkLatestFirmware(mModelName, mFwVersion, this);
     }
 
     @Override
     public void stop() {
+        FirmwareManager.getInstance().unsubscribeFirmwareCheck(this);
         mShouldStop = true;
     }
 
     @Override
     public void onSucceed(boolean shouldOta, String firmwareVersion) {
+        FirmwareManager.getInstance().unsubscribeFirmwareCheck(this);
         MLog.d(TAG, String.format("shouldOta = %s, firmware version = %s", shouldOta, firmwareVersion));
         if (mShouldStop) {
             return;
@@ -51,6 +52,7 @@ public class CheckFirmwareServerState extends State implements FirmwareManager.C
 
     @Override
     public void onFailed(int errorReason) {
+        FirmwareManager.getInstance().unsubscribeFirmwareCheck(this);
         if (mShouldStop) {
             return;
         }
