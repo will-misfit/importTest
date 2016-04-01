@@ -83,10 +83,14 @@ public class SyncPhaseController extends PhaseController {
     public void start() {
         super.start();
 
+        reset();
+        sendRequest(buildRequest(FileListRequest.class));
+    }
+
+    private void reset() {
         mSyncSession = new SyncSession();
         mTimestampCorrector = new TimestampCorrectorNew();
         mSwimLapPostProcessor = new SwimSessionPostProcessor();
-        sendRequest(buildRequest(FileListRequest.class));
     }
 
     @Override
