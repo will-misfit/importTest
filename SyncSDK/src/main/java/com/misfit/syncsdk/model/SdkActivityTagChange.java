@@ -11,11 +11,11 @@ public class SdkActivityTagChange {
 
 	private long mTimestamp = 0;
 
-	private int mMisfitActivityType = SdkActivityType.UNKNOWN_TYPE;
+	private int mMisfitActivityType = SdkActivityType.UNKNOWN;
 
 	public SdkActivityTagChange() {}
 
-	public SdkActivityTagChange(long timestamp, int activityTypeInt){
+	public SdkActivityTagChange(long timestamp, @SdkActivityType.ActivityType int activityTypeInt){
 		mTimestamp = timestamp;
 		mMisfitActivityType = activityTypeInt;
 	}

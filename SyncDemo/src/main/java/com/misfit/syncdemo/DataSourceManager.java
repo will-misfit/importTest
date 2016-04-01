@@ -42,7 +42,7 @@ public class DataSourceManager {
     public static List<SdkActivityTagChange> getSdkActivityChangeTagList(long startTime, long endTime) {
         List<SdkActivityTagChange> result = new ArrayList<>();
         if (endTime <= startTime) {
-            SdkActivityTagChange walkingActivityTag = new SdkActivityTagChange(endTime, SdkActivityType.WALKING_TYPE);
+            SdkActivityTagChange walkingActivityTag = new SdkActivityTagChange(endTime, SdkActivityType.WALKING);
             result.add(walkingActivityTag);
             return result;
         }
@@ -50,7 +50,7 @@ public class DataSourceManager {
         long duration = endTime - startTime;
         long intervalTime = duration / Activity_Tag_Size;
         for (int i = 0; i < Activity_Tag_Size; i++) {
-            result.add(new SdkActivityTagChange(startTime + i * intervalTime, SdkActivityType.WALKING_TYPE));
+            result.add(new SdkActivityTagChange(startTime + i * intervalTime, SdkActivityType.WALKING));
         }
         return result;
     }
@@ -74,7 +74,7 @@ public class DataSourceManager {
         long currTime = Calendar.getInstance().getTimeInMillis() / 1000;
         long timestamp = currTime - duration;
         for(int i = 0; i < count; i++) {
-            SdkResourceSettings settings = new SdkResourceSettings(timestamp, true, SdkActivityType.RUNNING_TYPE,
+            SdkResourceSettings settings = new SdkResourceSettings(timestamp, true, SdkActivityType.RUNNING,
                 Timezone_Offset_East_Eight);
             result.add(settings);
             timestamp += delta;
