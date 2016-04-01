@@ -101,6 +101,7 @@ public class FirmwareManager {
             return;
         }
 
+        // TODO: if another device come to call checkLatestFirmware(), with different [modelName, firmwareVer], how?
         if (mWorkingStatus.get() == STATUS_CHECKING_COMPLETED) {
             Log.d(TAG, "checkLatestFirmware(), check remote firmware has completed");
             if (mNewFirmwareInfo != null) {
@@ -159,7 +160,9 @@ public class FirmwareManager {
             String oldFwVersionNumber = mCurrentFirmwareVersion;
 
             // FIXME: except model name of 'shine', is there any other device model need to OTA when oldFwModelName is null?
-            if (!CheckUtils.isStringEmpty(newFwModelName)) {
+            if (CheckUtils.isStringEmpty(newFwModelName)) {
+                handleOnCheckFirmwareSucceed(false, newFwVersionNumber);
+            } else {
                 if (newFwModelName.equals(oldFwModelName)
                         || (CheckUtils.isStringEmpty(oldFwModelName) && newFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))) {
                     if (shouldOTA(newFwVersionNumber, oldFwVersionNumber)) {
@@ -218,7 +221,7 @@ public class FirmwareManager {
     /**
      * download firmware binary file
      * */
-    private boolean downloadFirmwareFile(FirmwareInfo firmwareInfo) {
+    public boolean downloadFirmwareFile(FirmwareInfo firmwareInfo) {
         String versionNumber = firmwareInfo.getVersionNumber();
         String tempFirmwareFileName = getTempFirmwareFileName(versionNumber);
         String firmwareFileName = getFirmwareFileName(versionNumber);

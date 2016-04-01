@@ -3,8 +3,8 @@ package com.misfit.syncsdk.task;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
+import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
-import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
@@ -96,11 +96,11 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
 
         MLog.d(TAG, String.format("onConnectionStateChanged(), newState %s", state));
         if (state == ShineProfile.State.CONNECTED) {
-            updateDeviceInfo();
+            ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+            updateDeviceWithModelName(proxy.getModelNumber(), proxy.getFirmwareVersion());
             mLogEvent.end(LogEvent.RESULT_SUCCESS, "connected");
 
             // ConnectTask successful, subscribe a monitoring ConnectionStateCallback for remaining Tasks
-            ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
             if (proxy != null) {
                 ConnectionStateCallback postConnectMonitor = mTaskSharedData.getPostConnectConnectionStateCallback();
                 proxy.subscribeConnectionStateChanged(postConnectMonitor);
@@ -113,11 +113,20 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
         }
     }
 
-    private void updateDeviceInfo() {
-        ShineSdkProfileProxy profileProxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        mTaskSharedData.setFirmwareVersion(profileProxy.getFirmwareVersion());
-        mTaskSharedData.setModelName(profileProxy.getModelNumber());
-        // TODO: for SyncFlashDevice, it is optional to update DeviceType to FlashLink now
+    // TODO: Firmware team is about to merge the model names of Flash and Flash Link, below method needs to update
+    private void updateDeviceWithModelName(String modelName, String firmwareVersion) {
+        mTaskSharedData.setModelName(modelName);
+        mTaskSharedData.setFirmwareVersion(firmwareVersion);
+
+        int initialDeviceType = mTaskSharedData.getDeviceType();
+        if (initialDeviceType == DeviceType.FLASH) {
+            int exactDeviceType = DeviceType.getDeviceType(mTaskSharedData.getSerialNumber(), modelName);
+            if (exactDeviceType == DeviceType.FLASH_LINK) {
+                mTaskSharedData.setDeviceType(exactDeviceType);
+                // insert additional tasks in Task list of SyncFlashDevice
+
+            }
+        }
     }
 
     /*
