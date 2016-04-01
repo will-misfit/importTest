@@ -189,51 +189,10 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
         @Override
         protected Void doInBackground(Void... params) {
-            sortRawData();
-            filterRawData();
-            saveMisfitSyncData(syncResult);
+            syncResult = sortRawData(rawSyncDataList);
+            filterRawData(syncResult, mTaskSharedData.getSyncParams().lastSyncTime);
+            buildActivitySessionGroup(syncResult);
             return null;
-        }
-
-        /**
-         * sort the raw data
-         */
-        private void sortRawData() {
-            Log.d(TAG, "sortRawData()");
-            if (CheckUtils.isCollectionEmpty(rawSyncDataList)) {
-                return;
-            }
-            AlgorithmUtils.sortSyncResultList(rawSyncDataList);
-            for (int i = 1; i < rawSyncDataList.size(); i++) {
-                AlgorithmUtils.handleNotContinuousActivities(rawSyncDataList.get(i - 1), rawSyncDataList.get(i));
-            }
-            syncResult = AlgorithmUtils.mergeSyncResults(rawSyncDataList);
-        }
-
-        /**
-         * filter the raw data with lastSyncTime
-         */
-        private void filterRawData() {
-            Log.d(TAG, "filterRawData()");
-            long lastSyncTime = mTaskSharedData.getSyncParams().lastSyncTime;
-
-            if (syncResult.mActivities.isEmpty()) {
-                return;  // if no data in syncResult.mActivities, nothing to filter
-            }
-            final int n = syncResult.mActivities.size();
-
-            // if lastSyncTime is later than current tail activity's start time, nothing to filter
-            long tailActivityStartTime = syncResult.mActivities.get(n - 1).mStartTimestamp;
-            if (tailActivityStartTime < lastSyncTime) {
-                MLog.d(TAG, "No data is newer than last data synced, do not import those activities");
-                return;
-            }
-
-            if (lastSyncTime == 0l) {
-                MLog.d(TAG, "Last sync time has not been saved before, so that nothing to filter");
-                return;
-            }
-            AlgorithmUtils.filterSyncResultInternalData(syncResult, lastSyncTime);
         }
 
         @Override
@@ -243,8 +202,47 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         }
     }
 
-    private void saveMisfitSyncData(SyncResult syncResult) {
-        MLog.d(TAG, String.format("saveMisfitSyncData(), syncResult size %d", syncResult.mActivities.size()));
+    /**
+     * sort the raw SyncResult list
+     */
+    public static SyncResult sortRawData(List<SyncResult> rawSyncDataList) {
+        Log.d(TAG, "sortRawData()");
+        if (CheckUtils.isCollectionEmpty(rawSyncDataList)) {
+            return new SyncResult();
+        }
+        AlgorithmUtils.sortSyncResultList(rawSyncDataList);
+        for (int i = 1; i < rawSyncDataList.size(); i++) {
+            AlgorithmUtils.handleNotContinuousActivities(rawSyncDataList.get(i - 1), rawSyncDataList.get(i));
+        }
+        return AlgorithmUtils.mergeSyncResults(rawSyncDataList);
+    }
+
+    /**
+     * filter the raw data with lastSyncTime
+     * @param syncResult, inout param
+     */
+    public static void filterRawData(SyncResult syncResult, long lastSyncTime) {
+        if (syncResult.mActivities.isEmpty()) {
+            return;
+        }
+        final int n = syncResult.mActivities.size();
+
+        // if lastSyncTime is later than current tail activity's start time, nothing to filter
+        long tailActivityStartTime = syncResult.mActivities.get(n - 1).mStartTimestamp;
+        if (tailActivityStartTime < lastSyncTime) {
+            MLog.d(TAG, "No data is newer than last data synced, do not import those activities");
+            return;
+        }
+
+        if (lastSyncTime == 0l) {
+            MLog.d(TAG, "Last sync time has not been saved before, so that nothing to filter");
+            return;
+        }
+        AlgorithmUtils.filterSyncResultInternalData(syncResult, lastSyncTime);
+    }
+
+    public void buildActivitySessionGroup(SyncResult syncResult) {
+        MLog.d(TAG, String.format("buildActivitySessionGroup(), syncResult size %d", syncResult.mActivities.size()));
 
         if (syncResult != null && !CheckUtils.isCollectionEmpty(syncResult.mActivities)) {
             boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
@@ -263,7 +261,6 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                     PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
                     mTaskSharedData.setPostCalculateData(postCalculateData);
                 }
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
             } else {
                 if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {
@@ -275,13 +272,12 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                 SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForShine(syncResult,
                     mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
                     mTaskSharedData.getSyncParams().userProfile);
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
                 if (mTaskSharedData.getReadDataCallback() != null) {
                     PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
                     mTaskSharedData.setPostCalculateData(postCalculateData);
                 }
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
             }
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
         }
     }
 }

@@ -380,7 +380,6 @@ public class MainActivity extends AppCompatActivity
     private SyncParams createSyncParams() {
         SyncParams syncParams = new SyncParams();
 
-        syncParams.firstSync = mFirstSync;
         syncParams.lastSyncTime = DataSourceManager.createLastSyncTime();
         syncParams.userProfile = DataSourceManager.getSdkProfile(SdkGender.MALE);
         syncParams.firstSync = mSwitchFirstSync.isChecked();
