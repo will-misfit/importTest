@@ -58,7 +58,7 @@ public class SyncMKIIDevice extends SyncCommonDevice {
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new CheckFirmwareTask());
         syncTasks.add(new PlayAnimationTask());
-        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
+        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.DefaultParams));
         syncTasks.add(new SyncAndCalculateTask());
         syncTasks.add(new OtaTask());
         syncTasks.add(new GetConfigurationTask());

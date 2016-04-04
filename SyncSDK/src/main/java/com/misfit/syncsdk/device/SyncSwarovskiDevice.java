@@ -53,7 +53,7 @@ public class SyncSwarovskiDevice extends SyncCommonDevice {
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new CheckFirmwareTask());
         syncTasks.add(new PlayAnimationTask());
-        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultSwarovskiParams()));
+        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.DefaultSwarovskiParams));
         syncTasks.add(new SyncAndCalculateTask());
         syncTasks.add(new OtaTask());
         syncTasks.add(new GetConfigurationTask());
