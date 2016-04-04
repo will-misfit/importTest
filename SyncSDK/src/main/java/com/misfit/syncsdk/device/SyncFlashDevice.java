@@ -22,9 +22,11 @@ import com.misfit.syncsdk.task.OtaTask;
 import com.misfit.syncsdk.task.PlayAnimationTask;
 import com.misfit.syncsdk.task.SetConfigurationTask;
 import com.misfit.syncsdk.task.SetConnectionParameterTask;
+import com.misfit.syncsdk.task.StartUserInputStreamingTask;
 import com.misfit.syncsdk.task.SwitchTrackerModeTask;
 import com.misfit.syncsdk.task.SyncAndCalculateTask;
 import com.misfit.syncsdk.task.Task;
+import com.misfit.syncsdk.task.UnmapEventAnimationTask;
 
 import java.util.List;
 
@@ -62,16 +64,20 @@ public class SyncFlashDevice extends SyncCommonDevice {
         tasks.add(new PlayAnimationTask());
         if (syncParams.firstSync) {
             tasks.add(new ActivateTask());
-            tasks.add(new SwitchTrackerModeTask());
-            // tasks.add(new UnmapEventAnimationTask());  // add this task only when it is Flash Button
         }
+        tasks.add(new SwitchTrackerModeTask());   // only works for Flash Button
+        tasks.add(new UnmapEventAnimationTask()); // only works for Flash Button
+
         tasks.add(new GetConfigurationTask());
         tasks.add(new CheckOnTagStatusTaskUserInput());
-        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultParams()));
+        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.DefaultParams));
         tasks.add(new SyncAndCalculateTask());
         tasks.add(new OtaTask());
         tasks.add(new GetConfigurationTask());
         tasks.add(new SetConfigurationTask());
+
+        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.SlowConnectionParams)); // only works for Flash Button
+        tasks.add(new StartUserInputStreamingTask());  // only works for Flash Button
         tasks.add(new DisconnectTask());
 
         SyncOperator syncOperator = new SyncOperator(taskSharedData, tasks, resultCallback, this);

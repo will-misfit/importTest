@@ -53,7 +53,7 @@ public class SyncIwcDevice extends SyncCommonDevice {
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new CheckFirmwareTask());
         syncTasks.add(new PlayAnimationTask());
-        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultIwcParams()));
+        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.DefaultIWCParams));
         syncTasks.add(new SyncAndCalculateTask());
         syncTasks.add(new OtaTask());
         syncTasks.add(new GetConfigurationTask());

@@ -53,7 +53,7 @@ public class SyncRayDevice extends SyncCommonDevice {
         List<Task> syncTasks = prepareTasks();
         syncTasks.add(new CheckFirmwareTask());
         syncTasks.add(new PlayAnimationTask());
-        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultRayParams()));
+        syncTasks.add(new SetConnectionParameterTask(ConnectionParameterManager.DefaultRayParams));
         syncTasks.add(new SyncAndCalculateTask());
         syncTasks.add(new OtaTask());
         syncTasks.add(new GetConfigurationTask());

@@ -5,6 +5,7 @@ import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
+import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
@@ -46,6 +47,14 @@ public class SwitchTrackerModeTask extends Task implements ShineProfile.Configur
     @Override
     protected void execute() {
         mLogEvent.start();
+
+        if (mTaskSharedData.getDeviceType() != DeviceType.FLASH_LINK) {
+            String msg = String.format("Ignore this task as it is not %s", DeviceType.getDeviceTypeText(DeviceType.FLASH_LINK));
+            mLogEvent.end(LogEvent.RESULT_OTHER, msg);
+            taskIgnored(msg);
+            return;
+        }
+
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
             mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProxy is not ready");

@@ -123,8 +123,6 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
             int exactDeviceType = DeviceType.getDeviceType(mTaskSharedData.getSerialNumber(), modelName);
             if (exactDeviceType == DeviceType.FLASH_LINK) {
                 mTaskSharedData.setDeviceType(exactDeviceType);
-                // insert additional tasks in Task list of SyncFlashDevice
-
             }
         }
     }
