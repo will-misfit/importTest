@@ -123,7 +123,13 @@ public class OTAPhaseController extends PhaseController {
 		if (request == null || request.equals(mCurrentRequest) == false)
 			return;
 		super.onRequestSentResult(request, result);
-		
+
+		// for OTAReset request, whatever the requestSentResult is, consider it succeed
+		if (request instanceof OTAResetRequest) {
+			onPhaseControllerFinish(RESULT_SUCCESS);
+            return;
+		}
+
 		if (result == ShineProfileCore.RESULT_FAILURE) {
 			onPhaseControllerFinish(RESULT_SENDING_REQUEST_FAILED);
 			return;
@@ -133,10 +139,6 @@ public class OTAPhaseController extends PhaseController {
 		} else if (result == ShineProfileCore.RESULT_UNSUPPORTED) {
 			onPhaseControllerFinish(RESULT_UNSUPPORTED);
 			return;
-		}
-		
-		if (request instanceof OTAResetRequest) {
-			onPhaseControllerFinish(RESULT_SUCCESS);
 		}
 	}
 	
