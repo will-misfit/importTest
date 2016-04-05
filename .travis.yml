@@ -60,6 +60,7 @@ script: |
 
 # after_script:
   # - travis-ext coveralls
+  travis-ext hockey_deploy
 
 cache:
   directories:
