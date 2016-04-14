@@ -1,4 +1,4 @@
-package com.misfit.syncsdk.reproduce;
+package com.misfit.syncdemo.reproduce;
 
 import com.misfit.ble.util.Convertor;
 

@@ -43,10 +43,10 @@ import butterknife.OnClick;
 import butterknife.OnTouch;
 
 
-public class MainActivity extends AppCompatActivity
+public class SyncActivity extends AppCompatActivity
         implements SyncOperationResultCallback, SyncOtaCallback, ReadDataCallback, ConnectionStateCallback {
 
-    private final static String TAG = "MainActivity";
+    private final static String TAG = "SyncActivity";
 
     private final static int REQ_SCAN = 1;
 
