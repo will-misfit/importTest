@@ -28,12 +28,8 @@ public class GeneralUtils {
         return mGeneralUtils;
     }
 
-    public static LogEvent createLogEvent(int eventId) {
-        String eventName = null;
-        if (eventId >= 0 && eventId < LogEventType.LogEventNames.length) {
-            eventName = LogEventType.LogEventNames[eventId];
-        }
-        return new LogEvent(eventId, eventName);
+    public static LogEvent createLogEvent(LogEventType eventType) {
+        return new LogEvent(eventType.getId(), eventType.name());
     }
 
     public int randomInt() {

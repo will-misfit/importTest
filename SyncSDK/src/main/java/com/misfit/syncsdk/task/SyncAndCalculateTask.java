@@ -45,7 +45,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     /* interface of Task */
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.GET_ACTIVITY);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.GetActivity);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     private void handleOnShineSdkSyncSucceed() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CALCULATE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.Calculate);
         mLogEvent.start();
 
         if (CheckUtils.isCollectionEmpty(mSyncResultSummary)) {

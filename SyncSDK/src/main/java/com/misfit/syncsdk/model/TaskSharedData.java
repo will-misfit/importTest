@@ -62,7 +62,7 @@ public class TaskSharedData {
                 setFailureReasonInLogSession(FailedReason.DISCONNECTED_UNEXPECTEDLY);
             } else {
                 // when the Sync process runs after connect, we don't care other State except Disconnected
-                LogEvent logEvent = GeneralUtils.createLogEvent(LogEventType.UNEXPECTED_CONNECTION_STATE);
+                LogEvent logEvent = GeneralUtils.createLogEvent(LogEventType.UnexpectedConnectionState);
                 mLogSession.appendEvent(logEvent);
             }
         }

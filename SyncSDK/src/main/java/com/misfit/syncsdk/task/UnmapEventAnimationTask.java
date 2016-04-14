@@ -24,7 +24,7 @@ public class UnmapEventAnimationTask extends Task implements ShineProfile.Config
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.UNMAP_EVENT_ANIMATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.UnmapEventAnimation);
     }
 
     @Override

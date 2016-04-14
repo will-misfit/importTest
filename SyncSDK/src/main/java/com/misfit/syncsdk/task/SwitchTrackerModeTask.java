@@ -41,7 +41,7 @@ public class SwitchTrackerModeTask extends Task implements ShineProfile.Configur
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SWITCH_TRACKER_MODE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SwitchTrackerMode);
     }
 
     @Override

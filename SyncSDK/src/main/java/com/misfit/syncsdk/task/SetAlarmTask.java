@@ -20,7 +20,7 @@ public class SetAlarmTask extends Task implements ShineProfile.ConfigurationCall
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_ALARM);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetAlarm);
     }
 
     @Override

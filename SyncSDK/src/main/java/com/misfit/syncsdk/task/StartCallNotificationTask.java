@@ -22,7 +22,7 @@ public class StartCallNotificationTask extends Task implements ShineProfile.Conf
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_CALL_NOTIFICATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StartCallNotification);
     }
 
     @Override

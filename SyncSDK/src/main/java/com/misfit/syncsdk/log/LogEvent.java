@@ -1,5 +1,6 @@
 package com.misfit.syncsdk.log;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
@@ -14,6 +15,9 @@ public class LogEvent {
     public final static int RESULT_FAILURE = 2;
     public final static int RESULT_TIMEOUT = 3;
     public final static int RESULT_OTHER = 4;
+
+    @IntDef({RESULT_SUCCESS, RESULT_FAILURE, RESULT_TIMEOUT, RESULT_OTHER})
+    public @interface Result{}
 
     @Expose
     @SerializedName("sessionId")
@@ -67,11 +71,11 @@ public class LogEvent {
         mStartTime = System.currentTimeMillis();
     }
 
-    public void end(int resultCode) {
+    public void end(@Result int resultCode) {
         end(resultCode, "");
     }
 
-    public void end(int resultCode, String resultMsg) {
+    public void end(@Result int resultCode, String resultMsg) {
         mDuration = System.currentTimeMillis() - mStartTime;
         mResultCode = resultCode;
         mResultMsg = resultMsg;

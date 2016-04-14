@@ -40,7 +40,7 @@ public class OtaTask extends Task {
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.OTA);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.Ota);
     }
 
     @Override

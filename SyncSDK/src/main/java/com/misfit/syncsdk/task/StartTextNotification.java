@@ -22,7 +22,7 @@ public class StartTextNotification extends Task implements ShineProfile.Configur
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_TEXT_NOTIFICATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StartTextNotification);
     }
 
     @Override

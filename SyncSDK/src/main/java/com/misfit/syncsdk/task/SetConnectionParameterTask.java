@@ -35,7 +35,7 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_CONNECTION_PARAMETER);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetConnectionParameter);
     }
 
     @Override

@@ -27,7 +27,7 @@ public class ConnectTask extends Task implements ConnectionStateCallback {
     /* inherited interface API of Task */
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CONNECT);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.Connect);
     }
 
     @Override

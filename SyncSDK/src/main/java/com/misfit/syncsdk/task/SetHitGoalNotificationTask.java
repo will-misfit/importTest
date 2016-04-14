@@ -23,7 +23,7 @@ public class SetHitGoalNotificationTask extends Task implements ShineProfile.Con
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_GOAL_MET_NOTIFICATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetGoalMetNotification);
     }
 
     @Override
