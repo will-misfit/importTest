@@ -20,7 +20,7 @@ public class StopAnimationTask extends Task implements ShineProfile.Configuratio
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_ANIMATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StopAnimation);
     }
 
     @Override

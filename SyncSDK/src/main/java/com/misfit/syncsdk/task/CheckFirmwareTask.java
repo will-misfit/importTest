@@ -18,7 +18,7 @@ public class CheckFirmwareTask extends Task {
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CHECK_FIRMWARE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CheckFirmware);
     }
 
     @Override

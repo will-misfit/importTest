@@ -28,7 +28,7 @@ public class StartUserInputStreamingTask extends Task implements ShineProfile.St
             mStreamingCallback = mSyncParams.streamingCallback;
         }
 
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_FILE_STREAMING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StartFileStreaming);
     }
 
     @Override

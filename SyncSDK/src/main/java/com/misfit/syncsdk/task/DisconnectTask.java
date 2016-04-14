@@ -3,7 +3,6 @@ package com.misfit.syncsdk.task;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
-import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.callback.ConnectionStateCallback;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
@@ -19,7 +18,7 @@ public class DisconnectTask extends Task implements ConnectionStateCallback {
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.DISCONNECT);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.Disconnect);
     }
 
     @Override

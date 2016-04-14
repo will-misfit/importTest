@@ -20,7 +20,7 @@ public class SetCallTextNotificationTask extends Task implements ShineProfile.Co
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_CALL_TEXT_NOTIFICATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetCallTextNotification);
     }
 
     @Override
