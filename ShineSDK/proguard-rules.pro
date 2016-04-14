@@ -109,6 +109,7 @@
 -keep class com.misfit.ble.setting.SDKSetting { public *; }
 
 -keep class com.misfit.ble.util.MutableBoolean { public *; }
+-keep class com.misfit.ble.util.Convertor { public *; }
 
 # Pluto Settings
 -keep class com.misfit.ble.setting.pluto.InactivityNudgeSettings { public *; }
