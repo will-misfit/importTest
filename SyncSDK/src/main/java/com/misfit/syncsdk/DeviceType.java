@@ -3,8 +3,6 @@ package com.misfit.syncsdk;
 import android.support.annotation.IntDef;
 import android.text.TextUtils;
 
-import com.misfit.syncsdk.utils.CheckUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -64,7 +62,7 @@ public class DeviceType {
         }
 
         if (result == DeviceType.FLASH) {
-            if (!CheckUtils.isStringEmpty(modelName) && modelName.equals("FL.2.1")) {
+            if (!TextUtils.isEmpty(modelName) && modelName.equals("FL.2.1")) {
                 result = DeviceType.FLASH_LINK;
             }
         }

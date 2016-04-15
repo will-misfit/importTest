@@ -18,8 +18,8 @@ import com.misfit.ble.shine.result.SwimSession;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.shine.result.TapEventSummary;
 import com.misfit.ble.shine.result.Event;
-import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.model.TagEvent;
+import com.misfit.syncsdk.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class AlgorithmUtils {
                                                                               @NonNull List<TapEventSummary> tapEventSummaries) {
         Log.d(TAG, "convertSdkActivityToShineActivityForShine()");
         ActivityShineVect activityShineVect = new ActivityShineVect();
-        if (CheckUtils.isCollectionEmpty(activities)) {
+        if (CollectionUtils.isEmpty(activities)) {
             return activityShineVect;
         }
 
@@ -76,7 +76,7 @@ public class AlgorithmUtils {
     public static ActivityShineVect convertSdkActivityToShineActivityForFlash(List<Activity> activities, List<SessionEvent> sessionEvents) {
         ActivityShineVect activityShineVect = new ActivityShineVect();
         List<TagEvent> tagEvents = importTaginTagoutBookmarks(sessionEvents, activities);
-        if (!CheckUtils.isCollectionEmpty(tagEvents)) {
+        if (!CollectionUtils.isEmpty(tagEvents)) {
             Collections.sort(tagEvents, new TagEventComparator());
         }
 
@@ -291,7 +291,7 @@ public class AlgorithmUtils {
 
     public static List<Long> importTripleTapBookmarks(List<TapEventSummary> tapEvents) {
         bookmarkTimestamps = new ArrayList<>();
-        if (CheckUtils.isCollectionEmpty(tapEvents)) {
+        if (CollectionUtils.isEmpty(tapEvents)) {
             return bookmarkTimestamps;
         }
         for (TapEventSummary tapEvent : tapEvents) {
@@ -322,7 +322,7 @@ public class AlgorithmUtils {
      * with latterSyncResult.mActivities[0].mStartTime as tag, remove overlapped sub list from tail of preSyncResult.mActivities
      * */
     public static void handleNotContinuousActivities(SyncResult preSyncResult, SyncResult latterSyncResult) {
-        if (CheckUtils.isCollectionEmpty(latterSyncResult.mActivities) || CheckUtils.isCollectionEmpty(preSyncResult.mActivities)) {
+        if (CollectionUtils.isEmpty(latterSyncResult.mActivities) || CollectionUtils.isEmpty(preSyncResult.mActivities)) {
             return;
         }
         Log.d(TAG, "activity size before filter " + preSyncResult.mActivities.size());

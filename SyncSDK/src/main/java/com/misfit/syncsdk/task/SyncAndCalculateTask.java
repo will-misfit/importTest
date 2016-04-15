@@ -21,7 +21,7 @@ import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.model.PostCalculateData;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SettingsElement;
-import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.CollectionUtils;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -155,7 +155,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         mLogEvent = GeneralUtils.createLogEvent(LogEventType.Calculate);
         mLogEvent.start();
 
-        if (CheckUtils.isCollectionEmpty(mSyncResultSummary)) {
+        if (CollectionUtils.isEmpty(mSyncResultSummary)) {
             mLogEvent.end(LogEvent.RESULT_SUCCESS, "List<SyncResult> is empty");
             taskSucceed();
             return;
@@ -200,7 +200,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
          */
         private void sortRawData() {
             Log.d(TAG, "sortRawData()");
-            if (CheckUtils.isCollectionEmpty(rawSyncDataList)) {
+            if (CollectionUtils.isEmpty(rawSyncDataList)) {
                 return;
             }
             AlgorithmUtils.sortSyncResultList(rawSyncDataList);
@@ -239,13 +239,13 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         private void saveMisfitSyncData(SyncResult syncResult) {
             MLog.d(TAG, String.format("saveMisfitSyncData(), syncResult size %d", syncResult.mActivities.size()));
 
-            if (syncResult != null && !CheckUtils.isCollectionEmpty(syncResult.mActivities)) {
+            if (syncResult != null && !CollectionUtils.isEmpty(syncResult.mActivities)) {
                 boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
                         SettingsElement.ACTIVITY_TAGGING);
                 boolean supportStream = mTaskSharedData.isStreamingSupported();
 
                 if (mTaskSharedData.getDeviceType() == DeviceType.FLASH) {
-                    if (!CheckUtils.isCollectionEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
+                    if (!CollectionUtils.isEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
                         MLog.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
                         syncResult.mSessionEvents.clear();
                     }
@@ -257,7 +257,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                         mTaskSharedData.setPostCalculateData(postCalculateData);
                     }
                 } else {
-                    if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
+                    if (!CollectionUtils.isEmpty(syncResult.mTapEventSummarys)) {
                         if (!supportActivityTagging && !supportStream) {
                             MLog.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));
                             syncResult.mTapEventSummarys.clear();

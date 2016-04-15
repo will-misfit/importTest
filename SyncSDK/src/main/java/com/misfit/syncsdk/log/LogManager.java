@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -12,7 +13,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.misfit.syncsdk.model.BaseResponse;
 import com.misfit.syncsdk.network.APIClient;
-import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.CollectionUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
 import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -254,7 +255,7 @@ public class LogManager {
     private boolean uploadEventsToServer(String sessionId) {
         String fileName = getLogFileName(SdkConstants.EVENTS_PREFIX, sessionId);
         List<String> eventStrings = readEventsJsonFromFile(fileName);
-        if (CheckUtils.isCollectionEmpty(eventStrings)) {
+        if (CollectionUtils.isEmpty(eventStrings)) {
             MLog.d(TAG, String.format("events_%s file does not exist or contains nothing", sessionId));
             return false;
         }
@@ -320,7 +321,7 @@ public class LogManager {
             bufferedReader = new BufferedReader(new InputStreamReader(inStream));
             while(bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
-                if (!CheckUtils.isStringEmpty(line)) {
+                if (!TextUtils.isEmpty(line)) {
                     jsonList.add(line);
                 }
             }
@@ -345,7 +346,7 @@ public class LogManager {
      * log files are named like session_[sessionId] or events_[sessionId]
      * */
     private static String parseSessionId(String fileName) {
-        if (CheckUtils.isStringEmpty(fileName)) {
+        if (TextUtils.isEmpty(fileName)) {
             return null;
         }
         final String splitStr = "_";
