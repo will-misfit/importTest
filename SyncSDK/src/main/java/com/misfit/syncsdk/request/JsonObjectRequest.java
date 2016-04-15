@@ -1,5 +1,6 @@
 package com.misfit.syncsdk.request;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -14,7 +15,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.misfit.syncsdk.enums.HttpStatus;
 import com.misfit.syncsdk.model.MetaMessage;
-import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.ContextManager;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.GsonUtils;
@@ -111,7 +111,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
 
             Log.d(TAG, String.format("%d:%s", response.statusCode, jsonString));
 
-            if (!CheckUtils.isStringEmpty(jsonString)) {
+            if (!TextUtils.isEmpty(jsonString)) {
                 Object result = GsonUtils.getInstance().getGson().fromJson(jsonString, super.getClass());
                 metaMessage = ((JsonObjectRequest) result).metaMessage;
                 buildResult(result);
@@ -158,7 +158,7 @@ public abstract class JsonObjectRequest<T> extends JsonRequest<T> {
          Currently only 1st kind of AuthToken is available, so use it temporarily.
          * */
         String authToken = ContextManager.getInstance().getUserAuthToken();
-        if (!CheckUtils.isStringEmpty(authToken)) {
+        if (!TextUtils.isEmpty(authToken)) {
             items.put("auth_token", authToken);
         }
         return items;

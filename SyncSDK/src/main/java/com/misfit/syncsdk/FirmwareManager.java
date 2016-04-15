@@ -1,13 +1,13 @@
 package com.misfit.syncsdk;
 
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.misfit.syncsdk.model.FirmwareInfo;
 import com.misfit.syncsdk.request.FirmwareRequest;
 import com.misfit.syncsdk.request.RequestListener;
-import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.LocalFileUtils;
 import com.misfit.syncsdk.utils.SdkConstants;
 
@@ -127,7 +127,7 @@ public class FirmwareManager {
     }
 
     public static boolean isFirmwareExisting(String firmwareVersion) {
-        if (CheckUtils.isStringEmpty(firmwareVersion)) {
+        if (TextUtils.isEmpty(firmwareVersion)) {
             return false;
         }
         String fileName = getFirmwareFileName(firmwareVersion);
@@ -160,11 +160,11 @@ public class FirmwareManager {
             String oldFwVersionNumber = mCurrentFirmwareVersion;
 
             // FIXME: except model name of 'shine', is there any other device model need to OTA when oldFwModelName is null?
-            if (CheckUtils.isStringEmpty(newFwModelName)) {
+            if (TextUtils.isEmpty(newFwModelName)) {
                 handleOnCheckFirmwareSucceed(false, newFwVersionNumber);
             } else {
                 if (newFwModelName.equals(oldFwModelName)
-                        || (CheckUtils.isStringEmpty(oldFwModelName) && newFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))) {
+                        || (TextUtils.isEmpty(oldFwModelName) && newFwModelName.equals(SdkConstants.SHINE_MODEL_NAME))) {
                     if (shouldOTA(newFwVersionNumber, oldFwVersionNumber)) {
                         mNewFirmwareInfo = newFirmwareInfo;
                         if (!isFirmwareExisting(newFwVersionNumber)) {
@@ -208,7 +208,7 @@ public class FirmwareManager {
 
         protected void onPostExecute(Boolean result) {
             if (result) {
-                if (!(CheckUtils.isStringEmpty(oldVersionNumber))){
+                if (!(TextUtils.isEmpty(oldVersionNumber))){
                     deleteOldFirmware(oldVersionNumber, newFirmwareInfo.getVersionNumber());
                 }
                 handleOnDownloadFirmwareSucceed(newFirmwareInfo.getVersionNumber());
@@ -293,7 +293,7 @@ public class FirmwareManager {
     }
 
     public void deleteOldFirmware(String oldFirmwareVersion, String newFirmwareVersion) {
-        if (!CheckUtils.isStringEmpty(oldFirmwareVersion)
+        if (!TextUtils.isEmpty(oldFirmwareVersion)
                 && !oldFirmwareVersion.equals(newFirmwareVersion)) {
             deleteFirmware(oldFirmwareVersion);
         }
@@ -309,7 +309,7 @@ public class FirmwareManager {
     }
 
     public static boolean shouldOTA(String newFirmwareVersion, String oldFirmwareVersion) {
-        return (!CheckUtils.isStringEmpty(newFirmwareVersion) && !newFirmwareVersion.equals(oldFirmwareVersion));
+        return (!TextUtils.isEmpty(newFirmwareVersion) && !newFirmwareVersion.equals(oldFirmwareVersion));
     }
 
     /* utility API */
