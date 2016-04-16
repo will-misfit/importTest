@@ -4,8 +4,6 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
-import com.misfit.ble.shine.controller.SyncPhaseController;
-import com.misfit.ble.shine.parser.TimestampCorrectorNew;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.syncdemo.util.FileUtils;
 import com.misfit.syncsdk.DeviceType;
@@ -71,24 +69,24 @@ public class SyncReproducer {
     }
 
     private List<SyncResult> getSyncResultsFromSdk() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
-        SyncPhaseController phaseController = new SyncPhaseController(null, null, null);
-        Method resetMethod = SyncPhaseController.class.getDeclaredMethod("reset", null);
-        resetMethod.setAccessible(true);
-        resetMethod.invoke(phaseController, null);
-        Method parseShineDataMethod = SyncPhaseController.class.getDeclaredMethod("parseShineData", int.class, long.class, byte[].class, boolean.class);
-        parseShineDataMethod.setAccessible(true);
+//        SyncPhaseController phaseController = new SyncPhaseController(null, null, null);
+//        Method resetMethod = SyncPhaseController.class.getDeclaredMethod("reset", null);
+//        resetMethod.setAccessible(true);
+//        resetMethod.invoke(phaseController, null);
+//        Method parseShineDataMethod = SyncPhaseController.class.getDeclaredMethod("parseShineData", int.class, long.class, byte[].class, boolean.class);
+//        parseShineDataMethod.setAccessible(true);
         List<SyncResult> syncResults = new ArrayList<>();
-        for (int i = 0; i < mFileResponses.length; i++) {
-            GetFileResponse response = mFileResponses[i];
-            SyncResult syncResult = (SyncResult) parseShineDataMethod.invoke(phaseController, response.fileFormat, response.fileTimestamp, response.getRawData(), i == mFileResponses.length - 1);
-            syncResults.add(syncResult);
-        }
-
-        Field timestampCorrectorField = SyncPhaseController.class.getDeclaredField("mTimestampCorrector");
-        timestampCorrectorField.setAccessible(true);
-        TimestampCorrectorNew timestampCorrector = (TimestampCorrectorNew) timestampCorrectorField.get(phaseController);
-
-        timestampCorrector.correctTimestamp(syncResults, mSyncTime);
+//        for (int i = 0; i < mFileResponses.length; i++) {
+//            GetFileResponse response = mFileResponses[i];
+//            SyncResult syncResult = (SyncResult) parseShineDataMethod.invoke(phaseController, response.fileFormat, response.fileTimestamp, response.getRawData(), i == mFileResponses.length - 1);
+//            syncResults.add(syncResult);
+//        }
+//
+//        Field timestampCorrectorField = SyncPhaseController.class.getDeclaredField("mTimestampCorrector");
+//        timestampCorrectorField.setAccessible(true);
+//        TimestampCorrectorNew timestampCorrector = (TimestampCorrectorNew) timestampCorrectorField.get(phaseController);
+//
+//        timestampCorrector.correctTimestamp(syncResults, mSyncTime);
         MLog.i(TAG, "from Sdk, syncResults size=" + syncResults.size());
         return syncResults;
     }

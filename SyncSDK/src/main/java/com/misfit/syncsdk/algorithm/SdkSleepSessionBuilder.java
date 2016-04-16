@@ -15,16 +15,14 @@ import com.misfit.cloud.algorithm.models.TimezoneChangeShine;
 import com.misfit.cloud.algorithm.models.TimezoneChangeShineVect;
 import com.misfit.cloud.algorithm.models.UserSleepSessionShine;
 import com.misfit.cloud.algorithm.models.UserSleepSessionShineVect;
+import com.misfit.syncsdk.enums.SdkSleepState;
 import com.misfit.syncsdk.model.SdkAutoSleepStateChangeTag;
 import com.misfit.syncsdk.model.SdkResourceSettings;
 import com.misfit.syncsdk.model.SdkSleepSession;
-import com.misfit.syncsdk.enums.SdkSleepState;
-import com.misfit.syncsdk.model.SdkTimeZoneOffset;
 import com.misfit.syncsdk.utils.CollectionUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
