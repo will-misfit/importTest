@@ -34,11 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ReproduceActivity"
-            android:screenOrientation="portrait"></activity>
-
-
+        <activity android:name=".ReproduceActivity" />
         <activity
             android:name="ru.bartwell.exfilepicker.ExFilePickerActivity"
             android:configChanges="orientation|screenSize"
