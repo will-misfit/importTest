@@ -51,6 +51,7 @@ public class SyncParams {
      * 1.the items should be listed in ascending order of timestamp
      * 2. the tail item should be the current Settings
      */
+    //FIXME: should not be null
     public List<SdkResourceSettings> settingsChangeListSinceLastSync;
 
     /**

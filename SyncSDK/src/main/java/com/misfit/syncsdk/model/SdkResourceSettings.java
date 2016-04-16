@@ -26,6 +26,10 @@ public class SdkResourceSettings {
         return mTimestamp;
     }
 
+    public void setTimestamp(long timestamp) {
+        mTimestamp = timestamp;
+    }
+
     public boolean getAutoSleepState() {
         return mAutoSleepState;
     }
