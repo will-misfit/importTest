@@ -1,5 +1,7 @@
 package com.misfit.syncsdk.model;
 
+import com.misfit.syncsdk.enums.SdkActivityType;
+
 /**
  * model class of partial fields of flagship App Settings
  * it is used to hold settings fields from flagship App
@@ -15,7 +17,7 @@ public class SdkResourceSettings {
 
     private int mTimezoneOffset;
 
-    public SdkResourceSettings(long timestamp, boolean autoSleepState, int defaultTripleTap, int timezoneOffset) {
+    public SdkResourceSettings(long timestamp, boolean autoSleepState, @SdkActivityType.ActivityType int defaultTripleTap, int timezoneOffset) {
         mTimestamp = timestamp;
         mAutoSleepState = autoSleepState;
         mDefaultTripleTap = defaultTripleTap;
@@ -34,6 +36,7 @@ public class SdkResourceSettings {
         return mAutoSleepState;
     }
 
+    @SdkActivityType.ActivityType
     public int getDefaultTripleState() {
         return mDefaultTripleTap;
     }
