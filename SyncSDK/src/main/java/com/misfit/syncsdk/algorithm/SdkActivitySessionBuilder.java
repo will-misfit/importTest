@@ -217,6 +217,7 @@ public class SdkActivitySessionBuilder {
     private static List<SdkActivityTagChange> getSdkActivityTagChangeList(List<SdkResourceSettings> settingsList) {
         List<SdkActivityTagChange> result = new ArrayList<>();
         if (CollectionUtils.isEmpty(settingsList)) {
+            //FIXME:should at least return 1 item
             return result;
         }
 
