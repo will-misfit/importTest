@@ -20,7 +20,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".SyncActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".ScanListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".NavigationActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,7 +34,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ScanListActivity"></activity>
+        <activity android:name=".ReproduceActivity" />
+        <activity
+            android:name="ru.bartwell.exfilepicker.ExFilePickerActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/ExFilePickerThemeDark" />
     </application>
 
 </manifest>

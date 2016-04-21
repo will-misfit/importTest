@@ -176,6 +176,11 @@ public class MisfitShineService extends Service {
         }
 
         @Override
+        public void onHardwareLogRead(byte[] hwLog) {
+
+        }
+
+        @Override
         public void onSyncCompleted(ShineProfile.ActionResult resultCode) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
                 mShineCallback_v1.onSyncSucceeded();

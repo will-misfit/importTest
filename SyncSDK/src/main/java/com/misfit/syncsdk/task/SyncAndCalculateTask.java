@@ -13,7 +13,6 @@ import com.misfit.ble.util.MutableBoolean;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
-import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
 import com.misfit.syncsdk.enums.FailedReason;
@@ -22,7 +21,7 @@ import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.model.PostCalculateData;
 import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SettingsElement;
-import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.CollectionUtils;
 import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 import com.misfit.syncsdk.utils.SdkConstants;
@@ -46,7 +45,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     /* interface of Task */
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.GET_ACTIVITY);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.GetActivity);
     }
 
     @Override
@@ -114,6 +113,18 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     @Override
+    public void onHardwareLogRead(final byte[] hwLog) {
+        mMainHander.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    mTaskSharedData.getReadDataCallback().onHardwareLogRead(hwLog);
+                }
+            }
+        });
+    }
+
+    @Override
     public void onSyncCompleted(final ShineProfile.ActionResult resultCode) {
         mMainHander.post(new Runnable() {
             @Override
@@ -141,10 +152,10 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
     }
 
     private void handleOnShineSdkSyncSucceed() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CALCULATE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.Calculate);
         mLogEvent.start();
 
-        if (CheckUtils.isCollectionEmpty(mSyncResultSummary)) {
+        if (CollectionUtils.isEmpty(mSyncResultSummary)) {
             mLogEvent.end(LogEvent.RESULT_SUCCESS, "List<SyncResult> is empty");
             taskSucceed();
             return;
@@ -189,7 +200,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
          */
         private void sortRawData() {
             Log.d(TAG, "sortRawData()");
-            if (CheckUtils.isCollectionEmpty(rawSyncDataList)) {
+            if (CollectionUtils.isEmpty(rawSyncDataList)) {
                 return;
             }
             AlgorithmUtils.sortSyncResultList(rawSyncDataList);
@@ -225,52 +236,51 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
             AlgorithmUtils.filterSyncResultInternalData(syncResult, lastSyncTime);
         }
 
+        private void saveMisfitSyncData(SyncResult syncResult) {
+            MLog.d(TAG, String.format("saveMisfitSyncData(), syncResult size %d", syncResult.mActivities.size()));
+
+            if (syncResult != null && !CollectionUtils.isEmpty(syncResult.mActivities)) {
+                boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
+                        SettingsElement.ACTIVITY_TAGGING);
+                boolean supportStream = mTaskSharedData.isStreamingSupported();
+
+                if (mTaskSharedData.getDeviceType() == DeviceType.FLASH) {
+                    if (!CollectionUtils.isEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
+                        MLog.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
+                        syncResult.mSessionEvents.clear();
+                    }
+                    SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForFlash(syncResult,
+                            mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
+                            mTaskSharedData.getSyncParams().userProfile);
+                    if (mTaskSharedData.getReadDataCallback() != null) {
+                        PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                        mTaskSharedData.setPostCalculateData(postCalculateData);
+                    }
+                } else {
+                    if (!CollectionUtils.isEmpty(syncResult.mTapEventSummarys)) {
+                        if (!supportActivityTagging && !supportStream) {
+                            MLog.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));
+                            syncResult.mTapEventSummarys.clear();
+                        }
+                    }
+
+                    SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForShine(syncResult,
+                            mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
+                            mTaskSharedData.getSyncParams().userProfile);
+                    mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
+                    if (mTaskSharedData.getReadDataCallback() != null) {
+                        PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                        mTaskSharedData.setPostCalculateData(postCalculateData);
+                    }
+                }
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
+            }
+        }
+
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             taskSucceed();
-        }
-    }
-
-    private void saveMisfitSyncData(SyncResult syncResult) {
-        MLog.d(TAG, String.format("saveMisfitSyncData(), syncResult size %d", syncResult.mActivities.size()));
-
-        if (syncResult != null && !CheckUtils.isCollectionEmpty(syncResult.mActivities)) {
-            boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
-                    SettingsElement.ACTIVITY_TAGGING);
-            boolean supportStream = mTaskSharedData.isStreamingSupported();
-
-            if (mTaskSharedData.getDeviceType() == DeviceType.FLASH) {
-                if (!CheckUtils.isCollectionEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
-                    MLog.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
-                    syncResult.mSessionEvents.clear();
-                }
-                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForFlash(syncResult,
-                    mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
-                    mTaskSharedData.getSyncParams().userProfile);
-                if (mTaskSharedData.getReadDataCallback() != null) {
-                    PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
-                    mTaskSharedData.setPostCalculateData(postCalculateData);
-                }
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
-            } else {
-                if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
-                    if (!supportActivityTagging && !supportStream) {
-                        MLog.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));
-                        syncResult.mTapEventSummarys.clear();
-                    }
-                }
-
-                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForShine(syncResult,
-                    mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
-                    mTaskSharedData.getSyncParams().userProfile);
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
-                if (mTaskSharedData.getReadDataCallback() != null) {
-                    PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
-                    mTaskSharedData.setPostCalculateData(postCalculateData);
-                }
-                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
-            }
         }
     }
 }

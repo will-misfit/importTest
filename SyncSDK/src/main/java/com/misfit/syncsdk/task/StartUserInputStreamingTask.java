@@ -2,6 +2,7 @@ package com.misfit.syncsdk.task;
 
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.syncsdk.ConnectionManager;
+import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
@@ -27,12 +28,19 @@ public class StartUserInputStreamingTask extends Task implements ShineProfile.St
             mStreamingCallback = mSyncParams.streamingCallback;
         }
 
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_FILE_STREAMING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StartFileStreaming);
     }
 
     @Override
     protected void execute() {
         mLogEvent.start();
+
+        if (mTaskSharedData.getDeviceType() != DeviceType.FLASH_LINK) {
+            String msg = String.format("Ignore this task as it is not %s", DeviceType.getDeviceTypeText(DeviceType.FLASH_LINK));
+            mLogEvent.end(LogEvent.RESULT_OTHER, msg);
+            taskIgnored(msg);
+            return;
+        }
 
         ConnectionManager connectionManager = ConnectionManager.getInstance();
         ShineSdkProfileProxy proxy = connectionManager.getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());

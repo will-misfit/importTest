@@ -1,9 +1,9 @@
 package com.misfit.syncsdk.model;
 
+import android.text.TextUtils;
+
 import com.google.gson.reflect.TypeToken;
-import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.utils.GsonUtils;
-import com.misfit.syncsdk.utils.VolleyRequestUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class SdkGraphDay {
     }
 
     public void buildObj() {
-        if (!CheckUtils.isStringEmpty(this.itemsJson)) {
+        if (!TextUtils.isEmpty(this.itemsJson)) {
             Type listType = new TypeToken<ArrayList<SdkGraphItem>>() {}.getType();
             this.items = GsonUtils.getInstance().getGson().fromJson(this.itemsJson, listType);
         } else {

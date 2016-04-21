@@ -19,7 +19,7 @@ import com.misfit.syncsdk.model.SdkActivityTagChange;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkProfile;
 import com.misfit.syncsdk.model.SdkResourceSettings;
-import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,7 +149,7 @@ public class SdkActivitySessionBuilder {
 
     public static ActivityChangeTagShineVect buildActivityChangeTagShineVect(List<SdkActivityTagChange> changeTagList) {
         ActivityChangeTagShineVect result = new ActivityChangeTagShineVect();
-        if (CheckUtils.isCollectionEmpty(changeTagList)) {
+        if (CollectionUtils.isEmpty(changeTagList)) {
             return result;
         }
         for(SdkActivityTagChange changeTag : changeTagList) {
@@ -216,7 +216,8 @@ public class SdkActivitySessionBuilder {
 
     private static List<SdkActivityTagChange> getSdkActivityTagChangeList(List<SdkResourceSettings> settingsList) {
         List<SdkActivityTagChange> result = new ArrayList<>();
-        if (CheckUtils.isCollectionEmpty(settingsList)) {
+        if (CollectionUtils.isEmpty(settingsList)) {
+            //FIXME:should at least return 1 item
             return result;
         }
 

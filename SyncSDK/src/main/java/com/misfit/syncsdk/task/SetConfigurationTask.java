@@ -26,7 +26,7 @@ public class SetConfigurationTask extends Task implements ShineProfile.Configura
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_CONFIGURATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetConfiguration);
     }
 
     /**

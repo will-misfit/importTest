@@ -5,8 +5,9 @@ import com.misfit.syncsdk.task.OtaTask;
 import com.misfit.syncsdk.utils.MLog;
 
 /**
- * get to confirm whether latest firmware is ready or not
- * if it is not ready yet while unnecessary to OTA, skip OTA
+ * if latest firmware is existing now, OTA now
+ * or if firmware download is not done, wait for its complete if necessary(force OTA)
+ * or else, skip OtaTask
  * */
 public class PrepareOtaState extends State implements FirmwareManager.DownloadFirmwareListener {
 
@@ -22,33 +23,31 @@ public class PrepareOtaState extends State implements FirmwareManager.DownloadFi
     public void execute() {
         MLog.d(TAG, String.format("Force OTA = ", Boolean.toString(otaTask.ifForceOta())));
 
-        FirmwareManager firmwareManager = FirmwareManager.getInstance();
-
-        if (firmwareManager.isFirmwareExisting(otaTask.getLatestFirmwareVersion())) {
+        if (FirmwareManager.isFirmwareExisting(otaTask.getLatestFirmwareVersion())) {
             String fileName = FirmwareManager.getFirmwareFileName(otaTask.getLatestFirmwareVersion());
             otaTask.gotoState(new OtaState(otaTask, fileName));
         } else if (otaTask.ifForceOta()) {
-            firmwareManager.onFirmwareReady(otaTask.getLatestFirmwareVersion(), this);
+            FirmwareManager.getInstance().subscribeFirmwareDownload(this);
         } else {
-            otaTask.onSucceed();  // skip OTA
+            otaTask.onSucceed();
         }
     }
 
     @Override
-    // TODO: clean the callback assign to FirmwareManager
     public void stop() {
+        FirmwareManager.getInstance().unsubscribeFirmwareDownload(this);
     }
 
     @Override
-    // TODO: clean the callback assign to FirmwareManager
     public void onSucceed(String fileName) {
+        FirmwareManager.getInstance().unsubscribeFirmwareDownload(this);
         MLog.d(TAG, "firmware ready, fileName=" + fileName);
         otaTask.gotoState(new OtaState(otaTask, fileName));
     }
 
     @Override
-    // TODO: clean the callback assign to FirmwareManager
     public void onFailed(int errorReason) {
+        FirmwareManager.getInstance().unsubscribeFirmwareDownload(this);
         otaTask.onFailed("download not ok");
     }
 }

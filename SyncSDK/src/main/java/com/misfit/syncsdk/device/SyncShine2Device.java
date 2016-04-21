@@ -59,7 +59,7 @@ public class SyncShine2Device extends SyncCommonDevice {
         tasks.add(new CheckFirmwareTask());
         tasks.add(new PlayAnimationTask());
         tasks.add(new StopAnimationTask());
-        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.defaultShine2Params()));
+        tasks.add(new SetConnectionParameterTask(ConnectionParameterManager.DefaultShine2Params));
         tasks.add(new SyncAndCalculateTask());
         tasks.add(new OtaTask());
         tasks.add(new GetConfigurationTask());

@@ -19,7 +19,7 @@ public class SdkProfile {
 	public SdkProfile() {
 	}
 
-	public SdkProfile(int genderInt, int age, float height, float weight, int unitInt) {
+	public SdkProfile(@SdkGender.Gender int genderInt, int age, float height, float weight, @SdkUnit.WeightUnit int unitInt) {
 		mSdkGender = genderInt;
 		mAge = age;
 		mHeight = height;

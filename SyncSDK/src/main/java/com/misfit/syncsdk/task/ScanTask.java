@@ -4,7 +4,6 @@ import com.misfit.ble.shine.ShineAdapter;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.MisfitScanner;
-import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
 import com.misfit.syncsdk.log.LogEventType;
@@ -39,7 +38,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
      */
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.START_SCANNING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StartScanning);
     }
 
     @Override
@@ -73,10 +72,11 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
         mLogSession.appendEvent(mLogEvent);
 
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_SCANNING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StopScanning);
         mLogEvent.start();
         MisfitScanner.getInstance().stopScan();
-        mLogEvent.end(LogEventType.STOP_SCANNING, "");
+        //TODO:will there be a stop scan failed?
+        mLogEvent.end(LogEvent.RESULT_SUCCESS);
 
         mLogSession.appendEvent(mLogEvent);
         mLogEvent = null;
@@ -90,7 +90,7 @@ public class ScanTask extends Task implements ShineAdapter.ShineScanCallback {
 
         MLog.d(TAG, String.format("onScanResult(), serial number %s, rssi %d", device.getSerialNumber(), rssi));
 
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SCANNED_DEVICE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.ScannedDevice);
         mLogEvent.start();
         mLogEvent.end(LogEvent.RESULT_SUCCESS, device.getSerialNumber());
         mLogSession.appendEvent(mLogEvent);

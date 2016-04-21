@@ -17,7 +17,7 @@ public class ReconnectState extends State implements ConnectionStateCallback {
 
     private OtaTask otaTask;
     private int mRemainingRetry = 2;
-    private final static int TIMEOUT_CONNECT = 45000;
+    private final static int TIMEOUT_CONNECT = 45 * 1000;
 
     public ReconnectState(OtaTask otaTask) {
         this.otaTask = otaTask;

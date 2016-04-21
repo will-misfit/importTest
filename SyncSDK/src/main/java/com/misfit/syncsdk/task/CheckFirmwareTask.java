@@ -10,7 +10,7 @@ import com.misfit.syncsdk.utils.GeneralUtils;
 import com.misfit.syncsdk.utils.MLog;
 
 /**
- * CheckFirmwareTask is special in entire task list: its execution result does not need to wait
+ * CheckFirmwareTask's execution does not need to wait for result
  * */
 public class CheckFirmwareTask extends Task {
 
@@ -18,7 +18,7 @@ public class CheckFirmwareTask extends Task {
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CHECK_FIRMWARE);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CheckFirmware);
     }
 
     @Override

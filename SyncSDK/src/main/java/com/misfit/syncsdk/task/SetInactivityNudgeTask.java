@@ -20,7 +20,7 @@ public class SetInactivityNudgeTask extends Task implements ShineProfile.Configu
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_INACTIVE_NUDGES);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetInactiveNudges);
     }
 
     @Override

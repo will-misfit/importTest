@@ -1,12 +1,16 @@
 package com.misfit.syncsdk.callback;
 
 /**
- * Created by Will-Hou on 1/11/16.
+ * callback exposed to App for OTA
  */
 public interface SyncOtaCallback {
-    void onOtaProgress(float progress);
+    /**
+     * invoked when the entire OTA operation completes, including OTA and reconnect in a while later
+     * */
+    void onEntireOtaCompleted();
 
-    void onOtaCompleted();
-
+    /**
+     * confirmed by App whether necessary to OTA although need to wait
+     * */
     boolean isForceOta(boolean hasNewFirmware);
 }

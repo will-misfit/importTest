@@ -18,7 +18,7 @@ public class ActivateTask extends Task implements ShineProfile.ConfigurationCall
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.ACTIVATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.Activation);
     }
 
     @Override

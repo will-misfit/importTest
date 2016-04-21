@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Checkable;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -44,10 +43,10 @@ import butterknife.OnClick;
 import butterknife.OnTouch;
 
 
-public class MainActivity extends AppCompatActivity
+public class SyncActivity extends AppCompatActivity
         implements SyncOperationResultCallback, SyncOtaCallback, ReadDataCallback, ConnectionStateCallback {
 
-    private final static String TAG = "MainActivity";
+    private final static String TAG = "SyncActivity";
 
     private final static int REQ_SCAN = 1;
 
@@ -240,13 +239,8 @@ public class MainActivity extends AppCompatActivity
 
     /* interface methods of SyncOtaCallback */
     @Override
-    public void onOtaProgress(float progress) {
-        MLog.d(TAG, "OTA progress = " + progress);
-    }
-
-    @Override
-    public void onOtaCompleted() {
-        MLog.d(TAG, "OTA Completed");
+    public void onEntireOtaCompleted() {
+        MLog.d(TAG, "entire OTA Completed");
     }
 
     @Override
@@ -319,6 +313,11 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    @Override
+    public void onHardwareLogRead(byte[] hwLog) {
+
+    }
+
     /* interface methods of ConnectionStateCallback */
     @Override
     public void onConnectionStateChanged(ShineProfile.State newState) {
@@ -381,7 +380,6 @@ public class MainActivity extends AppCompatActivity
     private SyncParams createSyncParams() {
         SyncParams syncParams = new SyncParams();
 
-        syncParams.firstSync = mFirstSync;
         syncParams.lastSyncTime = DataSourceManager.createLastSyncTime();
         syncParams.userProfile = DataSourceManager.getSdkProfile(SdkGender.MALE);
         syncParams.firstSync = mSwitchFirstSync.isChecked();

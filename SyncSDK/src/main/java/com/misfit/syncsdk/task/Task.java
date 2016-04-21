@@ -5,7 +5,6 @@ import android.util.Log;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.enums.FailedReason;
 import com.misfit.syncsdk.log.LogEvent;
-import com.misfit.syncsdk.log.LogEventType;
 import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.TaskSharedData;
 import com.misfit.syncsdk.utils.MLog;

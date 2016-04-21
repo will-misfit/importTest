@@ -16,7 +16,7 @@ import com.misfit.syncsdk.utils.SdkConstants;
 public class StopUserInputStreamingTask extends Task {
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_FILE_STREAMING);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StopFileStreaming);
     }
 
     @Override

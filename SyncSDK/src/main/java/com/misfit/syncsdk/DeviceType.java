@@ -1,8 +1,10 @@
 package com.misfit.syncsdk;
 
+import android.support.annotation.IntDef;
 import android.text.TextUtils;
 
-import com.misfit.syncsdk.utils.CheckUtils;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * DeviceType option
@@ -21,6 +23,10 @@ public class DeviceType {
 
     private int mTypeVal;
 
+    @IntDef({UNKNOWN, SHINE, FLASH, SWAROVSKI_SHINE, SPEEDO_SHINE, SHINE_MK_II, PLUTO, FLASH_LINK, SILVRETTA, BMW})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DEVICETYPE {}
+
     DeviceType(int typeVal) {
         mTypeVal = typeVal;
     }
@@ -32,7 +38,7 @@ public class DeviceType {
     /**
      * per design, model name 'FL.2.1' for Flash Button, 'FL.2.0' for Misfit Flash
      * */
-    public static int getDeviceType(String serialNumber, String modelName) {
+    public static @DEVICETYPE int getDeviceType(String serialNumber, String modelName) {
         int result = DeviceType.UNKNOWN;
 
         if (TextUtils.isEmpty(serialNumber)) {
@@ -56,7 +62,7 @@ public class DeviceType {
         }
 
         if (result == DeviceType.FLASH) {
-            if (!CheckUtils.isStringEmpty(modelName) && modelName.equals("FL.2.1")) {
+            if (!TextUtils.isEmpty(modelName) && modelName.equals("FL.2.1")) {
                 result = DeviceType.FLASH_LINK;
             }
         }

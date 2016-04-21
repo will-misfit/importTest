@@ -22,7 +22,7 @@ public class StopNotificationTask extends Task implements ShineProfile.Configura
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.STOP_NOTIFICATION);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.StopNotification);
     }
 
     @Override

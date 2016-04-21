@@ -31,34 +31,35 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SyncPhaseController extends PhaseController {
 
-    public interface SyncPhaseControllerCallback {
-        void onSyncPhaseControllerSyncDataReadProgress(
-                SyncPhaseController syncPhaseController,
-                Bundle extraInfo,
-                MutableBoolean shouldStop,
-                ShineProfile.SyncCallback syncCallback);
-        void onSyncPhaseControllerSyncDataReadCompleted(
-                SyncPhaseController controller,
-                List<SyncResult> syncResults,
-                MutableBoolean shouldStop,
-                ShineProfile.SyncCallback syncCallback);
-        void onGetActivityDataFinished();
-    }
+	public interface SyncPhaseControllerCallback {
+		void onSyncPhaseControllerSyncDataReadProgress(
+				SyncPhaseController syncPhaseController,
+				Bundle extraInfo, 
+				MutableBoolean shouldStop,
+				ShineProfile.SyncCallback syncCallback);
+		void onSyncPhaseControllerSyncDataReadCompleted(
+				SyncPhaseController controller,
+				List<SyncResult> syncResults,
+				MutableBoolean shouldStop,
+				ShineProfile.SyncCallback syncCallback);
+		void onGetActivityDataFinished();
+		void onHWLogRead(byte[] hwLog, ShineProfile.SyncCallback syncCallback);
+	}
+	
+	public class SyncSession {
+		public short mNumberOfActivityFiles;
+		public short mNumberOfActivityFilesRead;
+		public short mNumberOfActivityFilesErased;
+		public long mTotalFilesSize;
+		private List<SyncResult> syncResults = new ArrayList<>();
+	}
 
-    public class SyncSession {
-        public short mNumberOfActivityFiles;
-        public short mNumberOfActivityFilesRead;
-        public short mNumberOfActivityFilesErased;
-        public long mTotalFilesSize;
-        private List<SyncResult> syncResults = new ArrayList<>();
-    }
+	private TimestampCorrectorNew mTimestampCorrector;
+	private SwimSessionPostProcessor mSwimLapPostProcessor;
+	private SyncSession mSyncSession;
+	private SyncPhaseControllerCallback mSyncPhaseCallback;
 
-    private TimestampCorrectorNew mTimestampCorrector;
-    private SwimSessionPostProcessor mSwimLapPostProcessor;
-    private SyncSession mSyncSession;
-    private SyncPhaseControllerCallback mSyncPhaseCallback;
-
-    private ShineProfile.SyncCallback mSyncCallback;
+	private ShineProfile.SyncCallback mSyncCallback;
 
     private AtomicInteger mGetFileListIndex;
     private Handler mainHandler;
@@ -82,10 +83,14 @@ public class SyncPhaseController extends PhaseController {
     public void start() {
         super.start();
 
+        reset();
+        sendRequest(buildRequest(FileListRequest.class));
+    }
+
+    private void reset() {
         mSyncSession = new SyncSession();
         mTimestampCorrector = new TimestampCorrectorNew();
         mSwimLapPostProcessor = new SwimSessionPostProcessor();
-        sendRequest(buildRequest(FileListRequest.class));
     }
 
     @Override
@@ -229,6 +234,11 @@ public class SyncPhaseController extends PhaseController {
                 postProcessing(RESULT_REQUEST_ERROR);
                 return;
             }
+
+            if(mSyncPhaseCallback!=null){
+                mSyncPhaseCallback.onHWLogRead(response.data, mSyncCallback);
+            }
+
             sendRequest(buildRequest(FileEraseHardwareLogRequest.class));
 
         } else if (request instanceof FileEraseHardwareLogRequest) {

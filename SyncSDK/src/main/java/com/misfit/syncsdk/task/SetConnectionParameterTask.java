@@ -7,6 +7,8 @@ import com.misfit.ble.shine.ShineConnectionParameters;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.syncsdk.ConnectionManager;
+import com.misfit.syncsdk.ConnectionParameterManager;
+import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
 import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.log.LogEvent;
@@ -33,13 +35,22 @@ public class SetConnectionParameterTask extends Task implements ShineProfile.Con
 
     @Override
     protected void prepare() {
-        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SET_CONNECTION_PARAMETER);
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.SetConnectionParameter);
     }
 
     @Override
     protected void execute() {
         MLog.d(TAG, "execute()");
         mLogEvent.start();
+
+        if (mTaskSharedData.getDeviceType() != DeviceType.FLASH_LINK
+            && ConnectionParameterManager.paramsEquals(mParameters, ConnectionParameterManager.SlowConnectionParams)) {
+
+            String msg = String.format("Ignore this task as it is not %s", DeviceType.getDeviceTypeText(DeviceType.FLASH_LINK));
+            mLogEvent.end(LogEvent.RESULT_OTHER, msg);
+            taskIgnored(msg);
+            return;
+        }
 
         ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
         if (proxy == null || !proxy.isConnected()) {
