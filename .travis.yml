@@ -28,8 +28,8 @@ android:
 
 env:
   matrix:
-    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a  ANDROID_MODULE=ShineSDK
-    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi-v7a  ANDROID_MODULE=ShineSample
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi,armeabi-v7a  ANDROID_MODULE=ShineSDK BUNDLE_IDENTIFIER="com.misfit.ble_android"
+    - ANDROID_TARGET=android-22  ANDROID_ABI=armeabi-v7a  ANDROID_MODULE=ShineSample BUNDLE_IDENTIFIER="com.misfit.ble.sample_android"
 
   global:
     - BUNDLE_DISPLAY_NAME="ShineSDK for Misfit Android App"
@@ -53,10 +53,13 @@ before_install:
   # - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
   # - emulator -avd test -no-skin -no-audio -no-window &
   # - adb wait-for-device
+  # dull comment
 
 script: |
   travis-ext build && \
   travis-ext lint
+
+  travis-ext hockey_deploy
 
 # after_script:
   # - travis-ext coveralls
