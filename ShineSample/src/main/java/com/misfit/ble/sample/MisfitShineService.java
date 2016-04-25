@@ -112,7 +112,7 @@ public class MisfitShineService extends Service {
     public void onCreate() {
         super.onCreate();
         try {
-            SDKSetting.setUp(this.getApplicationContext(), "user@example.com");
+            SDKSetting.setUp(this.getApplicationContext(), "user_cn@example.com");
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
         }
