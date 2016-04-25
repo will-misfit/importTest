@@ -50,6 +50,7 @@ public class SyncSdkAdapter {
     public void startScanning(int expectedDeviceType, SyncScanCallback scanCallback) {
         //FIXME: check if should stop current scanning
         //FIXME: warning for memory leaking(SyncScanCallback).
+        //FIXME: find connected device
         if (MisfitScanner.getInstance().isBluetoothEnabled() == false) {
             scanCallback.onScanFailed(ScanFailedReason.NO_BLUETOOTH);
             return;
