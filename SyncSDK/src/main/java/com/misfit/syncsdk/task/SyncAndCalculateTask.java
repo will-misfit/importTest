@@ -2,58 +2,76 @@ package com.misfit.syncsdk.task;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.misfit.ble.shine.ShineProfile;
-import com.misfit.ble.shine.ShineProfile.SyncCallback;
 import com.misfit.ble.shine.ShineProfile.ActionResult;
-import com.misfit.ble.util.MutableBoolean;
 import com.misfit.ble.shine.result.SyncResult;
+import com.misfit.ble.util.MutableBoolean;
 import com.misfit.syncsdk.ConnectionManager;
 import com.misfit.syncsdk.DeviceType;
 import com.misfit.syncsdk.ShineSdkProfileProxy;
+import com.misfit.syncsdk.TimerManager;
 import com.misfit.syncsdk.algorithm.AlgorithmUtils;
 import com.misfit.syncsdk.algorithm.DailyUserDataBuilder;
-import com.misfit.syncsdk.utils.CollectionUtils;
+import com.misfit.syncsdk.enums.FailedReason;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.model.PostCalculateData;
+import com.misfit.syncsdk.model.SdkActivitySessionGroup;
 import com.misfit.syncsdk.model.SettingsElement;
+import com.misfit.syncsdk.utils.CheckUtils;
+import com.misfit.syncsdk.utils.GeneralUtils;
+import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * Created by Will Hou on 1/12/16.
+ * Task implementation to call sync() of ShineSDK, and complete the calculation with algorithm library
+ * this task covers LogEvent of GetActivity and Calculate.
  */
 public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallback {
 
     private final static String TAG = "SyncAndCalculateTask";
 
-    public interface SyncAndCalculationTaskCallback {
-        void onCalculationCompleted(SyncResult syncResult);
-    }
-
     private List<SyncResult> mSyncResultSummary;
 
-    SyncAndCalculationTaskCallback mSyncAndCalculationTaskCallback;
+    private Handler mMainHander = new Handler(Looper.getMainLooper());
 
+    /* interface of Task */
     @Override
     protected void prepare() {
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.GET_ACTIVITY);
     }
 
     @Override
     protected void execute() {
-        if (mTaskSharedData.getSyncSyncCallback() == null) {
-            taskFailed("SyncSyncCallback is not ready");
+        mLogEvent.start();
+        MLog.d(TAG, "execute()");
+
+        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
+        if (proxy == null || !proxy.isConnected()) {
+            MLog.d(TAG, String.format("execute(), ShineSdkProfileProxy not ready"));
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "ShineSdkProfileProxy is not ready");
+            mTaskSharedData.setFailureReasonInLogSession(FailedReason.SYNC_FAIL);
+            taskFailed("proxy not prepared");
             return;
         }
 
-        ShineSdkProfileProxy proxy = ConnectionManager.getInstance().getShineSDKProfileProxy(mTaskSharedData.getSerialNumber());
-        if (proxy != null && proxy.isConnected()) {
-//            ConnectionManager.getInstance().subscribeConfigCompleted(mTaskSharedData.serialNumber, this);//FIXME:need this?
-            proxy.startSyncing(this);
-        } else {
-            taskFailed("connection did not ready");
+        if (mTaskSharedData.getReadDataCallback() == null) {
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "ReadDataCallback is not ready");
+            mTaskSharedData.setFailureReasonInLogSession(FailedReason.SYNC_FAIL);
+            taskFailed("ReadDataCallback is not ready");
+            return;
         }
+
+        updateExecuteTimer(SdkConstants.READ_DATA_TIMEOUT);
+        proxy.startSyncing(this);
     }
 
     @Override
@@ -62,85 +80,83 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
 
     @Override
     protected void cleanup() {
+        cancelCurrentTimerTask();
+        mLogSession.appendEvent(mLogEvent);
+        mLogEvent = null;
     }
 
+    /* callback of ShineProfile.SyncCallback */
     @Override
     public void onSyncDataRead(Bundle extraInfo, MutableBoolean shouldStop) {
-        float progress = extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY);
-        Log.d(TAG, "progress=" + progress);
+        final float progress = extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY, 0.0f);
+        mMainHander.post(new Runnable() {
+            @Override
+            public void run() {
+                MLog.d(TAG, String.format("progress %.2f", progress));
+            }
+        });
     }
 
     @Override
-    public void onSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shouldStop) {
-        Log.d(TAG, "onDataReadCompleted:");
-        for (SyncResult result : syncResults) {
-            Log.d(TAG, "SyncResult: " + result.toString());
-        }
-        if (mSyncAndCalculationTaskCallback != null) {
-            mSyncAndCalculationTaskCallback.onCalculationCompleted(null);
-        }
+    public void onSyncDataReadCompleted(final List<SyncResult> syncResults, MutableBoolean shouldStop) {
+        mMainHander.post(new Runnable() {
+            @Override
+            public void run() {
+                MLog.d(TAG, "onSyncDataReadCompleted: List<SyncResult> size is " + syncResults.size());
+                mSyncResultSummary = syncResults;
+
+                // if test the ShineSDK ShineProfile SyncCallback result
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    mTaskSharedData.getReadDataCallback().onRawDataReadCompleted(syncResults);
+                }
+            }
+        });
     }
 
     @Override
-    public void onSyncCompleted(ShineProfile.ActionResult resultCode) {
-        Log.d(TAG, "syncCompleted");
-        taskSucceed();
-    }
-
-    public void setSyncAndCalculationTaskCallback(SyncAndCalculationTaskCallback syncAndCalculationTaskCallback) {
-        mSyncAndCalculationTaskCallback = syncAndCalculationTaskCallback;
-    }
-
-    public SyncCallback mSyncCallback = new ShineProfile.SyncCallback () {
-        @Override
-        public void onSyncDataRead(Bundle extraInfo, MutableBoolean shouldStop) {
-            handleOnSyncDataReadCallbackCalled(extraInfo, shouldStop);
-        }
-
-        @Override
-        public void onSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shouldStop) {
-            handleOnSyncDataReadCompleted(syncResults, shouldStop);
-        }
-
-        @Override
-        public void onSyncCompleted(ActionResult resultCode) {
-            handleOnSyncCompleted(resultCode);
-        }
-    };
-
-    private void handleOnSyncDataReadCallbackCalled(Bundle extraInfo, MutableBoolean shouldStop) {
-        float syncProgress = extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY, 0.0f);
-        Log.d(TAG, "onSyncDataRead() is called, sync progress is " + syncProgress);
-
-        // stop existing timer for this onSyncDataRead() callback
-        // start timer for next onSyncDataRead() callback received
-    }
-
-    private void handleOnSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shoudlStop) {
-        // stop existing timer for this onSyncDataRead() callback
-
-        mSyncResultSummary = syncResults;
-        // start timer for following erase action
+    public void onSyncCompleted(final ShineProfile.ActionResult resultCode) {
+        mMainHander.post(new Runnable() {
+            @Override
+            public void run() {
+                handleOnSyncCompleted(resultCode);
+            }
+        });
     }
 
     private void handleOnSyncCompleted(ActionResult resultCode) {
-        // stop timer for following erase action
         boolean success = (mSyncResultSummary != null);
-        Log.d(TAG, String.format("OnSyncCompleted callback is received, result is %s",Boolean.toString(success)));
+        MLog.d(TAG, String.format("OnSyncCompleted callback is received, result is %s", Boolean.toString(success)));
 
         if (success) {
-            handleOnSyncSucceed();
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
+            handleOnShineSdkSyncSucceed();
         } else {
-            handleOnSyncFailed();
+            mLogEvent.end(LogEvent.RESULT_FAILURE, "SyncResultSummary is null");
+            mLogSession.appendEvent(mLogEvent);
+            mLogEvent = null;
+            handleOnShineSdkSyncFailed();
         }
     }
 
-    private void handleOnSyncSucceed() {
+    private void handleOnShineSdkSyncSucceed() {
+        mLogEvent = GeneralUtils.createLogEvent(LogEventType.CALCULATE);
+        mLogEvent.start();
+
+        if (CheckUtils.isCollectionEmpty(mSyncResultSummary)) {
+            mLogEvent.end(LogEvent.RESULT_SUCCESS, "List<SyncResult> is empty");
+            taskSucceed();
+            return;
+        }
+
         SyncedDataCalculationTask syncCalculateTask = new SyncedDataCalculationTask(mSyncResultSummary);
         syncCalculateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void handleOnSyncFailed() {
+    private void handleOnShineSdkSyncFailed() {
+        MLog.d(TAG, "handleOnShineSdkSyncFailed()");
+        taskFailed("ShineSDK sync failed");
     }
 
     private class SyncedDataCalculationTask extends AsyncTask<Void, Void, Void> {
@@ -154,7 +170,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
                 if (syncResult != null) {
                     this.rawSyncDataList.add(syncResult);
                 } else {
-                    Log.d(TAG, "Null sync result found.");
+                    MLog.d(TAG, "Null sync result found.");
                 }
             }
             this.syncResult = new SyncResult();
@@ -173,7 +189,7 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
          */
         private void sortRawData() {
             Log.d(TAG, "sortRawData()");
-            if (CollectionUtils.isEmpty(rawSyncDataList)) {
+            if (CheckUtils.isCollectionEmpty(rawSyncDataList)) {
                 return;
             }
             AlgorithmUtils.sortSyncResultList(rawSyncDataList);
@@ -188,22 +204,22 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
          */
         private void filterRawData() {
             Log.d(TAG, "filterRawData()");
-            long lastSyncTime = getLastSyncTime();
+            long lastSyncTime = mTaskSharedData.getSyncParams().lastSyncTime;
 
-            if (syncResult.mActivities.isEmpty()) return;  // if no data in syncResult.mActivities, nothing to filter
-
+            if (syncResult.mActivities.isEmpty()) {
+                return;  // if no data in syncResult.mActivities, nothing to filter
+            }
             final int n = syncResult.mActivities.size();
 
             // if lastSyncTime is later than current tail activity's start time, nothing to filter
             long tailActivityStartTime = syncResult.mActivities.get(n - 1).mStartTimestamp;
             if (tailActivityStartTime < lastSyncTime) {
-                Log.d(TAG, "No data is newer than last data synced, do not import those activities");
+                MLog.d(TAG, "No data is newer than last data synced, do not import those activities");
                 return;
             }
 
-            // SharedPreferencesUtils.sharedInstance().saveLong(SharedPrefCategory.DEFAULT, SharedPreferencesUtils.PREF_SYNC_LAST_READ_DATA_TIME, tailActivityStartTime);
             if (lastSyncTime == 0l) {
-                Log.d(TAG, "Last sync time has not been saved before, so that nothing to filter");
+                MLog.d(TAG, "Last sync time has not been saved before, so that nothing to filter");
                 return;
             }
             AlgorithmUtils.filterSyncResultInternalData(syncResult, lastSyncTime);
@@ -212,41 +228,49 @@ public class SyncAndCalculateTask extends Task implements ShineProfile.SyncCallb
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            Log.d(TAG, "Save sync data task onPostExecute " + System.currentTimeMillis());
+            taskSucceed();
         }
     }
 
     private void saveMisfitSyncData(SyncResult syncResult) {
+        MLog.d(TAG, String.format("saveMisfitSyncData(), syncResult size %d", syncResult.mActivities.size()));
 
-        if (syncResult != null && !CollectionUtils.isEmpty(syncResult.mActivities)) {
+        if (syncResult != null && !CheckUtils.isCollectionEmpty(syncResult.mActivities)) {
             boolean supportActivityTagging = mTaskSharedData.supportSettingsElement(
                     SettingsElement.ACTIVITY_TAGGING);
             boolean supportStream = mTaskSharedData.isStreamingSupported();
 
             if (mTaskSharedData.getDeviceType() == DeviceType.FLASH) {
-                if (!CollectionUtils.isEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
-                    Log.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
+                if (!CheckUtils.isCollectionEmpty(syncResult.mSessionEvents) && !supportActivityTagging) {
+                    MLog.d(TAG, String.format("Device do not support activity tagging, tags: %d", syncResult.mSessionEvents.size()));
                     syncResult.mSessionEvents.clear();
                 }
-                DailyUserDataBuilder.getInstance().buildDailyUserDataForFlash(syncResult, mTaskSharedData.getSerialNumber());
+                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForFlash(syncResult,
+                    mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
+                    mTaskSharedData.getSyncParams().userProfile);
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                    mTaskSharedData.setPostCalculateData(postCalculateData);
+                }
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
             } else {
-                if (!CollectionUtils.isEmpty(syncResult.mTapEventSummarys)) {
+                if (!CheckUtils.isCollectionEmpty(syncResult.mTapEventSummarys)) {
                     if (!supportActivityTagging && !supportStream) {
-                        // FIXME, previous sync log
-                        Log.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));
+                        MLog.d(TAG, String.format("Device do not support activity tagging and streaming, tags: %d", syncResult.mTapEventSummarys.size()));
                         syncResult.mTapEventSummarys.clear();
                     }
                 }
 
-                DailyUserDataBuilder.getInstance().buildDailyUserDataForShine(syncResult, mTaskSharedData.getSyncSyncCallback());
+                SdkActivitySessionGroup sdkActivitySessionGroup = DailyUserDataBuilder.getInstance().buildUserDataForShine(syncResult,
+                    mTaskSharedData.getSyncParams().settingsChangeListSinceLastSync,
+                    mTaskSharedData.getSyncParams().userProfile);
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "");
+                if (mTaskSharedData.getReadDataCallback() != null) {
+                    PostCalculateData postCalculateData = mTaskSharedData.getReadDataCallback().onDataCalculateCompleted(sdkActivitySessionGroup);
+                    mTaskSharedData.setPostCalculateData(postCalculateData);
+                }
+                mLogEvent.end(LogEvent.RESULT_SUCCESS, "ActivitySessionGroup is built up");
             }
         }
-    }
-
-    /**
-     * in Misfit app code, the LastSyncTime needs to save in SharedProference. it is not ready yet in SyncSDK
-     * */
-    private long getLastSyncTime() {
-        return 0l;
     }
 }

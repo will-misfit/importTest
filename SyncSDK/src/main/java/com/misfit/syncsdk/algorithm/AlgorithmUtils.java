@@ -18,7 +18,7 @@ import com.misfit.ble.shine.result.SwimSession;
 import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.shine.result.TapEventSummary;
 import com.misfit.ble.shine.result.Event;
-import com.misfit.syncsdk.utils.CollectionUtils;
+import com.misfit.syncsdk.utils.CheckUtils;
 import com.misfit.syncsdk.model.TagEvent;
 
 import java.util.ArrayList;
@@ -44,9 +44,11 @@ public class AlgorithmUtils {
     private static SwimSessionComparator sSwimSessionComparator = new SwimSessionComparator();
     private static EventComparator sEventComparator = new EventComparator();
 
-    public static ActivityShineVect convertSdkActivityToShineActivityForShine(List<Activity> activities, List<TapEventSummary> tapEventSummaries) {
+    public static ActivityShineVect convertSdkActivityToShineActivityForShine(@NonNull List<Activity> activities,
+                                                                              @NonNull List<TapEventSummary> tapEventSummaries) {
+        Log.d(TAG, "convertSdkActivityToShineActivityForShine()");
         ActivityShineVect activityShineVect = new ActivityShineVect();
-        if (CollectionUtils.isEmpty(activities)) {
+        if (CheckUtils.isCollectionEmpty(activities)) {
             return activityShineVect;
         }
 
@@ -74,7 +76,9 @@ public class AlgorithmUtils {
     public static ActivityShineVect convertSdkActivityToShineActivityForFlash(List<Activity> activities, List<SessionEvent> sessionEvents) {
         ActivityShineVect activityShineVect = new ActivityShineVect();
         List<TagEvent> tagEvents = importTaginTagoutBookmarks(sessionEvents, activities);
-        Collections.sort(tagEvents, new TagEventComparator());
+        if (!CheckUtils.isCollectionEmpty(tagEvents)) {
+            Collections.sort(tagEvents, new TagEventComparator());
+        }
 
         final int COUNT = tagEvents.size();
         int tagIndex = 0;
@@ -117,7 +121,7 @@ public class AlgorithmUtils {
     public static List<TagEvent> importTaginTagoutBookmarks(List<SessionEvent> sessionEvents, List<Activity> activities) {
         Log.d(TAG, "importTaginTagoutBookmarks");
         if (sessionEvents == null || sessionEvents.size() == 0) {
-            return null;
+            return new ArrayList<>();
         }
         tagEvents = new ArrayList<TagEvent>();
         for (SessionEvent sessionEvent : sessionEvents) {
@@ -225,7 +229,7 @@ public class AlgorithmUtils {
             long startTime = tagEvents.get(i).getTaggedTimestamp();
             long endTime = tagEvents.get(i + 1).getTaggedTimestamp();
             long midNight = 0;
-            // long midNight = DateUtil.getMidNight(startTime);
+            // long midNight = DateUtil.getMidNight(mStartTime);
 
             if (endTime > midNight) {
                 TagEvent tagEventYest = new TagEvent(midNight, TagEvent.TAG_OUT);
@@ -271,8 +275,8 @@ public class AlgorithmUtils {
         swlEntry.setStartTime((int) swimSession.mStartTime);
         swlEntry.setEndTime((int) swimSession.mEndTime);
         swlEntry.setNbOflaps((int) swimSession.mNumberOfLaps);
-        SWLLapInfoEntryVect swlLapsVect = new SWLLapInfoEntryVect();
 
+        SWLLapInfoEntryVect swlLapsVect = new SWLLapInfoEntryVect();
         for(SwimLap lapSession : swimSession.mSwimLaps){
             SWLLapInfoEntry swlLapEntry = new SWLLapInfoEntry();
             swlLapEntry.setDuration(lapSession.mDuration);
@@ -287,7 +291,7 @@ public class AlgorithmUtils {
 
     public static List<Long> importTripleTapBookmarks(List<TapEventSummary> tapEvents) {
         bookmarkTimestamps = new ArrayList<>();
-        if (CollectionUtils.isEmpty(tapEvents)) {
+        if (CheckUtils.isCollectionEmpty(tapEvents)) {
             return bookmarkTimestamps;
         }
         for (TapEventSummary tapEvent : tapEvents) {
@@ -318,7 +322,7 @@ public class AlgorithmUtils {
      * with latterSyncResult.mActivities[0].mStartTime as tag, remove overlapped sub list from tail of preSyncResult.mActivities
      * */
     public static void handleNotContinuousActivities(SyncResult preSyncResult, SyncResult latterSyncResult) {
-        if (CollectionUtils.isEmpty(latterSyncResult.mActivities) || CollectionUtils.isEmpty(preSyncResult.mActivities)) {
+        if (CheckUtils.isCollectionEmpty(latterSyncResult.mActivities) || CheckUtils.isCollectionEmpty(preSyncResult.mActivities)) {
             return;
         }
         Log.d(TAG, "activity size before filter " + preSyncResult.mActivities.size());
@@ -488,7 +492,7 @@ public class AlgorithmUtils {
         @Override
         public SwimSession fakeFrom(Long timestamp) {
             SwimSession res = new SwimSession();
-            res.mStartTime = timestamp;  // only startTime will be used to compare
+            res.mStartTime = timestamp;  // only mStartTime will be used to compare
             return res;
         }
     }

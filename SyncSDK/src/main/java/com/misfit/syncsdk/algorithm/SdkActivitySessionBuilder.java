@@ -2,6 +2,7 @@ package com.misfit.syncsdk.algorithm;
 
 import android.util.Log;
 
+import com.misfit.cloud.algorithm.algos.ActivitySessionsFlashAlgorithm;
 import com.misfit.cloud.algorithm.algos.ActivitySessionsShineAlgorithm;
 import com.misfit.cloud.algorithm.models.ACEEntryVect;
 import com.misfit.cloud.algorithm.models.ActivityChangeTagShineVect;
@@ -14,11 +15,11 @@ import com.misfit.cloud.algorithm.models.ProfileShine;
 import com.misfit.cloud.algorithm.models.SWLEntryVect;
 import com.misfit.cloud.algorithm.models.SessionShine;
 import com.misfit.cloud.algorithm.models.SessionShineVect;
-import com.misfit.syncsdk.callback.SyncSyncCallback;
-import com.misfit.syncsdk.model.SdkActivityChangeTag;
+import com.misfit.syncsdk.model.SdkActivityTagChange;
 import com.misfit.syncsdk.model.SdkActivitySession;
 import com.misfit.syncsdk.model.SdkProfile;
-import com.misfit.syncsdk.utils.CollectionUtils;
+import com.misfit.syncsdk.model.SdkResourceSettings;
+import com.misfit.syncsdk.utils.CheckUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
 /**
  * to build up SdkActivitySession which can be converted to ActivitySession in flagship app namespace
  * to make use of algorithm library API, some information needs to be queried from flagship app:
- *   ActivityChangeTag among a duration
+ *   ActivityChangeTag among a mDuration
  *   UserProfile
  *   Timezone change
  */
@@ -34,58 +35,87 @@ public class SdkActivitySessionBuilder {
 
     private final static String TAG = "SDKActSessionBuilder";
 
-    public static List<SdkActivitySession> buildSDKActivitySessionForShine(ActivityShineVect activityShineVect,
-                                                                           ACEEntryVect aceEntryVect,
-                                                                           SWLEntryVect swlEntryVect,
-                                                                           SyncSyncCallback syncSyncCallback) {
-        List<SdkActivitySession> result = new ArrayList<>();
+    /**
+     * build up SdkActivitySession list for Shine
+     * */
+    public static List<SdkActivitySession> buildSdkActivitySessionsForShine(ActivityShineVect activityShineVect,
+                                                                            ACEEntryVect aceEntryVect,
+                                                                            SWLEntryVect swlEntryVect,
+                                                                            List<SdkResourceSettings> settingsSinceLastSync,
+                                                                            SdkProfile sdkUserProfile) {
+        Log.d(TAG, "buildSdkActivitySessionsForShine()");
         ActivitySessionsShineAlgorithm activitySessionsShineAlgorithm = new ActivitySessionsShineAlgorithm();
         ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect gapSessionShineVect = new GapSessionShineVect();
         activitySessionsShineAlgorithm.buildActivitySession(activityShineVect, aceEntryVect, swlEntryVect,
                 activitySessionShineVect, gapSessionShineVect);
         if (activitySessionShineVect.isEmpty() && gapSessionShineVect.isEmpty()) {
-            Log.d(TAG, "no session to build");
-            return result;
+            Log.d(TAG, "buildSdkActivitySessionsForShine(), no session to build");
+            return new ArrayList<>();
         }
 
-        int[] sessionShineVectStartEndTime = getActivitySessionsStartEndTime(convertSubVect2SessionShineVect(activitySessionShineVect));
-        int[] gapSessionShineVectStartEndTime = getActivitySessionsStartEndTime(convertSubVect2SessionShineVect(gapSessionShineVect));
-        int[] wholeSessionStartEndTime = AlgorithmUtils.getStartEndTimeFromTwoSessions(sessionShineVectStartEndTime, gapSessionShineVectStartEndTime);
-
-        // get ActivityTag change list and user profile from App via callback
-        List<SdkActivityChangeTag> sdkChangeTags = syncSyncCallback.getSdkActivityChangeTagList(wholeSessionStartEndTime);
-        SdkProfile sdkProfile = syncSyncCallback.getProfileInDatabase();
+        List<SdkActivityTagChange> sdkTagChanges = getSdkActivityTagChangeList(settingsSinceLastSync);
 
         ActivitySessionShineVect resultActivitySessionShineVect = new ActivitySessionShineVect();
         GapSessionShineVect resultGapSessionShineVect = new GapSessionShineVect();
+
         activitySessionsShineAlgorithm.buildUserSessions(activitySessionShineVect, gapSessionShineVect,
                 resultActivitySessionShineVect, resultGapSessionShineVect,
-                buildActivityChangeTagShineVect(sdkChangeTags),
-                buildProfileShine(sdkProfile));
+                buildActivityChangeTagShineVect(sdkTagChanges),
+                buildProfileShine(sdkUserProfile));
 
-        // FIXME, the params should be resultActivitySessionShineVect and resultGapSessionShineVect
-        result = convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
-        return result;
+        return convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
     }
 
+    /**
+     * build up SdkActivitySession list for Flash
+     * */
+    public static List<SdkActivitySession> buildSdkActivitySessionsForFlash(ActivityShineVect activityShineVect,
+                                                                            List<SdkResourceSettings> settingsSinceLastSync,
+                                                                            SdkProfile sdkUserProfile) {
+        Log.d(TAG, "buildSdkActivitySessionsForFlash");
+        ActivitySessionsFlashAlgorithm activitySessionsFlashAlgorithm = new ActivitySessionsFlashAlgorithm();
+        ActivitySessionShineVect activitySessionShineVect = new ActivitySessionShineVect();
+        GapSessionShineVect gapSessionShineVect = new GapSessionShineVect();
+        activitySessionsFlashAlgorithm.buildActivitySession(activityShineVect, activitySessionShineVect, gapSessionShineVect);
+        if (activitySessionShineVect == null && gapSessionShineVect == null) {
+            Log.d(TAG, "buildSdkActivitySessionsForFlash(), no session build");
+            return new ArrayList<>();
+        }
+
+        List<SdkActivityTagChange> sdkTagChanges = getSdkActivityTagChangeList(settingsSinceLastSync);
+
+        ActivitySessionShineVect resultActivitySessionShineVect = new ActivitySessionShineVect();
+        GapSessionShineVect resultGapSessionShineVect = new GapSessionShineVect();
+        activitySessionsFlashAlgorithm.buildUserSessions(activitySessionShineVect, gapSessionShineVect,
+            resultActivitySessionShineVect, resultGapSessionShineVect,
+            buildActivityChangeTagShineVect(sdkTagChanges),
+            buildProfileShine(sdkUserProfile));
+
+        return convertSessionShineVect2SdkActivitySessionList(resultActivitySessionShineVect, resultGapSessionShineVect);
+    }
+
+    /**
+     * as GapSession should stay inside ActivitySession list, does the output SdkActivitySession List need to be sorted in order?
+     * */
     private static List<SdkActivitySession> convertSessionShineVect2SdkActivitySessionList(
         ActivitySessionShineVect activitySessionShineVect, GapSessionShineVect gapSessionShineVect) {
-        Log.d(TAG, String.format("convertXXXSessionShineVect2SDKActivitySessionList: activity sessions size: %d, gap sessions size: %d",
+
+        Log.d(TAG, String.format("convertSessionShineVect2SdkActivitySessionList: activity sessions size: %d, gap sessions size: %d",
             activitySessionShineVect.size(), gapSessionShineVect.size()));
         
         List<SdkActivitySession> result = new ArrayList<>();
         for (int i = 0; i < activitySessionShineVect.size(); i++) {
             SdkActivitySession sdkActivitySession = convertActivitySessionShine2SdkActivitySession(activitySessionShineVect.get(i));
             result.add(sdkActivitySession);
-            Log.d(TAG, String.format("SdkActivitySession: timestamp is %d, points is %d",
-                sdkActivitySession.getStartTime(), sdkActivitySession.getPoint()));
+            Log.d(TAG, String.format("SdkActivitySession: timestamp is %d, points is %d", sdkActivitySession.getStartTime(),
+                sdkActivitySession.getPoints()));
         }
         for(int i = 0; i < gapSessionShineVect.size(); i++) {
             SdkActivitySession sdkActivitySession = convertGapSessionShine2SdkActivitySession(gapSessionShineVect.get(i));
             result.add(sdkActivitySession);
-            Log.d(TAG, String.format("SdkActivitySession of Gap session: timestamp is %d, points is %d",
-                        sdkActivitySession.getStartTime(), sdkActivitySession.getPoint()));
+            Log.d(TAG, String.format("SdkActivitySession of Gap session: timestamp is %d, points is %d", sdkActivitySession.getStartTime(),
+                sdkActivitySession.getPoints()));
         }
         return result;
     }
@@ -96,7 +126,6 @@ public class SdkActivitySessionBuilder {
         result.setIsGapSession(false);
         result.setLaps(activitySessionShine.getLaps());
         result.setActivityType(activitySessionShine.getType());
-        // lapCountingState, poolLength, poolLengthUnit are saved in Settings of flagship app
         return result;
     }
 
@@ -118,12 +147,12 @@ public class SdkActivitySessionBuilder {
         return result;
     }
 
-    public static ActivityChangeTagShineVect buildActivityChangeTagShineVect(List<SdkActivityChangeTag> changeTagList) {
+    public static ActivityChangeTagShineVect buildActivityChangeTagShineVect(List<SdkActivityTagChange> changeTagList) {
         ActivityChangeTagShineVect result = new ActivityChangeTagShineVect();
-        if (CollectionUtils.isEmpty(changeTagList)) {
+        if (CheckUtils.isCollectionEmpty(changeTagList)) {
             return result;
         }
-        for(SdkActivityChangeTag changeTag : changeTagList) {
+        for(SdkActivityTagChange changeTag : changeTagList) {
             result.add(changeTag.convert2ActivityChangeTagShine());
         }
         return result;
@@ -184,4 +213,18 @@ public class SdkActivitySessionBuilder {
         startEndTime[1] = sessionsEndTime;
         return startEndTime;
     }
+
+    private static List<SdkActivityTagChange> getSdkActivityTagChangeList(List<SdkResourceSettings> settingsList) {
+        List<SdkActivityTagChange> result = new ArrayList<>();
+        if (CheckUtils.isCollectionEmpty(settingsList)) {
+            return result;
+        }
+
+        for (SdkResourceSettings settings : settingsList) {
+            SdkActivityTagChange sdkActivityTagChange = new SdkActivityTagChange(settings.getTimestamp(), settings.getDefaultTripleState());
+            result.add(sdkActivityTagChange);
+        }
+        return result;
+    }
+
 }

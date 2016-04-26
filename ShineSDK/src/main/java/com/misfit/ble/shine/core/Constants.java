@@ -245,5 +245,7 @@ public class Constants {
 	public static final int EXTERNAL_CONNECT_TIMEOUT = 44000;   // currently Misfit app set 30 sec for connect timeout, so SDK promises to stop all internal attempts before it ticks
 	public static final int DUMMY_FILE_LIST_TIMEOUT = 1000;   // in milliseconds
 
+	// Bluetooth scanning retry
+	public static final int INTERNAL_BEFORE_RESTART_SCAN = 1000;
 
 }

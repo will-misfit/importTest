@@ -2,12 +2,20 @@ package com.misfit.syncsdk.task;
 
 import android.util.Log;
 
+import com.misfit.syncsdk.TimerManager;
+import com.misfit.syncsdk.enums.FailedReason;
+import com.misfit.syncsdk.log.LogEvent;
+import com.misfit.syncsdk.log.LogEventType;
+import com.misfit.syncsdk.log.LogSession;
 import com.misfit.syncsdk.model.TaskSharedData;
+import com.misfit.syncsdk.utils.MLog;
+import com.misfit.syncsdk.utils.SdkConstants;
 
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by Will Hou on 1/11/16.
+ * base class for all the detailed task in operation
  */
 public abstract class Task {
     private final static String TAG = "Task";
@@ -19,16 +27,18 @@ public abstract class Task {
     }
 
     protected TaskResultCallback mTaskResultCallback;
+
+    // subclass need to define its own remaining retry count
     protected int mRemainingRetry = 0;
+
     protected TaskSharedData mTaskSharedData;
-    protected boolean mIsFinished = false;
+    protected AtomicBoolean mIsFinished = new AtomicBoolean(false);
+
+    protected LogEvent mLogEvent;
+    protected LogSession mLogSession;
 
     // Timer to monitor whether the Task execution timeout
     protected TimerTask mCurrTimerTask;
-
-    public boolean couldIgnoreResult() {
-        return false;
-    }
 
     public boolean shouldEndFlow() {
         return false;
@@ -36,18 +46,22 @@ public abstract class Task {
 
     public void start(TaskSharedData sharedData) {
         mTaskSharedData = sharedData;
-        mIsFinished = false;
+        mIsFinished.set(false);
         Log.d(TAG, this.getClass().getSimpleName() + " start");
+        mLogSession = mTaskSharedData.getLogSession();
         prepare();
         execute();
     }
 
     public void stop() {
-        mIsFinished = true;
+        mIsFinished.set(true);
         onStop();
         cleanup();
     }
 
+    /**
+     * retry at single Task level
+     * */
     protected void retry() {
         mRemainingRetry--;
         Log.d(TAG, this.getClass().getSimpleName() + " retry, remaining retry=" + mRemainingRetry);
@@ -59,10 +73,23 @@ public abstract class Task {
         }
     }
 
+    protected void retryAndIgnored() {
+        MLog.d(TAG, String.format("retryAndIgnored(), remaining retry %d", mRemainingRetry));
+
+        if (mRemainingRetry > 0){
+            mRemainingRetry--;
+            cleanup();
+            start(mTaskSharedData);
+        } else {
+            taskIgnored("retry out");
+        }
+    }
+
     protected void taskFailed(String reason) {
-        mIsFinished = true;
+        MLog.d(TAG, this.getClass().getSimpleName() + " failed by " + reason);
+
+        mIsFinished.set(true);
         cleanup();
-        Log.d(TAG, this.getClass().getSimpleName() + "ended by " + reason);
         if (mTaskResultCallback != null) {
             //FIXME:use enum
             mTaskResultCallback.onTaskFailed(this, -1);
@@ -70,7 +97,7 @@ public abstract class Task {
     }
 
     protected void taskSucceed() {
-        mIsFinished = true;
+        mIsFinished.set(true);
         cleanup();
         Log.d(TAG, this.getClass().getSimpleName() + " completed");
         if (mTaskResultCallback != null) {
@@ -78,8 +105,17 @@ public abstract class Task {
         }
     }
 
+    protected void taskIgnored(String reason) {
+        mIsFinished.set(true);
+        cleanup();
+        Log.d(TAG, this.getClass().getSimpleName() + " was skipped by " + reason);
+        if (mTaskResultCallback != null) {
+            mTaskResultCallback.onTaskFinished();
+        }
+    }
+
     /**
-     * will be called in start
+     * methods to be called in start()
      */
     protected abstract void prepare();
 
@@ -88,9 +124,21 @@ public abstract class Task {
     protected abstract void onStop();
 
     /**
-     * will be called in succeed/ failed/ stop/ retry
+     * to be called in succeed/ failed/ stop/ retry
      */
     protected abstract void cleanup();
+
+    // default TimerTask to monitor in each Task subclass, no retry
+    protected TimerTask createTimeoutTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                MLog.d(TAG, "Task instance timeout timer ticks!");
+                mTaskSharedData.setFailureReasonInLogSession(FailedReason.TIMEOUT);
+                taskFailed("timeout");
+            }
+        };
+    }
 
     public void setCallback(TaskResultCallback mCallback) {
         this.mTaskResultCallback = mCallback;
@@ -101,5 +149,15 @@ public abstract class Task {
             mCurrTimerTask.cancel();
             mCurrTimerTask = null;
         }
+    }
+
+    protected void updateExecuteTimer() {
+        updateExecuteTimer(SdkConstants.DEFAULT_TIMEOUT);
+    }
+
+    protected void updateExecuteTimer(long timeout) {
+        cancelCurrentTimerTask();
+        mCurrTimerTask = createTimeoutTask();
+        TimerManager.getInstance().addTimerTask(mCurrTimerTask, timeout);
     }
 }

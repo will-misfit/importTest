@@ -615,7 +615,8 @@ public class MisfitShineService extends Service {
         if (connectionParameters != null) {
             String[] components = connectionParameters.split(",");
             if (components.length >= 3) {
-                parameters = new ShineConnectionParameters(Double.parseDouble(components[0]), Integer.parseInt(components[1]), Integer.parseInt(components[2]));
+                parameters = new ShineConnectionParameters(Double.parseDouble(components[0].trim()),
+                    Integer.parseInt(components[1].trim()), Integer.parseInt(components[2].trim()));
             }
         }
         mShineProfile.setConnectionParameters(parameters, configurationCallback);

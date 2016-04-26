@@ -50,6 +50,23 @@ public class ScanLogSession {
 		logEventItem.mRequestStartedLog = new RequestStartedLog(json);
 		mLogItems.add(logEventItem);
 	}
+
+    /**
+     * work with ShineAdapter.internalStartScanning(), compared to start():
+     * - without log session start time update
+     * - log restartIndex instead of hex conversion of callback
+     * */
+	public void internalStart(int restartIndex) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("restartIndex", restartIndex);
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+        LogEventItem logEventItem = new LogEventItem(LogEventItem.EVENT_RESTART_SCANNING);
+        logEventItem.mRequestStartedLog = new RequestStartedLog(json);
+        mLogItems.add(logEventItem);
+    }
 	
 	public void stop(ShineScanCallback callback) {
 		JSONObject json = new JSONObject();
@@ -64,6 +81,18 @@ public class ScanLogSession {
 		
 		mEndTime = System.currentTimeMillis();
 	}
+
+    /**
+     * work with ShineAdapter.internalStopScanning(), compared to stop():
+     * - without log session end time update
+     * - without hex conversion of callback
+     * */
+    public void internalStop() {
+        JSONObject json = new JSONObject();
+        LogEventItem logEventItem = new LogEventItem(LogEventItem.EVENT_STOP_SCANNING);
+        logEventItem.mRequestStartedLog = new LogEventItem.RequestStartedLog(json);
+        mLogItems.add(logEventItem);
+    }
 
 	public void clearLogItems() {
 		mLogItems.clear();

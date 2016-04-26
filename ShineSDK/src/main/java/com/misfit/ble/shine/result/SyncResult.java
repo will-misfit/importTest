@@ -31,8 +31,8 @@ public class SyncResult {
 	 *
 	 * @return -1 if no activity
      */
-	public long getEarliestStartTime(){
-		if(mActivities==null || mActivities.size()==0){
+	public long getHeadStartTime(){
+		if(mActivities == null || mActivities.isEmpty()){
 			return -1;
 		}
 		return mActivities.get(0).mStartTimestamp;
@@ -42,15 +42,18 @@ public class SyncResult {
 	 *
 	 * @return -1 if no activity
 	 */
-	public long getLatestActEndTime(){
-		if(mActivities==null || mActivities.size()==0){
+	public long getTailEndTime(){
+		if(mActivities == null || mActivities.isEmpty()){
 			return -1;
 		}
 		return mActivities.get(mActivities.size()-1).mEndTimestamp;
 	}
 
-	public long getTotalMinOfActivities(){
-		if(mActivities==null || mActivities.size()==0){
+	/**
+	 * get total minutes of the per minute data collection
+	 * */
+	public long getTotalMinutes(){
+		if(mActivities == null || mActivities.isEmpty()){
 			return -1;
 		}
 		return mActivities.size();
