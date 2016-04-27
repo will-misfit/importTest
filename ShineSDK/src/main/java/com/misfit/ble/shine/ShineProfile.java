@@ -62,6 +62,7 @@ import com.misfit.ble.shine.result.SyncResult;
 import com.misfit.ble.util.Convertor;
 import com.misfit.ble.util.MutableBoolean;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -1899,6 +1900,21 @@ public final class ShineProfile {
                 logUnexpectedEvent(LogEventItem.EVENT_ON_SYNC_PHASE_PROGRESS_CHANGED, json);
                 shouldStop.setValue(true);
                 return;
+            }
+            if (syncResults != null && syncResults.size() > 0) {
+                JSONArray jsonArray = new JSONArray();
+                try {
+                    for (SyncResult syncResult : syncResults) {
+                        JSONObject jsonSyncResult = new JSONObject();
+                        jsonSyncResult.put("startTimestamp", syncResult.getHeadStartTime());
+                        jsonSyncResult.put("activityCount", syncResult.getTotalMinutes());
+                        jsonArray.put(jsonSyncResult);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                LogEventItem logEventItem = newLogEventItem(LogEventItem.EVENT_SYNC_RESULT_TRACKING);
+                logEventItem.mResponseFinishedLog = ResponseFinishedLog.newArrayValueInstance(0, jsonArray);
             }
             syncCallback.onSyncDataReadCompleted(syncResults, shouldStop);
         }

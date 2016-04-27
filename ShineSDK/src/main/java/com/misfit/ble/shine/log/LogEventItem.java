@@ -1,5 +1,6 @@
 package com.misfit.ble.shine.log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +38,8 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_SET_DEVICE_CONFIGURATION = "setDeviceConfiguration";
 	
 	public static final String EVENT_SYNC = "sync";
-	
+	public static final String EVENT_SYNC_RESULT_TRACKING = "syncResultTracking";
+
 	public static final String EVENT_OTA = "ota";
 	
 	public static final String EVENT_CHANGE_SERIAL_NUMBER = "changeSerialNumber";
@@ -201,14 +203,21 @@ public class LogEventItem extends LogItem {
 	}
 	
 	public static class ResponseFinishedLog {
-		public long mTimeMillis;
-		public int mResult;
-		public JSONObject mValue;
+		private long mTimeMillis;
+		private int mResult;
+		private JSONObject mValue;
+		private JSONArray mArrayValue;
 		
 		public ResponseFinishedLog(int result, JSONObject value) {
 			mTimeMillis = System.currentTimeMillis();
 			mResult = result;
 			mValue = value;
+		}
+
+		public static ResponseFinishedLog newArrayValueInstance(int result, JSONArray value) {
+			ResponseFinishedLog finishedLog = new ResponseFinishedLog(result, null);
+			finishedLog.mArrayValue = value;
+			return finishedLog;
 		}
 		
 		public JSONObject toJSONObject() {
@@ -216,7 +225,11 @@ public class LogEventItem extends LogItem {
 			try {
 				jsonObject.put("timestamp", mTimeMillis * 1.0 / 1000);
 				jsonObject.put("result", mResult);
-				jsonObject.put("value", mValue);
+				if (mValue != null) {
+					jsonObject.put("value", mValue);
+				} else {
+					jsonObject.put("value", mArrayValue);
+				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
