@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SyncPhaseController extends PhaseController {
-
+    
     public interface SyncPhaseControllerCallback {
         void onSyncPhaseControllerSyncDataReadProgress(
                 SyncPhaseController syncPhaseController,
