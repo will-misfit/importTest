@@ -206,18 +206,11 @@ public class LogEventItem extends LogItem {
 		private long mTimeMillis;
 		private int mResult;
 		private JSONObject mValue;
-		private JSONArray mArrayValue;
 		
 		public ResponseFinishedLog(int result, JSONObject value) {
 			mTimeMillis = System.currentTimeMillis();
 			mResult = result;
 			mValue = value;
-		}
-
-		public static ResponseFinishedLog newArrayValueInstance(int result, JSONArray value) {
-			ResponseFinishedLog finishedLog = new ResponseFinishedLog(result, null);
-			finishedLog.mArrayValue = value;
-			return finishedLog;
 		}
 		
 		public JSONObject toJSONObject() {
@@ -225,11 +218,7 @@ public class LogEventItem extends LogItem {
 			try {
 				jsonObject.put("timestamp", mTimeMillis * 1.0 / 1000);
 				jsonObject.put("result", mResult);
-				if (mValue != null) {
-					jsonObject.put("value", mValue);
-				} else {
-					jsonObject.put("value", mArrayValue);
-				}
+				jsonObject.put("value", mValue);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

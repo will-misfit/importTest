@@ -1901,6 +1901,7 @@ public final class ShineProfile {
                 shouldStop.setValue(true);
                 return;
             }
+            JSONObject value = new JSONObject();
             if (syncResults != null && syncResults.size() > 0) {
                 JSONArray jsonArray = new JSONArray();
                 try {
@@ -1910,11 +1911,12 @@ public final class ShineProfile {
                         jsonSyncResult.put("activityCount", syncResult.getTotalMinutes());
                         jsonArray.put(jsonSyncResult);
                     }
+                    value.put("arrayData", jsonArray);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 LogEventItem logEventItem = newLogEventItem(LogEventItem.EVENT_SYNC_RESULT_TRACKING);
-                logEventItem.mResponseFinishedLog = ResponseFinishedLog.newArrayValueInstance(0, jsonArray);
+                logEventItem.mResponseFinishedLog = new ResponseFinishedLog(0, value);
             }
             syncCallback.onSyncDataReadCompleted(syncResults, shouldStop);
         }
