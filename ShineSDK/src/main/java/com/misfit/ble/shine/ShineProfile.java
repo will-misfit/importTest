@@ -22,6 +22,7 @@ import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.ble.setting.pluto.PlutoSequence;
+import com.misfit.ble.setting.pluto.SpecifiedAnimationSetting;
 import com.misfit.ble.shine.ShineProfileCore.ShineCoreCallback;
 import com.misfit.ble.shine.compatibility.FirmwareCompatibility;
 import com.misfit.ble.shine.controller.BoltControllers;
@@ -2298,6 +2299,23 @@ public final class ShineProfile {
 			return startPhaseController(mPlutoControllers.playLedAnimation(ledAnimationSequence, numOfRepeats, millisBetweenRepeats, configurationCallback));
 		}
 	}
+
+    /**
+     * start a specified animation
+     * <br>NOTE: currently device has a feature to stop any animation/vibe that take long time (>35s) to play. So number of repeats will be limited to 20 for short animation/vibe and 10 for long one.</br>
+     * @param specifiedAnimationSetting see {@link SpecifiedAnimationSetting}
+     * @return  operation was started successfully
+     */
+    public boolean startSpecifiedAnimation(SpecifiedAnimationSetting specifiedAnimationSetting,
+                                           ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_STOP_NOTIFICATION);
+                return false;
+            }
+            return startPhaseController(mPlutoControllers.startSpecifiedAnimation(specifiedAnimationSetting, configurationCallback));
+        }
+    }
 
 	/**
 	 * Set custom mode for flash link event

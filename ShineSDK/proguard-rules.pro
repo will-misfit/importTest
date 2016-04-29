@@ -119,6 +119,7 @@
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$LED { public *; }
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Vibe { public *; }
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Sound { public *; }
+-keep class com.misfit.ble.setting.pluto.StartSpecifiedAnimationRequest { public *; }
 
 # Log, ConnectionErrorCode enum
 -keep class com.misfit.ble.shine.log.ConnectFailCode { public *; }

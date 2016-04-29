@@ -5,6 +5,7 @@ import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.ble.setting.pluto.PlutoSequence;
+import com.misfit.ble.setting.pluto.SpecifiedAnimationSetting;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.ShineProfile;
@@ -29,6 +30,7 @@ import com.misfit.ble.shine.request.SetCallTextNotificationsRequest;
 import com.misfit.ble.shine.request.SetGoalHitNotificationRequest;
 import com.misfit.ble.shine.request.SetInactivityNudgeRequest;
 import com.misfit.ble.shine.request.SetSingleAlarmTimeRequest;
+import com.misfit.ble.shine.request.StartSpecifiedAnimationRequest;
 import com.misfit.ble.shine.request.StopNotificationRequest;
 
 import java.util.Arrays;
@@ -392,6 +394,22 @@ public class PlutoControllers {
 
 		return new ControllerBuilder(ActionID.PLAY_SOUND,
 				LogEventItem.EVENT_PLAY_SOUND,
+				Arrays.asList(requests), mPhaseControllerCallback, new ControllerBuilder.Callback() {
+			@Override
+			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+				configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, null);
+			}
+		});
+	}
+
+	public PhaseController startSpecifiedAnimation(SpecifiedAnimationSetting specifiedAnimationSetting, final ShineProfile.ConfigurationCallback configurationCallback) {
+		StartSpecifiedAnimationRequest request = new StartSpecifiedAnimationRequest();
+		request.buildRequest(specifiedAnimationSetting);
+
+		Request[] requests = {request};
+
+		return new ControllerBuilder(ActionID.START_SPECIFIED_ANIMATION,
+				LogEventItem.EVENT_START_SPECIFIED_ANIMATION,
 				Arrays.asList(requests), mPhaseControllerCallback, new ControllerBuilder.Callback() {
 			@Override
 			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {

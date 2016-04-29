@@ -84,6 +84,12 @@ public class Constants {
 	public static final byte DEVICE_SETTING_ID_ALARMS = 0x0e;
 	public static final byte DEVICE_SETTING_ID_BLE_NOTIFICATIONS = 0x0f;
 
+	public class LEDControl {
+		public final static byte PARAMETER_ID = 0x0e;
+		public final static byte COMMAND_START_SPECIFIED_ANIMATION = 0x04;
+		public final static byte COMMAND_ANIMATION_COLOR = 0x05;
+	}
+
 
 	// Algorithm Settings Id (Pluto)
 	public static final byte ALGORITHM_SETTING_ID_SET_ACE = 0x01;

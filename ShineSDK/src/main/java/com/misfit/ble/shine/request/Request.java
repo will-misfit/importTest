@@ -6,7 +6,7 @@ import com.misfit.ble.util.Convertor;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Request {
+public abstract class Request {
 	
 	// iVars
 	protected boolean mIsCompleted;
@@ -16,9 +16,7 @@ public class Request {
 		return null;
 	}
 	
-	public String getCharacteristicUUID() {
-		return null;
-	}
+	abstract public String getCharacteristicUUID();
 	
 	public int getTimeOut() {
 		return 3000;
