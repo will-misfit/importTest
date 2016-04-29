@@ -5,7 +5,6 @@ import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.ble.setting.pluto.PlutoSequence;
-import com.misfit.ble.setting.pluto.SpecifiedAnimationSetting;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.ShineProfile;
@@ -31,6 +30,7 @@ import com.misfit.ble.shine.request.SetGoalHitNotificationRequest;
 import com.misfit.ble.shine.request.SetInactivityNudgeRequest;
 import com.misfit.ble.shine.request.SetSingleAlarmTimeRequest;
 import com.misfit.ble.shine.request.StartSpecifiedAnimationRequest;
+import com.misfit.ble.shine.request.StartSpecifiedVibrationRequest;
 import com.misfit.ble.shine.request.StopNotificationRequest;
 
 import java.util.Arrays;
@@ -402,14 +402,30 @@ public class PlutoControllers {
 		});
 	}
 
-	public PhaseController startSpecifiedAnimation(SpecifiedAnimationSetting specifiedAnimationSetting, final ShineProfile.ConfigurationCallback configurationCallback) {
+	public PhaseController startSpecifiedAnimation(PlutoSequence.LED led, byte repeats, short timeBetweenRepeats, PlutoSequence.Color color, final ShineProfile.ConfigurationCallback configurationCallback) {
 		StartSpecifiedAnimationRequest request = new StartSpecifiedAnimationRequest();
-		request.buildRequest(specifiedAnimationSetting);
+		request.buildRequest(led, repeats, timeBetweenRepeats, color);
 
 		Request[] requests = {request};
 
 		return new ControllerBuilder(ActionID.START_SPECIFIED_ANIMATION,
 				LogEventItem.EVENT_START_SPECIFIED_ANIMATION,
+				Arrays.asList(requests), mPhaseControllerCallback, new ControllerBuilder.Callback() {
+			@Override
+			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+				configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, null);
+			}
+		});
+	}
+
+	public PhaseController startSpecifiedVibration(PlutoSequence.Vibe vibe, byte repeats, short timeBetweenRepeats, final ShineProfile.ConfigurationCallback configurationCallback) {
+		StartSpecifiedVibrationRequest request = new StartSpecifiedVibrationRequest();
+		request.buildRequest(vibe, repeats, timeBetweenRepeats);
+
+		Request[] requests = {request};
+
+		return new ControllerBuilder(ActionID.START_SPECIFIED_VIBRATION,
+				LogEventItem.EVENT_START_SPECIFIED_VIBRATION,
 				Arrays.asList(requests), mPhaseControllerCallback, new ControllerBuilder.Callback() {
 			@Override
 			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {

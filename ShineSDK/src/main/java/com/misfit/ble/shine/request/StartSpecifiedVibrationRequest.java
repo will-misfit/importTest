@@ -10,16 +10,15 @@ import org.json.JSONObject;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class StartSpecifiedAnimationRequest extends Request {
+public class StartSpecifiedVibrationRequest extends Request {
 
-    private PlutoSequence.LED mLed;
-    private PlutoSequence.Color mColor;
+    private PlutoSequence.Vibe mSequence;
     private byte mRepeats;
     private short mTimeBetweenRepeats;
 
     @Override
     public String getRequestName() {
-        return "StartSpecifiedAnimation";
+        return "StartSpecifiedVibration";
     }
 
     @Override
@@ -27,21 +26,19 @@ public class StartSpecifiedAnimationRequest extends Request {
         return Constants.MFSERVICE_DEVICE_CONFIGURATION_CHARACTERISTIC_UUID;
     }
 
-    public void buildRequest(PlutoSequence.LED led, byte repeats, short timeBetweenRepeats, PlutoSequence.Color color) {
-        mLed = led;
+    public void buildRequest(PlutoSequence.Vibe sequence, byte repeats, short timeBetweenRepeats) {
+        mSequence = sequence;
         mRepeats = repeats;
         mTimeBetweenRepeats = timeBetweenRepeats;
-        mColor = color;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         byteBuffer.put(Constants.DEVICE_CONFIG_OPERATION_SET);
-        byteBuffer.put(Constants.LEDControl.PARAMETER_ID);
-        byteBuffer.put(Constants.LEDControl.COMMAND_START_SPECIFIED_ANIMATION);
-        byteBuffer.put(Convertor.unsignedByteFromShort(mLed.getValue()));
+        byteBuffer.put(Constants.VibeControl.PARAMETER_ID);
+        byteBuffer.put(Constants.VibeControl.COMMAND_PLAY_SPECIFIED_VIBRATION);
+        byteBuffer.put(Convertor.unsignedByteFromShort(mSequence.getValue()));
         byteBuffer.put(mRepeats);
         byteBuffer.putShort(mTimeBetweenRepeats);
-        byteBuffer.put(Convertor.unsignedByteFromShort(mColor.getValue()));
 
         mRequestData = byteBuffer.array();
     }
@@ -50,10 +47,9 @@ public class StartSpecifiedAnimationRequest extends Request {
     public JSONObject getRequestDescriptionJSON() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("sequence", mLed.getValue());
+            jsonObject.put("sequence", mSequence.getValue());
             jsonObject.put("repeats", mRepeats);
             jsonObject.put("timeBetweenRepeats", mTimeBetweenRepeats);
-            jsonObject.put("color", mColor.getValue());
         } catch (JSONException e) {
             e.printStackTrace();
         }

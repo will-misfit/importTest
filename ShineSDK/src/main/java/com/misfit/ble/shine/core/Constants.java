@@ -90,6 +90,11 @@ public class Constants {
 		public final static byte COMMAND_ANIMATION_COLOR = 0x05;
 	}
 
+	public class VibeControl {
+		public final static byte PARAMETER_ID = 0x0f;
+		public final static byte COMMAND_PLAY_SPECIFIED_VIBRATION = 0x05;
+	}
+
 
 	// Algorithm Settings Id (Pluto)
 	public static final byte ALGORITHM_SETTING_ID_SET_ACE = 0x01;
