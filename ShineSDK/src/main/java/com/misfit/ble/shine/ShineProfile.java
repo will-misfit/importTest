@@ -321,14 +321,14 @@ public final class ShineProfile {
                 setState(State.CONNECTING);
                 mNumberOfConnectionRetriesLeft--;
                 mConnectTimer.schedule(new IndexedTimerTask(mCurrentConnectIndex) {
-                        @Override
-                        public void run() {
-                            if (getIndex() == mCurrentConnectIndex
+                    @Override
+                    public void run() {
+                        if (getIndex() == mCurrentConnectIndex
                                 && mState == State.CONNECTING
                                 && mInConnectAttempt) {
-                                disconnect();
-                            }
+                            disconnect();
                         }
+                    }
                 }, Constants.CONNECT_CALLBACK_TIMEOUT);
             }
             return result;

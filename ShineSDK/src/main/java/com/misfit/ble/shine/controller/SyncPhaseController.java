@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SyncPhaseController extends PhaseController {
-    
+
     public interface SyncPhaseControllerCallback {
         void onSyncPhaseControllerSyncDataReadProgress(
                 SyncPhaseController syncPhaseController,
@@ -47,11 +47,25 @@ public class SyncPhaseController extends PhaseController {
     }
 
     public class SyncSession {
+        private static final int ERASE_EXTRA_ONE_TIME = 1;
+
         public short mNumberOfActivityFiles;
         public short mNumberOfActivityFilesRead;
         public short mNumberOfActivityFilesErased;
         public long mTotalFilesSize;
         private List<SyncResult> syncResults = new ArrayList<>();
+
+
+        /**
+         *  Send one more time FileEraseRequest to fix bug sync-1217, make sure that file data read before is deleted.
+         */
+        public boolean needErase() {
+            return (mNumberOfActivityFilesErased < (mNumberOfActivityFiles + ERASE_EXTRA_ONE_TIME));
+        }
+
+        public boolean isNecessaryErase() {
+            return (mNumberOfActivityFilesErased < mNumberOfActivityFiles);
+        }
     }
 
     private TimestampCorrectorNew mTimestampCorrector;
@@ -219,7 +233,9 @@ public class SyncPhaseController extends PhaseController {
             FileEraseActivityRequest fileEraseRequest = (FileEraseActivityRequest)request;
             FileEraseActivityRequest.Response response = fileEraseRequest.getResponse();
 
-            if (response.result != Constants.RESPONSE_SUCCESS) {
+            // Only the result of necessary erase is checked, the last extra one is no need to check to make sure
+            // the normal sync process is successful.
+            if (mSyncSession.isNecessaryErase() && response.result != Constants.RESPONSE_SUCCESS) {
                 postProcessing(RESULT_REQUEST_ERROR);
                 return;
             }
@@ -329,7 +345,7 @@ public class SyncPhaseController extends PhaseController {
     private void handleActivityFileErasedCompleted() {
         mSyncSession.mNumberOfActivityFilesErased += 1;
 
-        if (mSyncSession.mNumberOfActivityFilesErased < mSyncSession.mNumberOfActivityFiles) {
+        if (mSyncSession.needErase()) {
             sendRequest(buildRequest(FileEraseActivityRequest.class));
         }
         else {
