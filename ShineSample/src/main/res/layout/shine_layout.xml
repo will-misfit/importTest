@@ -16,6 +16,7 @@
 
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="true"
@@ -134,7 +135,9 @@
 
             <com.misfit.ble.sample.utils.FlexLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:align_item="center"
+                >
 
                 <Button
                     android:id="@+id/btn_enable_bt"
@@ -163,6 +166,12 @@
                     android:layout_height="wrap_content"
                     android:layout_toStartOf="@+id/btn_close"
                     android:text="@string/start_ota" />
+
+                <CheckBox
+                    android:id="@+id/cb_auto_retry_ota"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="auto retry ota"/>
 
                 <Button
                     android:id="@+id/btn_close"

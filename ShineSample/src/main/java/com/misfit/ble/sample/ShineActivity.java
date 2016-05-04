@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ru.bartwell.exfilepicker.ExFilePicker;
@@ -84,6 +85,9 @@ public class ShineActivity extends BaseActivity {
 	private Button mUnmapAllEventsButton;
 	private Button mUnmapSpecificEventButton;
 	private Button mCustomModeButton;
+
+	@Bind(R.id.cb_auto_retry_ota)
+	CheckBox mAutoRetryOtaCb;
 
 	/**
 	 * Activity Events
@@ -777,6 +781,6 @@ public class ShineActivity extends BaseActivity {
 		}
 
 		setMessage(path.substring(path.lastIndexOf("/") + 1));
-		mService.startOTAing(firmwareData);
+		mService.startOTAing(firmwareData, mAutoRetryOtaCb.isChecked());
 	}
 }

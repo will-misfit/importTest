@@ -11,7 +11,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.misfit.ble.sample.utils.Convertor;
-import com.misfit.ble.sample.utils.logger.MFLog;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
@@ -89,6 +88,10 @@ public class MisfitShineService extends Service {
 
     private int lastConnErrorCode = -1;
 
+    private byte[] mTempOtaFile;
+    private int mAutoOtaCountDown;
+    private final static int AUTO_OTA_MAX_COUNT = 50;
+
     /**
      * for external connect timeout listener
      */
@@ -154,7 +157,13 @@ public class MisfitShineService extends Service {
             if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
                 mShineCallback_v1.onOTASucceeded();
             } else {
-                mShineCallback_v1.onOTAFailed();
+                mAutoOtaCountDown--;
+                if (mAutoOtaCountDown < 0 || mTempOtaFile == null) {
+                    Log.i(TAG, "auto continue ota, left try:" + mAutoOtaCountDown);
+                    mShineCallback_v1.onOTAFailed();
+                } else {
+                    mShineProfile.ota(mTempOtaFile, otaCallback);
+                }
             }
         }
 
@@ -177,7 +186,7 @@ public class MisfitShineService extends Service {
 
         @Override
         public void onHardwareLogRead(byte[] hwLog) {
-
+            Log.i(TAG, "hw log:{" + com.misfit.ble.util.Convertor.bytesToString(hwLog) + "}");
         }
 
         @Override
@@ -486,7 +495,7 @@ public class MisfitShineService extends Service {
 
                 @Override
                 public void onConnectionStateChangedForTest(ShineProfile shineProfile, int status, int newState, int failCode) {
-                    MFLog.w(TAG, String.format("onConnectionStateChange(), status=%d, newState=%d, timestamp=%d, failCode=%d",
+                    Log.w(TAG, String.format("onConnectionStateChange(), status=%d, newState=%d, timestamp=%d, failCode=%d",
                         status, newState, System.currentTimeMillis(), failCode));
                 }
             });
@@ -607,7 +616,11 @@ public class MisfitShineService extends Service {
         mShineProfile.sync(syncCallback);
     }
 
-    public void startOTAing(byte[] firmwareData) {
+    public void startOTAing(byte[] firmwareData, boolean shouldAutoRetry) {
+        if (shouldAutoRetry) {
+            mTempOtaFile = firmwareData;
+            mAutoOtaCountDown = AUTO_OTA_MAX_COUNT;
+        }
         mShineProfile.ota(firmwareData, otaCallback);
     }
 
