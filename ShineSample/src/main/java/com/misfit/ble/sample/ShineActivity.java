@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.misfit.ble.sample.ui.BmwActivity;
 import com.misfit.ble.sample.ui.TestSyncAndConnectActivity;
 import com.misfit.ble.sample.utils.FileDialog;
+import com.misfit.ble.sample.utils.SharedPreferencesUtils;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
 import com.misfit.ble.shine.ShineAdapter;
@@ -46,6 +47,8 @@ import ru.bartwell.exfilepicker.ExFilePickerParcelObject;
 public class ShineActivity extends BaseActivity {
 
 	public static final String TAG = "ShineActivity";
+
+	public static final String CONFIG_LAST_OPEN_DIR = "last_open_dir";
 
 	private static final int REQUEST_SELECT_DEVICE = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
@@ -739,8 +742,8 @@ public class ShineActivity extends BaseActivity {
 		try {
 			Intent intent = new Intent(getApplicationContext(), ru.bartwell.exfilepicker.ExFilePickerActivity.class);
 			intent.putExtra(ExFilePicker.SET_ONLY_ONE_ITEM, true);
+			intent.putExtra(ExFilePicker.SET_START_DIRECTORY, SharedPreferencesUtils.readConfig(this, CONFIG_LAST_OPEN_DIR, Environment.getExternalStorageDirectory().getAbsolutePath()));
 			startActivityForResult(intent, REQUEST_FIRMWARE_SELECTION);
-
 //			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 //			// intent.setType("*/*"); // this setup needs to test on many kinds of devices
 //			startActivityForResult(intent, REQUEST_FIRMWARE_SELECTION);
@@ -780,6 +783,10 @@ public class ShineActivity extends BaseActivity {
 	}
 
 	private void onFirmwareSelected(String path) {
+		File file = new File(path).getParentFile();
+		if (file.isDirectory()) {
+			SharedPreferencesUtils.writeConfig(this, CONFIG_LAST_OPEN_DIR, file.getAbsolutePath());
+		}
 		byte[] firmwareData = readRawResourceFile(path);
 
 		if (firmwareData == null || firmwareData.length <= 0) {
