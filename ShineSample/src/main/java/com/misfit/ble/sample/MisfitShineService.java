@@ -1014,6 +1014,53 @@ public class MisfitShineService extends Service {
         });
     }
 
+    public boolean startSpecifiedAnimation(PlutoSequence.LED led, byte repeats, short timeBetweenRepeats, PlutoSequence.Color color) {
+        return mShineProfile.startSpecifiedAnimation(led, repeats, timeBetweenRepeats, color, new ShineProfile.ConfigurationCallback() {
+            @Override
+            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
+                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                    onOperationCompleted("onStartSpecifiedAnimationSucceed");
+                } else {
+                    onOperationCompleted("onStartSpecifiedAnimationFailed");
+                }
+            }
+        });
+    }
+
+    public boolean startSpecifiedVibration(PlutoSequence.Vibe vibe, byte repeats, short timeBetweenRepeats) {
+        return mShineProfile.startSpecifiedVibration(vibe, repeats, timeBetweenRepeats, new ShineProfile.ConfigurationCallback() {
+            @Override
+            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
+                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                    onOperationCompleted("onStartSpecifiedVibrationSucceed");
+                } else {
+                    onOperationCompleted("onStartSpecifiedVibrationFailed");
+                }
+            }
+        });
+    }
+
+
+    public boolean startSpecifiedNotification(PlutoSequence.LED led,
+                                              PlutoSequence.Color color,
+                                              byte animationRepeats,
+                                              short timeBetweenAnimationRepeats,
+                                              PlutoSequence.Vibe vibe,
+                                              byte vibeRepeats,
+                                              short timeBetweenVibeRepeats) {
+        return mShineProfile.startSpecifiedNotification(led, color, animationRepeats, timeBetweenAnimationRepeats, vibe, vibeRepeats, timeBetweenVibeRepeats, new ShineProfile.ConfigurationCallback() {
+            @Override
+            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
+                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                    onOperationCompleted("onStartSpecifiedAnimationSucceed");
+                } else {
+                    onOperationCompleted("onStartSpecifiedAnimationFailed");
+                }
+            }
+        });
+    }
+
+
     public boolean playLEDAnimation(PlutoSequence.LED sequence, short mRepeat, int milliSecondsRepeat) {
         return mShineProfile.playLEDAnimation(sequence, mRepeat, milliSecondsRepeat, new ShineProfile.ConfigurationCallback() {
             @Override

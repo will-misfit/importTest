@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="title_text" format="string" />
+    <declare-styleable name="TogglePreferenceSwitch">
+        <attr name="title_text" />
+    </declare-styleable>
+    <declare-styleable name="NumberPreferenceEditText">
+        <attr name="title_text" />
+    </declare-styleable>
+    <declare-styleable name="TimePreferenceButton">
+        <attr name="title_text" />
+    </declare-styleable>
+</resources>

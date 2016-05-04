@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.misfit.ble.sample.ui.BmwActivity;
 import com.misfit.ble.sample.ui.TestSyncAndConnectActivity;
 import com.misfit.ble.sample.utils.FileDialog;
 import com.misfit.ble.setting.SDKSetting;
@@ -497,6 +498,12 @@ public class ShineActivity extends BaseActivity {
 	@OnClick(R.id.btn_is_streaming)
 	void isStreaming(){
 		setMessage("isStreaming="+mService.isUserEventStreaming());
+	}
+
+	@OnClick(R.id.btn_bmw)
+	void gotoBmw() {
+		Intent intent = new Intent(this, BmwActivity.class);
+		startActivity(intent);
 	}
 
 	public void onTestBluetooth(View v) {

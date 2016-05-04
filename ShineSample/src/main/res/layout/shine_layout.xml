@@ -84,6 +84,12 @@
             android:text="Pluto" />
 
         <Button
+            android:id="@+id/btn_bmw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BMW" />
+
+        <Button
             android:id="@+id/btnPlutoToBolt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

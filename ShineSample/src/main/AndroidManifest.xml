@@ -25,8 +25,8 @@
         <activity
             android:name=".ShineActivity"
             android:configChanges="keyboard|keyboardHidden|navigation"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -40,11 +40,10 @@
         <activity
             android:name=".DeviceListActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Dialog"></activity>
+            android:theme="@android:style/Theme.Dialog" />
         <activity android:name=".BaseActivity" />
         <activity android:name=".PlutoActivity" />
         <activity android:name=".BoltActivity" />
-
 
         <service
             android:name=".MisfitShineService"
@@ -52,8 +51,9 @@
 
         <activity
             android:name=".ui.TestSyncAndConnectActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_test_sync_and_connect"></activity>
+            android:label="@string/title_activity_test_sync_and_connect"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.BmwActivity"></activity>
     </application>
 
 </manifest>
