@@ -2300,6 +2300,35 @@ public final class ShineProfile {
 	}
 
     /**
+     * Start a specified notification, include LED/Vibration
+     * <br>NOTE: currently device has a feature to stop any animation/vibe that take long time (>35s) to play. So number of repeats will be limited to 20 for short animation/vibe and 10 for long one.</br>
+     * @param led could be one of {@link com.misfit.ble.setting.pluto.PlutoSequence.LED#SPECIFIED_SHORT}, {@link com.misfit.ble.setting.pluto.PlutoSequence.LED#SPECIFIED_LONG}
+     * @param color could be one of {@link com.misfit.ble.setting.pluto.PlutoSequence.Color#SPECIFIED_BLUE}, {@link com.misfit.ble.setting.pluto.PlutoSequence.Color#SPECIFIED_GREEN}, {@link com.misfit.ble.setting.pluto.PlutoSequence.Color#SPECIFIED_ORANGE}, {@link com.misfit.ble.setting.pluto.PlutoSequence.Color#SPECIFIED_PINK}, {@link com.misfit.ble.setting.pluto.PlutoSequence.Color#SPECIFIED_PURPLE}, {@link com.misfit.ble.setting.pluto.PlutoSequence.Color#SPECIFIED_YELLOW}
+     * @param animationRepeats 0 for not play, 1-20 for number of blinks
+     * @param timeBetweenAnimationRepeats the time between every repeats in milliseconds, NOT USED YET
+     * @param vibe could be one of {@link com.misfit.ble.setting.pluto.PlutoSequence.Vibe#SPECIFIED_SHORT}, {@link com.misfit.ble.setting.pluto.PlutoSequence.Vibe#SPECIFIED_LONG}
+     * @param vibeRepeats 0 for not play, 1-20 for number of vibes
+     * @param timeBetweenVibeRepeats the time between every repeats in milliseconds, NOT USED YET
+     * @return operation was started successfully
+     */
+    public boolean startSpecifiedNotification(PlutoSequence.LED led,
+                                           PlutoSequence.Color color,
+                                           byte animationRepeats,
+                                           short timeBetweenAnimationRepeats,
+                                           PlutoSequence.Vibe vibe,
+                                           byte vibeRepeats,
+                                           short timeBetweenVibeRepeats,
+                                           ShineProfile.ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_START_SPECIFIED_NOTIFICATION);
+                return false;
+            }
+            return startPhaseController(mPlutoControllers.startSpecifiedNotification(led, color, animationRepeats, timeBetweenAnimationRepeats, vibe, vibeRepeats, timeBetweenVibeRepeats, configurationCallback));
+        }
+    }
+
+    /**
      * Start a specified animation
      * <br>NOTE: currently device has a feature to stop any animation/vibe that take long time (>35s) to play. So number of repeats will be limited to 20 for short animation/vibe and 10 for long one.</br>
      * @param led could be one of {@link com.misfit.ble.setting.pluto.PlutoSequence.LED#SPECIFIED_SHORT}, {@link com.misfit.ble.setting.pluto.PlutoSequence.LED#SPECIFIED_LONG}

@@ -402,6 +402,31 @@ public class PlutoControllers {
 		});
 	}
 
+	public PhaseController startSpecifiedNotification(PlutoSequence.LED led,
+													  PlutoSequence.Color color,
+													  byte animationRepeats,
+													  short timeBetweenAnimationRepeats,
+													  PlutoSequence.Vibe vibe,
+													  byte vibeRepeats,
+													  short timeBetweenVibeRepeats,
+													  final ShineProfile.ConfigurationCallback configurationCallback) {
+		StartSpecifiedAnimationRequest animationRequest = new StartSpecifiedAnimationRequest();
+		animationRequest.buildRequest(led, animationRepeats, timeBetweenAnimationRepeats, color);
+		StartSpecifiedVibrationRequest vibrationRequest = new StartSpecifiedVibrationRequest();
+		vibrationRequest.buildRequest(vibe, vibeRepeats, timeBetweenVibeRepeats);
+
+		Request[] requests = {animationRequest, vibrationRequest};
+
+		return new ControllerBuilder(ActionID.START_SPECIFIED_NOTIFICATION,
+				LogEventItem.EVENT_START_SPECIFIED_NOTIFICATION,
+				Arrays.asList(requests), mPhaseControllerCallback, new ControllerBuilder.Callback() {
+			@Override
+			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+				configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, null);
+			}
+		});
+	}
+
 	public PhaseController startSpecifiedAnimation(PlutoSequence.LED led, byte repeats, short timeBetweenRepeats, PlutoSequence.Color color, final ShineProfile.ConfigurationCallback configurationCallback) {
 		StartSpecifiedAnimationRequest request = new StartSpecifiedAnimationRequest();
 		request.buildRequest(led, repeats, timeBetweenRepeats, color);

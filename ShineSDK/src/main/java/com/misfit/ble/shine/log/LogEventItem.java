@@ -116,6 +116,7 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_PLAY_SOUND = "playSound";
 	public static final String EVENT_PLAY_LED_ANIMATION = "playLEDAnimation";
 
+	public static final String EVENT_START_SPECIFIED_NOTIFICATION = "startSpecifiedNotification";
 	public static final String EVENT_START_SPECIFIED_ANIMATION = "startSpecifiedAnimation";
 	public static final String EVENT_START_SPECIFIED_VIBRATION = "startSpecifiedVibration";
 

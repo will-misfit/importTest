@@ -32,7 +32,7 @@ public class StartSpecifiedAnimationRequest extends Request {
         mRepeats = repeats;
         mTimeBetweenRepeats = timeBetweenRepeats;
         mColor = color;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(8);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         byteBuffer.put(Constants.DEVICE_CONFIG_OPERATION_SET);

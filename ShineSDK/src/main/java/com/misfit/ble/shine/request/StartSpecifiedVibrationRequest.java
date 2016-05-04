@@ -30,7 +30,7 @@ public class StartSpecifiedVibrationRequest extends Request {
         mSequence = sequence;
         mRepeats = repeats;
         mTimeBetweenRepeats = timeBetweenRepeats;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(7);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         byteBuffer.put(Constants.DEVICE_CONFIG_OPERATION_SET);
