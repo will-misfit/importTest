@@ -224,6 +224,8 @@ public class SetConnectionParametersPhaseController extends PhaseController {
             minConnectionInterval += delta;
             maxConnectionInterval += delta;
         }
+		//interval less than 7.5 would lead to timeout in Flash
+		minConnectionInterval = Math.max(minConnectionInterval, Constants.MINIMUM_CONNECTION_INTERVAL);
 
 		SetConnectionParameterRequest setConnectionParameterRequest = new SetConnectionParameterRequest();
 		setConnectionParameterRequest.buildRequest(minConnectionInterval, maxConnectionInterval,

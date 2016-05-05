@@ -13,6 +13,15 @@ HOW TO USE
 
 UPDATE
 ------
+VER 2.3.2 for Misfit flagship app - 5/4/2016
+1. send extra one time FileEraseRequest to make sure delete all file
+2. add syncTracking log
+3. [SYNC-1206] add specified notification for notification filter
+4. [MFA-43]add callback for hardware log read
+5. [SYNC-907] for OTAResetRequest, whatever the request sent result is, consider it succeed.
+6. [SYNC-927] for FlashButton device, resume file streaming when disconnect
+7. [SYNC-926] for FlashButton device, set slow connection parameters before sync finish
+
 VER 2.3.1 for Misfit flagship app - 3/29/2016
 1. handle FileList cmd error response which causes sync fail
 2. update SetConnectionParam request
