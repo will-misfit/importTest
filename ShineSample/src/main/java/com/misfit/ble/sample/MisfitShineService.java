@@ -10,10 +10,12 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.misfit.ble.sample.utils.AESEncrypt;
 import com.misfit.ble.sample.utils.Convertor;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
+import com.misfit.ble.setting.lapCounting.LapCountingMode;
 import com.misfit.ble.setting.pluto.AlarmSettings;
 import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
@@ -21,11 +23,11 @@ import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.ble.setting.pluto.PlutoSequence;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineAdapter;
-import com.misfit.ble.shine.ShineAdapter.ShineScanCallback;
 import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineConnectionParameters;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineEventAnimationMapping;
+import com.misfit.ble.shine.ShineLapCountingStatus;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.ShineStreamingConfiguration;
@@ -38,6 +40,7 @@ import com.misfit.ble.shine.result.TapEventSummary;
 import com.misfit.ble.shine.result.UserInputEvent;
 import com.misfit.ble.util.MutableBoolean;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
@@ -403,6 +406,31 @@ public class MisfitShineService extends Service {
                         mShineCallback_v1.onSettingExtraAdvertisingDataStateRequestFailed();
                     }
                     break;
+                case GET_LAP_COUNTING_STATUS:
+                    ShineLapCountingStatus shineLapCountingStatus = null;
+                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
+                        if (data != null) {
+                            shineLapCountingStatus = (ShineLapCountingStatus) data.get(ShineProperty.LAP_COUNTING_STATUS);
+                        }
+                        mShineCallback_v1.onGettingLapCountingStatusSucceeded(shineLapCountingStatus);
+                    } else {
+                        mShineCallback_v1.onGettingLapCountingStatusFailed();
+                    }
+                    break;
+                case SET_LAP_COUNTING_LICENSE_INFO:
+                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
+                        mShineCallback_v1.onSettingLapCountingLicenseInfoSucceeded();
+                    } else {
+                        mShineCallback_v1.onSettingLapCountingLicenseInfoFailed();
+                    }
+                    break;
+                case SET_LAP_COUNTING_MODE:
+                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
+                        mShineCallback_v1.onSettingLapCountingModeSucceeded();
+                    } else {
+                        mShineCallback_v1.onSettingLapCountingModeFailed();
+                    }
+                    break;
                 default:
                     onOperationCompleted("Received configurationCallback - action: " + actionID + ", result: " + resultCode + ", data: " + data);
                     break;
@@ -697,6 +725,57 @@ public class MisfitShineService extends Service {
 
     public void startGettingActivationState() {
         mShineProfile.getActivationState(configurationCallback);
+    }
+
+    public void startGettingLapCountingStatus() {
+        mShineProfile.getLapCountingStatus(configurationCallback);
+    }
+
+    public void startSettingLapCountingLicenseInfo(String serialNumber, boolean isReady) {
+        final byte[] LICENSE_READY = {0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
+        final byte[] LICENSES_NOT_READY = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
+
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        if (isReady) {
+            buffer.put(LICENSE_READY);
+        } else {
+            buffer.put(LICENSES_NOT_READY);
+        }
+
+        int time = 1483142400;// 2016-12-31-12:00 (UTC)
+        Log.d(TAG, "lap time is " + time);
+
+        byte[] timeBytes = Convertor.unsignedInt2BEBytes(time);
+        Log.d(TAG, "lap timeBytes is " + Convertor.bytesToString(timeBytes, ":"));
+
+        buffer.put(timeBytes);
+
+        byte[] originData = buffer.array();
+        Log.d(TAG, "lap origin data is " + Convertor.bytesToString(originData, ":"));
+
+        final String DEFAULT_PASSCODE_POSTFIX = "MISFIT";
+        String passcode = serialNumber + DEFAULT_PASSCODE_POSTFIX;
+        Log.d(TAG, "lap passcode is " + passcode);
+
+        byte[] encryptData = AESEncrypt.encrypt(buffer.array(), passcode);
+        Log.d(TAG, "lap encrypt data is " + Convertor.bytesToString(encryptData, ":"));
+
+        byte[] decryptData = AESEncrypt.decrypt(encryptData, passcode);
+        Log.d(TAG, "lap decrypt data is " + Convertor.bytesToString(decryptData, ":"));
+
+        mShineProfile.setLapCountingLicenseInfo(encryptData, configurationCallback);
+    }
+
+    public void startSettingLapCountingMode(String modeStr) {
+        String[] params = modeStr.split(",");
+        if (params.length == 2) {
+            LapCountingMode mode = LapCountingMode.getModeFromByte(Byte.parseByte(params[0]));
+            short timeout = Short.parseShort(params[1]);
+            mShineProfile.setLapCountingMode(mode, timeout, configurationCallback);
+        } else {
+            Toast.makeText(this, "Please input the fields:[mode], [timeout]", Toast.LENGTH_SHORT).show();
+            configurationCallback.onConfigCompleted(ActionID.SET_LAP_COUNTING_MODE, ShineProfile.ActionResult.FAILED, null);
+        }
     }
 
     public void startStreamingUserInputEvents() {
@@ -1723,6 +1802,36 @@ public class MisfitShineService extends Service {
         @Override
         public void onSettingFlashButtonModeSucceeded() {
             onOperationCompleted("onSettingFlashButtonModeSucceeded");
+        }
+
+        @Override
+        public void onGettingLapCountingStatusSucceeded(ShineLapCountingStatus status) {
+            onOperationCompleted("onGettingLapCountingStatusSucceeded " + status.toString());
+        }
+
+        @Override
+        public void onGettingLapCountingStatusFailed() {
+            onOperationCompleted("onGettingLapCountingStatusFailed");
+        }
+
+        @Override
+        public void onSettingLapCountingLicenseInfoSucceeded() {
+            onOperationCompleted("onSettingLapCountingLicenseInfoSucceeded");
+        }
+
+        @Override
+        public void onSettingLapCountingLicenseInfoFailed() {
+            onOperationCompleted("onSettingLapCountingLicenseInfoFailed");
+        }
+
+        @Override
+        public void onSettingLapCountingModeSucceeded() {
+            onOperationCompleted("onSettingLapCountingModeSucceeded");
+        }
+
+        @Override
+        public void onSettingLapCountingModeFailed() {
+            onOperationCompleted("onSettingLapCountingModeFailed");
         }
     };
 

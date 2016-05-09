@@ -68,6 +68,8 @@
 -keep class com.misfit.ble.shine.ShineConnectionParameters { public *; }
 -keep class com.misfit.ble.shine.ShineStreamingConfiguration { public *; }
 -keep class com.misfit.ble.shine.ShineEventAnimationMapping { public *; }
+-keep class com.misfit.ble.shine.ShineLapCountingStatus { public *;}
+-keep class com.misfit.ble.setting.lapCounting.LapCountingMode { public *;}
 
 -keep class com.misfit.ble.shine.ShineDevice { public *; }
 -keep class com.misfit.ble.shine.ShineDevice$ShineHIDConnectionCallback { public *; }

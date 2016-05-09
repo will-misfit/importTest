@@ -422,6 +422,51 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="isStreaming" />
+
+                <Button
+                    android:id="@+id/btn_get_lap_counting_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/get_lap_counting_status"/>
+
+
+                <Button
+                    android:id="@+id/btn_set_lap_counting_license_info_not_ready"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/lap_counting_license_info_not_ready"/>
+
+                <Button
+                    android:id="@+id/btn_set_lap_counting_license_info_ready"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/lap_counting_license_info_ready"/>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/edit_lap_counting_mode"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignBaseline="@+id/btn_set_lap_counting_mode"
+                        android:hint="mode,timeout"
+                        android:textSize="14sp"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content" />
+
+                    <Button
+                        android:id="@+id/btn_set_lap_counting_mode"
+                        android:layout_toRightOf="@+id/edit_lap_counting_mode"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/set_lap_counting_mode"/>
+                </RelativeLayout>
+
             </com.misfit.ble.sample.utils.FlexLayout>
 
         </LinearLayout>

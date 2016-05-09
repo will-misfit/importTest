@@ -95,6 +95,17 @@ public class Constants {
 		public final static byte COMMAND_PLAY_SPECIFIED_VIBRATION = 0x05;
 	}
 
+	public class LapCounting {
+        public static final byte PARAMETER_ID_LAP_COUNTING = 0x03;
+        public static final byte COMMAND_ID_LAP_COUNTING = 0x06;
+        public static final byte SETTING_ID_LAP_COUNTING = 0x02;
+
+        public static final byte PARAMETER_ID_MODE = 0x0b;
+        public static final byte COMMAND_ID_MODE = 0x40;
+        public static final byte SETTING_ID_MODE = 0x0c;
+        public static final byte EXTRA_MODE = 0x10;
+
+    }
 
 	// Algorithm Settings Id (Pluto)
 	public static final byte ALGORITHM_SETTING_ID_SET_ACE = 0x01;
@@ -142,7 +153,7 @@ public class Constants {
  	// Streaming Settings List
  	public static final byte STREAMING_SETTING_ID_NUMBER_OF_MAPPED_EVENT_PACKETS = (byte)0xe0;
  	public static final byte STREAMING_SETTING_ID_CONNECTION_HEARTBEAT_INTERVAL = (byte)0xf0;
- 	
+
  	// File Control
  	public static final byte FILE_CONTROL_OPERATION_GET = 0x01;
 	public static final byte FILE_CONTROL_OPERATION_GET_RESPONSE = 0x02;

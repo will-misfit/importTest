@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
 import com.misfit.ble.shine.ShineConnectionParameters;
+import com.misfit.ble.shine.ShineLapCountingStatus;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineStreamingConfiguration;
 import com.misfit.ble.shine.controller.ConfigurationSession;
@@ -159,5 +160,18 @@ public abstract class ShineCallback_v1 {
     }
 
     public void onGettingExtraAdvertisingDataStateRequestFailed() {
+    }
+
+    public void onGettingLapCountingStatusSucceeded(ShineLapCountingStatus status) {
+    }
+    public void onGettingLapCountingStatusFailed() {
+    }
+    public void onSettingLapCountingLicenseInfoSucceeded() {
+    }
+    public void onSettingLapCountingLicenseInfoFailed() {
+    }
+    public void onSettingLapCountingModeSucceeded() {
+    }
+    public void onSettingLapCountingModeFailed() {
     }
 }

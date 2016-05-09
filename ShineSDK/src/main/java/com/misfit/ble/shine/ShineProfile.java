@@ -17,6 +17,7 @@ import com.misfit.ble.BuildConfig;
 import com.misfit.ble.sdk.GlobalVars;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
+import com.misfit.ble.setting.lapCounting.LapCountingMode;
 import com.misfit.ble.setting.pluto.AlarmSettings;
 import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
@@ -575,6 +576,59 @@ public final class ShineProfile {
             }
 
             return startPhaseController(mShineControllers.getActivationState(configurationCallback));
+        }
+    }
+
+    /**
+     * Get Device Lap Counting status.
+     *
+     * @return operation was started successfully
+     */
+    public boolean getLapCountingStatus(ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_GET_LAP_COUNTING_STATUS);
+                return false;
+            }
+
+            return startPhaseController(mShineControllers.getLapCountingStatus(configurationCallback));
+        }
+    }
+
+    /**
+     * Set Lap Counting license info
+     *
+     * @param licenseInfo the byte array license info to be set.
+     * @param configurationCallback refer to {@link com.misfit.ble.shine.ShineProfile.ConfigurationCallback}
+     * @return operation was started successfully
+     */
+    public boolean setLapCountingLicenseInfo(byte[] licenseInfo, ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_SET_LAP_COUNTING_LICENSE_INFO);
+                return false;
+            }
+
+            return startPhaseController(mShineControllers.setLapCountingLicenseInfo(licenseInfo, configurationCallback));
+        }
+    }
+
+    /**
+     * Set Lap Counting mode
+     *
+     * @param mode the mode to be set, refer to {@link com.misfit.ble.setting.lapCounting.LapCountingMode}
+     * @param timeout the value of total time, used by Lap Counting Timeout Mode , not be cared and is 0 in Lap Counting Manual Mode.
+     * @param configurationCallback refer to {@link com.misfit.ble.shine.ShineProfile.ConfigurationCallback}
+     * @return operation was started successfully
+     */
+    public boolean setLapCountingMode(LapCountingMode mode, short timeout, ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_SET_LAP_COUNTING_MODE);
+                return false;
+            }
+
+            return startPhaseController(mShineControllers.setLapCountingMode(mode, timeout, configurationCallback));
         }
     }
 

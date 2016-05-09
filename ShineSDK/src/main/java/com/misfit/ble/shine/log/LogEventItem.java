@@ -132,6 +132,11 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_SET_PASSCODE = "setPassCode";
 	public static final String EVENT_GET_PASSCODE = "getPassCode";
 
+	// LapCounting
+	public static final String EVENT_GET_LAP_COUNTING_STATUS = "getLapCountingStatus";
+	public static final String EVENT_SET_LAP_COUNTING_LICENSE_INFO = "setLapCountingLicenseInfo";
+	public static final String EVENT_SET_LAP_COUNTING_MODE = "setLapCountingMode";
+
 	public static class RequestStartedLog {
 		public long mTimeMillis;
 		public JSONObject mValue;

@@ -42,6 +42,10 @@
     <string name="button_animation_hint">button animation</string>
     <string name="disable_bluetooth">bt off</string>
     <string name="enable_bluetooth">bt on/off</string>
+    <string name="get_lap_counting_status">get LapCounting</string>
+    <string name="lap_counting_license_info_ready">lapCounting licenseInfo Ready</string>
+    <string name="lap_counting_license_info_not_ready">lapCounting licenseInfo Not Ready</string>
+    <string name="set_lap_counting_mode">set lapCounting mode</string>
 
     <string name="activate">Activate</string>
     <string name="stop_activating">Stop activating</string>

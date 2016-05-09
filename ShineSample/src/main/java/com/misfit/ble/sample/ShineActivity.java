@@ -93,6 +93,13 @@ public class ShineActivity extends BaseActivity {
 	@Bind(R.id.cb_auto_retry_ota)
 	CheckBox mAutoRetryOtaCb;
 
+	private Button mGetLapCountingStatusButton;
+    private Button mSetLapCountingLicenseInfoButtonNotReady;
+    private Button mSetLapCountingLicenseInfoButtonReady;
+    private Button mSetLapCountingModeButton;
+    private EditText mSetLapCountingModeEditText;
+
+
 	/**
 	 * Activity Events
 	 */
@@ -103,23 +110,23 @@ public class ShineActivity extends BaseActivity {
 
 		mScanButton = (Button) findViewById(R.id.btn_start_or_stop_scan);
 		mScanButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mState == BTLE_STATE_IDLE) {
-					if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-						Log.i(TAG, "onClick - BT not enabled yet");
-						Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-						startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-					} else {
-						Intent newIntent = new Intent(ShineActivity.this, DeviceListActivity.class);
-						startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+            @Override
+            public void onClick(View v) {
+                if (mState == BTLE_STATE_IDLE) {
+                    if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                        Log.i(TAG, "onClick - BT not enabled yet");
+                        Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+                    } else {
+                        Intent newIntent = new Intent(ShineActivity.this, DeviceListActivity.class);
+                        startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
 
-						setState(BTLE_STATE_SCANNING);
-						setMessage("SCANNING");
-					}
-				}
-			}
-		});
+                        setState(BTLE_STATE_SCANNING);
+                        setMessage("SCANNING");
+                    }
+                }
+            }
+        });
 
 		mAnimateButton = (Button) findViewById(R.id.btn_animate);
 		mAnimateButton.setOnClickListener(new OnClickListener() {
@@ -133,12 +140,12 @@ public class ShineActivity extends BaseActivity {
 
 		mStopAnimationButton = (Button) findViewById(R.id.btn_stop_animation);
 		mStopAnimationButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("STOP PLAYING ANIMATION");
-				mService.stopPlayingAnimation();
-			}
-		});
+            @Override
+            public void onClick(View v) {
+                setMessage("STOP PLAYING ANIMATION");
+                mService.stopPlayingAnimation();
+            }
+        });
 
 		mConnectButton = (Button) findViewById(R.id.btn_connect_or_disconnect);
 		mConnectButton.setOnClickListener(new OnClickListener() {
@@ -352,46 +359,46 @@ public class ShineActivity extends BaseActivity {
 
 		Timer rssiTimer = new Timer();
 		rssiTimer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				if (mState >= BTLE_STATE_CONNECTED) {
-					mService.readRssi();
-				}
-			}
-		}, 1000, 1000);
+            @Override
+            public void run() {
+                if (mState >= BTLE_STATE_CONNECTED) {
+                    mService.readRssi();
+                }
+            }
+        }, 1000, 1000);
 
 		mActivateButton = (Button) findViewById(R.id.btn_start_or_stop_activating);
 		mActivateButton.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				setMessage("ACTIVATING");
-				mService.startActivating();
+            @Override
+            public void onClick(View v) {
+                setMessage("ACTIVATING");
+                mService.startActivating();
 
-			}
-		});
+            }
+        });
 
 		mActivateStateButton = (Button) findViewById(R.id.btn_activation_state);
 		mActivateStateButton.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				setMessage("GETTING ACTIVATION STATE");
-				mService.startGettingActivationState();
+            @Override
+            public void onClick(View v) {
+                setMessage("GETTING ACTIVATION STATE");
+                mService.startGettingActivationState();
 
-			}
-		});
+            }
+        });
 
 		mHIDConnectButton = (Button) findViewById(R.id.hidConnectButton);
 		mHIDConnectButton.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				if (mDevice != null) {
-					setMessage("HID CONNECT - success=" + mService.hidConnect(mDevice));
-				}
-			}
-		});
+            @Override
+            public void onClick(View v) {
+                if (mDevice != null) {
+                    setMessage("HID CONNECT - success=" + mService.hidConnect(mDevice));
+                }
+            }
+        });
 
 		mHIDDisconnectButton = (Button) findViewById(R.id.hidDisconnectButton);
 		mHIDDisconnectButton.setOnClickListener(new OnClickListener() {
@@ -469,12 +476,12 @@ public class ShineActivity extends BaseActivity {
 
 		mUnmapAllEventsButton = (Button) findViewById(R.id.btn_unmap_all_events);
 		mUnmapAllEventsButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("UNMAP ALL EVENTS");
-				mService.unmapAllEvents();
-			}
-		});
+            @Override
+            public void onClick(View v) {
+                setMessage("UNMAP ALL EVENTS");
+                mService.unmapAllEvents();
+            }
+        });
 
 		mUnmapSpecificEventButton = (Button) findViewById(R.id.btn_unmap_specific_event);
 		mUnmapSpecificEventButton.setOnClickListener(new OnClickListener() {
@@ -488,13 +495,48 @@ public class ShineActivity extends BaseActivity {
 
 		mCustomModeButton = (Button) findViewById(R.id.btn_custom_mode);
 		mCustomModeButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("SET CUSTOM MODE");
-				mService.setCustomMode(CustomModeEnum.ActionType.HID_MEDIA, CustomModeEnum.MemEventNumber.PLUTO_TRIPLE_TAP,
-						CustomModeEnum.AnimNumber.TRIPLE_PRESS_SUCCEEDED, CustomModeEnum.KeyCode.MEDIA_VOLUME_UP_OR_SELFIE, true);
-			}
-		});
+            @Override
+            public void onClick(View v) {
+                setMessage("SET CUSTOM MODE");
+                mService.setCustomMode(CustomModeEnum.ActionType.HID_MEDIA, CustomModeEnum.MemEventNumber.PLUTO_TRIPLE_TAP,
+                        CustomModeEnum.AnimNumber.TRIPLE_PRESS_SUCCEEDED, CustomModeEnum.KeyCode.MEDIA_VOLUME_UP_OR_SELFIE, true);
+            }
+        });
+
+        mGetLapCountingStatusButton = (Button) findViewById(R.id.btn_get_lap_counting_status);
+        mGetLapCountingStatusButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setMessage("GET LAP COUNTING STATUS");
+                mService.startGettingLapCountingStatus();
+            }
+        });
+
+        mSetLapCountingLicenseInfoButtonReady = (Button) findViewById(R.id.btn_set_lap_counting_license_info_ready);
+        mSetLapCountingLicenseInfoButtonReady.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mService.startSettingLapCountingLicenseInfo(mDevice.getSerialNumber(), true);
+            }
+        });
+
+        mSetLapCountingLicenseInfoButtonNotReady = (Button) findViewById(R.id.btn_set_lap_counting_license_info_not_ready);
+        mSetLapCountingLicenseInfoButtonNotReady.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mService.startSettingLapCountingLicenseInfo(mDevice.getSerialNumber(), false);
+            }
+        });
+
+        mSetLapCountingModeEditText = (EditText) findViewById(R.id.edit_lap_counting_mode);
+        mSetLapCountingModeButton = (Button) findViewById(R.id.btn_set_lap_counting_mode);
+        mSetLapCountingModeButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String modeStr = mSetLapCountingModeEditText.getText().toString().trim();
+                mService.startSettingLapCountingMode(modeStr);
+            }
+        });
 		ButterKnife.bind(this);
 	}
 
@@ -677,6 +719,10 @@ public class ShineActivity extends BaseActivity {
 
 		mShineToPlutoButton.setEnabled(isReady);
 		mShineToBoltButton.setEnabled(isReady);
+
+        mGetLapCountingStatusButton.setEnabled(isReady);
+        mSetLapCountingLicenseInfoButtonReady.setEnabled(isReady);
+        mSetLapCountingModeButton.setEnabled(isReady);
 
 		boolean isUserEventStreaming = mService != null && mService.isStreaming();
 		mInterruptButton.setEnabled(isReady || isUserEventStreaming);

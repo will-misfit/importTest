@@ -1,9 +1,11 @@
 package com.misfit.ble.shine.controller;
 
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
+import com.misfit.ble.setting.lapCounting.LapCountingMode;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineConnectionParameters;
+import com.misfit.ble.shine.ShineLapCountingStatus;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.compatibility.FirmwareCompatibility;
@@ -19,6 +21,7 @@ import com.misfit.ble.shine.request.GetConnectionParameterRequest;
 import com.misfit.ble.shine.request.GetExtraAdvDataStateRequest;
 import com.misfit.ble.shine.request.GetFlashButtonModeRequest;
 import com.misfit.ble.shine.request.GetGoalRequest;
+import com.misfit.ble.shine.request.GetLapCountingStatusRequest;
 import com.misfit.ble.shine.request.GetTimeRequest;
 import com.misfit.ble.shine.request.GetTripleTapEnableRequest;
 import com.misfit.ble.shine.request.Request;
@@ -28,6 +31,8 @@ import com.misfit.ble.shine.request.SetClockStateRequest;
 import com.misfit.ble.shine.request.SetExtraAdvDataStateRequest;
 import com.misfit.ble.shine.request.SetFlashButtonModeRequest;
 import com.misfit.ble.shine.request.SetGoalRequest;
+import com.misfit.ble.shine.request.SetLapCountingLicenseInfoRequest;
+import com.misfit.ble.shine.request.SetLapCountingModeRequest;
 import com.misfit.ble.shine.request.SetTimeRequest;
 import com.misfit.ble.shine.request.SetTripleTapEnableRequest;
 import com.misfit.ble.shine.request.StopDisplayingPairAnimationRequest;
@@ -245,6 +250,74 @@ public class ShineControllers {
 			}
 		});
 	}
+
+    public PhaseController getLapCountingStatus(final ShineProfile.ConfigurationCallback configurationCallback) {
+        GetLapCountingStatusRequest getLapCountingStatusRequest = new GetLapCountingStatusRequest();
+        getLapCountingStatusRequest.buildRequest();
+
+        Request[] requests = {getLapCountingStatusRequest};
+
+        return new ControllerBuilder(ActionID.GET_LAP_COUNTING_STATUS,
+                LogEventItem.EVENT_GET_LAP_COUNTING_STATUS,
+                Arrays.asList(requests),
+                mPhaseControllerCallback, new ControllerBuilder.Callback() {
+            @Override
+            public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+                Hashtable<ShineProperty, Object> objects = null;
+
+                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                    for (Request request : requests) {
+                        if (request instanceof GetLapCountingStatusRequest) {
+                            GetLapCountingStatusRequest.Response response = ((GetLapCountingStatusRequest) request).getResponse();
+                            ShineLapCountingStatus shineLapCountingStatus = new ShineLapCountingStatus();
+                            shineLapCountingStatus.setLicenseStatus(response.licenseStatus);
+                            shineLapCountingStatus.setTrialCounter(response.trialCounter);
+                            shineLapCountingStatus.setLapCountingMode(response.lapCountingMode);
+                            shineLapCountingStatus.setTimeout(response.timeout);
+
+                            objects = new Hashtable<>();
+                            objects.put(ShineProperty.LAP_COUNTING_STATUS, shineLapCountingStatus);
+                        }
+                    }
+                }
+                configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, objects);
+            }
+        });
+    }
+
+    public PhaseController setLapCountingLicenseInfo(byte[] licenseInfo, final ShineProfile.ConfigurationCallback configurationCallback) {
+        SetLapCountingLicenseInfoRequest setLapCountingLicenseInfoRequest = new SetLapCountingLicenseInfoRequest();
+        setLapCountingLicenseInfoRequest.buildRequest(licenseInfo);
+
+        Request[] requests = {setLapCountingLicenseInfoRequest};
+
+        return new ControllerBuilder(ActionID.SET_LAP_COUNTING_LICENSE_INFO,
+                LogEventItem.EVENT_SET_LAP_COUNTING_LICENSE_INFO,
+                Arrays.asList(requests),
+                mPhaseControllerCallback, new ControllerBuilder.Callback() {
+            @Override
+            public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+                configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, null);
+            }
+        });
+    }
+
+    public PhaseController setLapCountingMode(LapCountingMode mode, short timeout, final ShineProfile.ConfigurationCallback configurationCallback) {
+        SetLapCountingModeRequest setLapCountingModeRequest = new SetLapCountingModeRequest();
+        setLapCountingModeRequest.buildRequest(mode, timeout);
+
+        Request[] requests = {setLapCountingModeRequest};
+
+        return new ControllerBuilder(ActionID.SET_LAP_COUNTING_MODE,
+                LogEventItem.EVENT_SET_LAP_COUNTING_MODE,
+                Arrays.asList(requests),
+                mPhaseControllerCallback, new ControllerBuilder.Callback() {
+            @Override
+            public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+                configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, null);
+            }
+        });
+    }
 
 	public PhaseController setDeviceConfiguration(String firmwareVersion, String modelNumber, ConfigurationSession session, final ShineProfile.ConfigurationCallback configurationCallback) {
 		ConfigurationSession mSyncSession = session;
