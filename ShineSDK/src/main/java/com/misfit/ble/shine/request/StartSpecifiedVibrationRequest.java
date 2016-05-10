@@ -33,12 +33,12 @@ public class StartSpecifiedVibrationRequest extends Request {
         ByteBuffer byteBuffer = ByteBuffer.allocate(7);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        byteBuffer.put(Constants.DEVICE_CONFIG_OPERATION_SET);
-        byteBuffer.put(Constants.VibeControl.PARAMETER_ID);
-        byteBuffer.put(Constants.VibeControl.COMMAND_PLAY_SPECIFIED_VIBRATION);
-        byteBuffer.put(Convertor.unsignedByteFromShort(mSequence.getValue()));
-        byteBuffer.put(mRepeats);
-        byteBuffer.putShort(mTimeBetweenRepeats);
+        byteBuffer.put(0, Constants.DEVICE_CONFIG_OPERATION_SET);
+        byteBuffer.put(1, Constants.VibeControl.PARAMETER_ID);
+        byteBuffer.put(2, Constants.VibeControl.COMMAND_PLAY_SPECIFIED_VIBRATION);
+        byteBuffer.put(3, Convertor.unsignedByteFromShort(mSequence.getValue()));
+        byteBuffer.put(4, mRepeats);
+        byteBuffer.putShort(5, mTimeBetweenRepeats);
 
         mRequestData = byteBuffer.array();
     }
