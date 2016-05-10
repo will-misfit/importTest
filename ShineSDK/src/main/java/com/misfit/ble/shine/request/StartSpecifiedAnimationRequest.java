@@ -35,13 +35,13 @@ public class StartSpecifiedAnimationRequest extends Request {
         ByteBuffer byteBuffer = ByteBuffer.allocate(8);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        byteBuffer.put(Constants.DEVICE_CONFIG_OPERATION_SET);
-        byteBuffer.put(Constants.LEDControl.PARAMETER_ID);
-        byteBuffer.put(Constants.LEDControl.COMMAND_START_SPECIFIED_ANIMATION);
-        byteBuffer.put(Convertor.unsignedByteFromShort(mLed.getValue()));
-        byteBuffer.put(mRepeats);
-        byteBuffer.putShort(mTimeBetweenRepeats);
-        byteBuffer.put(Convertor.unsignedByteFromShort(mColor.getValue()));
+        byteBuffer.put(0, Constants.DEVICE_CONFIG_OPERATION_SET);
+        byteBuffer.put(1, Constants.LEDControl.PARAMETER_ID);
+        byteBuffer.put(2, Constants.LEDControl.COMMAND_START_SPECIFIED_ANIMATION);
+        byteBuffer.put(3, Convertor.unsignedByteFromShort(mLed.getValue()));
+        byteBuffer.put(4, mRepeats);
+        byteBuffer.putShort(5, mTimeBetweenRepeats);
+        byteBuffer.put(7, Convertor.unsignedByteFromShort(mColor.getValue()));
 
         mRequestData = byteBuffer.array();
     }
