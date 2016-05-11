@@ -358,6 +358,8 @@ public final class ShineAdapter {
 			if (deviceName != null
 					&& (deviceName.contains("Shine")
 						|| deviceName.contains("Flash")
+						|| deviceName.contains("Ray")
+						|| deviceName.contains("IWC Connect")
 						|| deviceName.length() == 8 /* Encrypted Bluetooth Ad Name's length in Bolt control mode*/)) {
 				ShineDevice shineDevice = ShineDeviceFactory.getShineDevice(device); // returned ShineDevice may has no serial number if it is not in cache
 				if (shineDevice != null) {
