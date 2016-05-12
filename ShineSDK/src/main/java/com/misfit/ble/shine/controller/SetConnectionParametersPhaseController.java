@@ -1,10 +1,10 @@
 package com.misfit.ble.shine.controller;
 
 import com.misfit.ble.shine.ActionID;
-import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.ShineConnectionParameters;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProfileCore;
+import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.core.Constants;
 import com.misfit.ble.shine.log.LogEventItem;
 import com.misfit.ble.shine.request.GetConnectionParameterRequest;
@@ -15,35 +15,27 @@ import java.util.Hashtable;
 
 public class SetConnectionParametersPhaseController extends PhaseController {
 
-	private static final String TAG = SetConnectionParametersPhaseController.class.getName();
-
 	private static final int MAX_RETRY_COUNT = 5;
 
 	private ShineProfile.ConfigurationCallback mConfigurationCallback;
 
-	private ShineConnectionParameters mConnectionParametersRequested;
-	private ShineConnectionParameters mConnectionParameters;
-    private double minConnectionInterval = 0f;
-	private double maxConnectionInterval = 0f;
-    private static final int MAX_SET_PARAMS_COUNT = 2;
-	private int mNumOfSetConnectionIntervalAttempts = 0;
+	private ShineConnectionParameters mExpectedConnectionParameters;
+	private ShineConnectionParameters mCurrConnectionParameters;
+    private double mMinConnectionInterval = 0f;
+	private double mMaxConnectionInterval = 0f;
+	private int mNumOfSetActionAttempts = 0;
 
     public SetConnectionParametersPhaseController(PhaseControllerCallback callback, ShineProfile.ConfigurationCallback configurationCallback, ShineConnectionParameters connectionParametersRequested) {
         super(ActionID.SET_CONNECTION_PARAMETERS,
 				LogEventItem.EVENT_SET_CONNECTION_PARAMETERS,
 				callback);
-
-        mConnectionParametersRequested = connectionParametersRequested;
+		//interval less than 7.5 would lead to timeout in Flash
+		double expectedInterval = Math.max(connectionParametersRequested.getConnectionInterval(), Constants.MINIMUM_CONNECTION_INTERVAL);
+        mExpectedConnectionParameters = new ShineConnectionParameters(expectedInterval,
+				connectionParametersRequested.getConnectionLatency(),
+				connectionParametersRequested.getSupervisionTimeout());
 		mConfigurationCallback = configurationCallback;
     }
-
-	public void setConnectionParameters(ShineConnectionParameters connectionParameters) {
-		mConnectionParameters = connectionParameters;
-	}
-
-	public ShineConnectionParameters getConnectionParameters() {
-		return mConnectionParameters;
-	}
 	
 	@Override
 	public void start() {
@@ -110,11 +102,10 @@ public class SetConnectionParametersPhaseController extends PhaseController {
 				return;
 			}
 
-			mConnectionParameters = new ShineConnectionParameters(response.connectionInterval, 
+			mCurrConnectionParameters = new ShineConnectionParameters(response.connectionInterval,
 																  response.connectionLatency, 
 																  response.supervisionTimeout);
-
-			if (isEqualConnectionParameters(mConnectionParametersRequested, mConnectionParameters)) {
+			if (isConnectionParamsAcceptable(mExpectedConnectionParameters, mCurrConnectionParameters)) {
                 notifySetConnParamsSucceed();
             } else {
                 attemptToUpdateConnectionParameters();
@@ -124,43 +115,39 @@ public class SetConnectionParametersPhaseController extends PhaseController {
 			SetConnectionParameterRequest setConnectionParameterRequest = (SetConnectionParameterRequest)request;
 			SetConnectionParameterRequest.Response response = setConnectionParameterRequest.getResponse();
 			
-			mConnectionParameters = new ShineConnectionParameters(response.connectionInterval, 
+			mCurrConnectionParameters = new ShineConnectionParameters(response.connectionInterval,
 																  response.connectionLatency, 
 																  response.supervisionTimeout);
-			
-			if (response.result != Constants.RESPONSE_SUCCESS ) {
-				attemptToUpdateConnectionParameters();
-			} else if (isEqualConnectionParameters(mConnectionParametersRequested, mConnectionParameters)) {
+			boolean isMaxRetryAndMajorParamsAcceptable = mNumOfSetActionAttempts >= MAX_RETRY_COUNT
+														&& isMajorConnectionParamsAcceptable(mExpectedConnectionParameters, mCurrConnectionParameters);
+			if (response.result == Constants.RESPONSE_SUCCESS
+					&& (isMaxRetryAndMajorParamsAcceptable || isConnectionParamsAcceptable(mExpectedConnectionParameters, mCurrConnectionParameters))) {
 				notifySetConnParamsSucceed();
-			} else if (mNumOfSetConnectionIntervalAttempts == MAX_SET_PARAMS_COUNT){
-                if (isMajorConnectionParamsAcceptable(mConnectionParametersRequested, mConnectionParameters)) {
-                    notifySetConnParamsSucceed();
-                } else {
-                    notifySetConnParamsFailed();
-                }
-            } else {
-                attemptToUpdateConnectionParameters();
-            }
+			} else if (mNumOfSetActionAttempts >= MAX_RETRY_COUNT) {
+				notifySetConnParamsFailed();
+			} else {
+				attemptToUpdateConnectionParameters();
+			}
 		}
 	}
 
-	private boolean isEqualConnectionParameters(ShineConnectionParameters lhs, ShineConnectionParameters rhs) {
+	private boolean isConnectionParamsAcceptable(ShineConnectionParameters lhs, ShineConnectionParameters rhs) {
 		int lhsTimeoutBlockIndex = (int)Math.floor(lhs.getSupervisionTimeout() * 1.0 / Constants.SUPERVISION_TIMEOUT_UNIT);
 		int rhsTimeoutBlockIndex = (int)Math.floor(rhs.getSupervisionTimeout() * 1.0 / Constants.SUPERVISION_TIMEOUT_UNIT);
 
 		return (isConnectionIntervalAcceptable(lhs.getConnectionInterval(), rhs.getConnectionInterval())
-                && mConnectionParametersRequested.getConnectionLatency() == mConnectionParameters.getConnectionLatency()
+                && mExpectedConnectionParameters.getConnectionLatency() == mCurrConnectionParameters.getConnectionLatency()
 				&& lhsTimeoutBlockIndex == rhsTimeoutBlockIndex);
 	}
 
     /**
      * compare ConnectionInterval separately
-     * for interval in getConnParams() response, compare by the value/STEP
+     * for interval in getConnParams() response, compare by the value/STEP, to make sure it in the range [expected - STEP*1, expected + STEP*1]
      * for interval in last setConnParams() response, assert it whether among range [min, max] which is sent last time
      * */
     private boolean isConnectionIntervalAcceptable(double expectedInterval, double responseInterval) {
-        if (mNumOfSetConnectionIntervalAttempts > 0) {
-            return (responseInterval >= minConnectionInterval && responseInterval <= maxConnectionInterval);
+        if (mNumOfSetActionAttempts > 0) {
+            return (responseInterval >= mMinConnectionInterval && responseInterval <= mMaxConnectionInterval);
         } else {
             int lhsIntervalBlockIndex = (int)Math.floor(expectedInterval / Constants.CONNECTION_INTERVAL_STEP);
             int rhsIntervalBlockIndex = (int)Math.floor(responseInterval / Constants.CONNECTION_INTERVAL_STEP);
@@ -180,13 +167,9 @@ public class SetConnectionParametersPhaseController extends PhaseController {
      * attempt to send a setConnParams request after the assertion of ConnectionParams not pass
      * */
 	private void attemptToUpdateConnectionParameters() {
-		if (mNumOfSetConnectionIntervalAttempts >= MAX_RETRY_COUNT) {
-            notifySetConnParamsFailed();
-			return;
-		}
-
-		sendRequest(buildSetConnectionParamsRequest());
-		++mNumOfSetConnectionIntervalAttempts;
+		Request request = buildSetConnectionParamsRequest();
+		++mNumOfSetActionAttempts;
+		sendRequest(request);
 	}
 
     /**
@@ -196,7 +179,7 @@ public class SetConnectionParametersPhaseController extends PhaseController {
         mResult = RESULT_SUCCESS;
         mPhaseControllerCallback.onPhaseControllerCompleted(this);
         Hashtable<ShineProperty, Object> objects = new Hashtable<>();
-        objects.put(ShineProperty.CONNECTION_PARAMETERS, mConnectionParameters);
+        objects.put(ShineProperty.CONNECTION_PARAMETERS, mCurrConnectionParameters);
         mConfigurationCallback.onConfigCompleted(getActionID(), ShineProfile.ActionResult.SUCCEEDED, objects);
     }
 
@@ -213,23 +196,17 @@ public class SetConnectionParametersPhaseController extends PhaseController {
      * build a SetConnParamsRequest, without assertion of ConnectionParams
      * */
 	private Request buildSetConnectionParamsRequest() {
-        double expectedInterval = mConnectionParametersRequested.getConnectionInterval();
+        double expectedInterval = mExpectedConnectionParameters.getConnectionInterval();
 
-        if (mNumOfSetConnectionIntervalAttempts == 0) {
-            minConnectionInterval = expectedInterval * 2 / 3;
-            maxConnectionInterval = Math.max(minConnectionInterval + 10, expectedInterval + Constants.CONNECTION_INTERVAL_STEP);
-
-        } else if (!isConnectionIntervalAcceptable(expectedInterval, mConnectionParameters.getConnectionInterval())) {
-            double delta = (mNumOfSetConnectionIntervalAttempts + 1) * Constants.CONNECTION_INTERVAL_UNIT;
-            minConnectionInterval += delta;
-            maxConnectionInterval += delta;
+        if (!isConnectionIntervalAcceptable(expectedInterval, mCurrConnectionParameters.getConnectionInterval())) {
+            double delta = mNumOfSetActionAttempts * Constants.CONNECTION_INTERVAL_STEP;
+			mMinConnectionInterval = expectedInterval + delta;
+			mMaxConnectionInterval = mMinConnectionInterval +  Constants.CONNECTION_INTERVAL_STEP - 0.01f;
         }
-		//interval less than 7.5 would lead to timeout in Flash
-		minConnectionInterval = Math.max(minConnectionInterval, Constants.MINIMUM_CONNECTION_INTERVAL);
 
 		SetConnectionParameterRequest setConnectionParameterRequest = new SetConnectionParameterRequest();
-		setConnectionParameterRequest.buildRequest(minConnectionInterval, maxConnectionInterval,
-            mConnectionParametersRequested.getConnectionLatency(), mConnectionParametersRequested.getSupervisionTimeout());
+		setConnectionParameterRequest.buildRequest(mMinConnectionInterval, mMaxConnectionInterval,
+            mExpectedConnectionParameters.getConnectionLatency(), mExpectedConnectionParameters.getSupervisionTimeout());
 		return setConnectionParameterRequest;
 	}
 	
