@@ -1,5 +1,7 @@
 package com.misfit.ble.shine.log;
 
+import android.bluetooth.BluetoothDevice;
+
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.util.Convertor;
 import com.misfit.ble.shine.log.LogEventItem.RequestStartedLog;
@@ -91,6 +93,15 @@ public class LogUtilHelper {
 
         LogEventItem logEventItem = new LogEventItem(LogEventItem.EVENT_CONNECTED_DEVICE);
         appendScanRawResult(logEventItem, deviceName, macAddr, 0, serialNum, eventItemPosition);
+        return logEventItem;
+    }
+
+    public static LogEventItem makeConnectedBluetoothDeviceEventItem(BluetoothDevice device, LogEventItemPosition eventItemPosition) {
+        String deviceName = device.getName();
+        String macAddr = device.getAddress();
+
+        LogEventItem logEventItem = new LogEventItem(LogEventItem.EVENT_CONNECTED_BLUETOOTH_DEVICE);
+        appendScanRawResult(logEventItem, deviceName, macAddr, 0, "", eventItemPosition);
         return logEventItem;
     }
 
