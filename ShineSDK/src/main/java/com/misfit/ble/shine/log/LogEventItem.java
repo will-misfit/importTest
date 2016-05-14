@@ -11,6 +11,7 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_RESTART_SCANNING = "restartScanning";
 	public static final String EVENT_SCAN_RESULT = "scanResult";
 	public static final String EVENT_CONNECTED_DEVICE = "connectedDevice";
+	public static final String EVENT_CONNECTED_BLUETOOTH_DEVICE = "connectedBluetoothDevice";
 
 	public static final String EVENT_SEND_DUMMY_FILE_LIST = "sendDummyFileList";
 

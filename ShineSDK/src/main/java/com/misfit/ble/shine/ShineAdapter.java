@@ -335,6 +335,7 @@ public final class ShineAdapter {
 		AndroidHIDProfile.getSharedInstance().getConnectedHIDDevices(new AndroidHIDProfile.RetrieveConnectedHIDCallback() {
 			@Override
 			public void onConnectedHIDRetrieved(List<BluetoothDevice> connectedHIDs) {
+				new WriteConnectedBluetoothDeviceInScanLogTask().execute(connectedHIDs);
 				List<ShineDevice> shineDevices = filterShineDevices(connectedHIDs);
 
 				ShineRetrieveCallback callback = mShineHIDRetrieveCallback;
@@ -347,6 +348,7 @@ public final class ShineAdapter {
 	public List<ShineDevice> getGattConnectedShines() {
 		SDKSetting.validateSettings();
 		List<BluetoothDevice> gattConnectedDevices = AndroidGattProfile.getSharedInstance().getConnectedGattDevices();
+		new WriteConnectedBluetoothDeviceInScanLogTask().execute(gattConnectedDevices);
 		List<ShineDevice> shineDevices = filterShineDevices(gattConnectedDevices);
 		return shineDevices;
 	}
@@ -355,9 +357,12 @@ public final class ShineAdapter {
 		ArrayList<ShineDevice> shineDevices = new ArrayList<>();
 		for (BluetoothDevice device : bluetoothDevices) {
 			String deviceName = device.getName();
+
 			if (deviceName != null
 					&& (deviceName.contains("Shine")
 						|| deviceName.contains("Flash")
+						|| deviceName.contains("Ray")
+						|| deviceName.contains("IWC Connect")
 						|| deviceName.length() == 8 /* Encrypted Bluetooth Ad Name's length in Bolt control mode*/)) {
 				ShineDevice shineDevice = ShineDeviceFactory.getShineDevice(device); // returned ShineDevice may has no serial number if it is not in cache
 				if (shineDevice != null) {
@@ -438,6 +443,34 @@ public final class ShineAdapter {
 		return serviceUUIDs;
 	}
 
+	class WriteConnectedBluetoothDeviceInScanLogTask extends AsyncTask<List<BluetoothDevice>, Void, Void> {
+		@Override
+		protected void onPreExecute() {}
+
+		@Override
+		protected Void doInBackground(List<BluetoothDevice>... passings) {
+			if (passings == null || passings.length < 1) return null;
+
+			List<BluetoothDevice> bluetoothDevices = passings[0];
+			if (bluetoothDevices == null || bluetoothDevices.size() <= 0) {
+				return null;
+			}
+			for (BluetoothDevice device : bluetoothDevices) {
+				LogEventItem logEventItem
+						= LogUtilHelper.makeConnectedBluetoothDeviceEventItem(device, ResponseFinished);
+				if (mScanLogSession != null) {
+					synchronized (SCANLogWriteLock) {
+						mScanLogSession.addLogEventItem(logEventItem);
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void obj){}
+	}
+
 	class WriteConnectedDeviceInScanLogTask extends AsyncTask<List<ShineDevice>, Void, Void> {
 		@Override
 		protected void onPreExecute() {}
@@ -447,6 +480,9 @@ public final class ShineAdapter {
 			if (passings == null || passings.length < 1) return null;
 
 			List<ShineDevice> shineDevices = passings[0];
+			if (shineDevices == null || shineDevices.size() <= 0) {
+				return null;
+			}
 			for (ShineDevice device : shineDevices) {
 				LogEventItem logEventItem
 					= LogUtilHelper.makeConnectedDeviceEventItem(device, ResponseFinished);
