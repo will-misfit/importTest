@@ -22,7 +22,8 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:22.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':ShineSDK')
+    debugCompile project(path:':ShineSDK', configuration: 'developDebug')
+    releaseCompile project(path:':ShineSDK', configuration: 'developRelease')
     compile 'com.android.support:design:22.+'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'ru.bartwell:exfilepicker:1.8'

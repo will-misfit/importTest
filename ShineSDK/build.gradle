@@ -5,6 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultPublishConfig "developRelease"
+    publishNonDefault true
 
     defaultConfig {
         minSdkVersion 17
@@ -34,7 +35,7 @@ android {
         def API_SERVER = "API_SERVER"
 
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", API_SERVER, "\"https://data-again.eng.int.misfit.com/v3/events\""
         }
@@ -53,15 +54,12 @@ android {
         misfit {
             buildConfigField "String", ACCESS_KEY, "\"23209348793248639-dulJD6O48s6l6K6A605KC0WnNkh05Q8R\""
         }
-        misfit_link {
-            buildConfigField "String", ACCESS_KEY, "\"70810177010273385-MQL7IAyoowac81lCrixLeshExTZ8nEO\""
-        }
     }
 }
 
 dependencies {
     provided fileTree(dir: 'libs_reference', include: ['*.jar'])
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:appcompat-v7:22.+'
     testCompile 'junit:junit:4.12'
 }
