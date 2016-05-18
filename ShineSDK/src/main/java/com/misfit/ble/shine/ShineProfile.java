@@ -168,6 +168,7 @@ public final class ShineProfile {
 
     private volatile State mState;
 	private volatile ActionID mActionID = null;
+	private volatile ActionID mButtonRequestActionID = null;
 	private volatile boolean mIsInStreaming = false;
 
     private String mFirmwareVersion;
@@ -720,9 +721,9 @@ public final class ShineProfile {
 
         boolean succeeded = (ShineProfileCore.RESULT_SUCCESS == result);
 
-        switch (mActionID) {
+        switch (mButtonRequestActionID) {
         case START_BUTTON_ANIMATION:
-            mActionID = null;
+            mButtonRequestActionID = null;
 
             if (succeeded) {
                 configurationCallback.onConfigCompleted(ActionID.START_BUTTON_ANIMATION, ActionResult.SUCCEEDED, null);
@@ -731,7 +732,7 @@ public final class ShineProfile {
             }
             break;
         case MAP_EVENT_ANIMATION:
-			mActionID = null;
+            mButtonRequestActionID = null;
 
             if (succeeded) {
                 configurationCallback.onConfigCompleted(ActionID.MAP_EVENT_ANIMATION, ActionResult.SUCCEEDED, null);
@@ -740,7 +741,7 @@ public final class ShineProfile {
             }
             break;
         case UNMAP_ALL_EVENT_ANIMATION:
-			mActionID = null;
+            mButtonRequestActionID = null;
 
             if (succeeded) {
                 configurationCallback.onConfigCompleted(ActionID.UNMAP_ALL_EVENT_ANIMATION, ActionResult.SUCCEEDED, null);
@@ -749,7 +750,7 @@ public final class ShineProfile {
             }
             break;
         case EVENT_MAPPING_SYSTEM_CONTROL:
-			mActionID = null;
+            mButtonRequestActionID = null;
 
             if (succeeded) {
                 configurationCallback.onConfigCompleted(ActionID.EVENT_MAPPING_SYSTEM_CONTROL, ActionResult.SUCCEEDED, null);
@@ -775,7 +776,7 @@ public final class ShineProfile {
             }
 
             setConfigurationCallback(configCallback);
-            mActionID = ActionID.START_BUTTON_ANIMATION;
+            mButtonRequestActionID = ActionID.START_BUTTON_ANIMATION;
 
             PlayButtonAnimationRequest request = new PlayButtonAnimationRequest();
             request.buildRequest(buttonAnimation, numOfRepeats);
@@ -800,7 +801,7 @@ public final class ShineProfile {
                 return false;
 
             setConfigurationCallback(configCallback);
-            mActionID = ActionID.MAP_EVENT_ANIMATION;
+            mButtonRequestActionID = ActionID.MAP_EVENT_ANIMATION;
 
             EventAnimationMappingRequest request = new EventAnimationMappingRequest();
             request.buildRequest(eventAnimationMappings);
@@ -821,7 +822,7 @@ public final class ShineProfile {
             }
 
             setConfigurationCallback(configCallback);
-            mActionID = ActionID.UNMAP_ALL_EVENT_ANIMATION;
+            mButtonRequestActionID = ActionID.UNMAP_ALL_EVENT_ANIMATION;
 
             EventActionUnmappingAllRequest request = new EventActionUnmappingAllRequest();
             request.buildRequest();
@@ -842,7 +843,7 @@ public final class ShineProfile {
             }
 
             setConfigurationCallback(configCallback);
-            mActionID = ActionID.EVENT_MAPPING_SYSTEM_CONTROL;
+            mButtonRequestActionID = ActionID.EVENT_MAPPING_SYSTEM_CONTROL;
 
             byte unsignedControlBits = Convertor.unsignedByteFromShort(controlBits);
             unsignedControlBits = (byte) (unsignedControlBits | ShineEventMappingSystemControl.MASK_DEFAULT);
