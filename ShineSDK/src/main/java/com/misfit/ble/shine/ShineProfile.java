@@ -892,7 +892,7 @@ public final class ShineProfile {
 	 */
     public String getFirmwareVersion() {
         synchronized (mShineProfileCore.lockObject) {
-            if (!isReady()) {
+            if (State.CONNECTED != mState) {
                 logUnexpectedEvent(LogEventItem.EVENT_GET_FIRMWARE_VERSION);
                 return null;
             }
@@ -906,7 +906,7 @@ public final class ShineProfile {
 	 */
     public String getModelNumber() {
         synchronized (mShineProfileCore.lockObject) {
-            if (!isReady()) {
+            if (State.CONNECTED != mState) {
                 logUnexpectedEvent(LogEventItem.EVENT_GET_MODEL_NUMBER);
                 return null;
             }
