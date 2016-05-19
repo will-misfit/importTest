@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.misfit.ble.sample.utils.AESEncrypt;
 import com.misfit.ble.sample.utils.Convertor;
+import com.misfit.ble.sample.utils.MLog;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
@@ -189,7 +190,7 @@ public class MisfitShineService extends Service {
 
         @Override
         public void onHardwareLogRead(byte[] hwLog) {
-            Log.i(TAG, "hw log:{" + com.misfit.ble.util.Convertor.bytesToString(hwLog) + "}");
+            MLog.i(TAG, "hw log:{" + com.misfit.ble.util.Convertor.bytesToString(hwLog) + "}");
         }
 
         @Override
