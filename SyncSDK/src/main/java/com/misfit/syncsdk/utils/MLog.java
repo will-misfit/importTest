@@ -2,7 +2,7 @@ package com.misfit.syncsdk.utils;
 
 import android.util.Log;
 
-import com.misfit.syncsdk.BuildConfig;
+import com.misfit.ble.BuildConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,13 @@ public class MLog {
 
     // initially this value is from BuildConfig.DEBUG. But within SyncDemo,
     // SyncSDK build type is RELEASE, so set it true to display the log on UI
-    private final static boolean OPEN_LOG = true;
+    private final static boolean OPEN_LOG = BuildConfig.DEBUG;
+    private final static LogNode mLogCat;
+
+    static {
+        mLogCat = new LogCat();
+        registerLogNode(mLogCat);
+    }
 
     public interface LogNode {
         void printLog(int priority, String tag, String msg);
@@ -39,58 +45,26 @@ public class MLog {
 
     public static void d(String tag, String msg) {
         if (OPEN_LOG) {
-            Log.d(tag, msg);
             notifyLogNodes(Log.DEBUG, tag, msg);
         }
     }
 
     public static void w(String tag, String msg) {
         if (OPEN_LOG) {
-            Log.w(tag, msg);
             notifyLogNodes(Log.WARN, tag, msg);
         }
     }
 
     public static void i(String tag, String msg) {
         if (OPEN_LOG) {
-            Log.i(tag, msg);
             notifyLogNodes(Log.INFO, tag, msg);
         }
     }
 
     public static void e(String tag, String msg) {
         if (OPEN_LOG) {
-            Log.e(tag, msg);
             notifyLogNodes(Log.ERROR, tag, msg);
         }
-    }
-
-    public static String getArrayString(Object[] array) {
-        if (array == null) {
-            return "null";
-        }
-        StringBuilder builder = new StringBuilder("[");
-        for (Object item : array) {
-            builder.append(item)
-                    .append(",");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        builder.append("]");
-        return builder.toString();
-    }
-
-    public static String getListString(List<Object> list) {
-        if (list == null) {
-            return "null";
-        }
-        StringBuilder builder = new StringBuilder("[");
-        for (Object item : list) {
-            builder.append(item)
-                    .append(",");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        builder.append("]");
-        return builder.toString();
     }
 
     public static String getMapString(Map<Object, Object> map) {
@@ -106,5 +80,50 @@ public class MLog {
         builder.deleteCharAt(builder.length() - 1);
         builder.append("]");
         return builder.toString();
+    }
+
+    public static class LogCat implements LogNode {
+
+        private final static int LOG_CAT_MAX_LENGTH = 3000;
+
+        @Override
+        public void printLog(int priority, String tag, String msg) {
+            if (msg == null) {
+                print(priority, tag, msg);
+                return;
+            }
+            while (msg.length() > LOG_CAT_MAX_LENGTH) {
+                String printMsg = msg.substring(0, LOG_CAT_MAX_LENGTH);
+                print(priority, tag, printMsg);
+                msg = msg.substring(LOG_CAT_MAX_LENGTH);
+            }
+            print(priority, tag, msg);
+        }
+
+        private void print(int priority, String tag, String msg) {
+            switch (priority) {
+                case Log.ASSERT:
+                    Log.d(tag, msg);
+                    break;
+                case Log.VERBOSE:
+                    Log.v(tag, msg);
+                    break;
+                case Log.INFO:
+                    Log.i(tag, msg);
+                    break;
+                case Log.WARN:
+                    Log.w(tag, msg);
+                    break;
+                case Log.ERROR:
+                    Log.e(tag, msg);
+                    break;
+                case Log.DEBUG:
+                    Log.d(tag, msg);
+                    break;
+                default:
+                    Log.e(tag, msg);
+                    break;
+            }
+        }
     }
 }
