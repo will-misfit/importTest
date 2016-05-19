@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.misfit.ble.sample.utils.AESEncrypt;
 import com.misfit.ble.sample.utils.Convertor;
+import com.misfit.ble.sample.utils.GsonUtils;
 import com.misfit.ble.sample.utils.MLog;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
@@ -22,6 +23,7 @@ import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.ble.setting.pluto.PlutoSequence;
+import com.misfit.ble.setting.speedo.ActivityType;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineAdapter;
 import com.misfit.ble.shine.ShineConfiguration;
@@ -233,10 +235,23 @@ public class MisfitShineService extends Service {
         }
     };
 
+    private void buildMessage(ActionID actionID, ShineProfile.ActionResult result, String content) {
+        onOperationCompleted(actionID + " " + result + ": " + content);
+    }
+
     private ShineProfile.ConfigurationCallback configurationCallback = new ShineProfile.ConfigurationCallback() {
         @Override
         public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
             switch (actionID) {
+                case GET_ACTIVITY_TYPE:
+                    ActivityType activityType = null;
+                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
+                        if (data != null) {
+                            activityType = (ActivityType) data.get(ShineProperty.ACTIVITY_TYPE);
+                        }
+                    }
+                    buildMessage(actionID, resultCode, GsonUtils.getGon().toJson(activityType));
+                    break;
                 case GET_CONFIGURATION:
                     ConfigurationSession session = null;
                     if (data != null) {
@@ -807,6 +822,14 @@ public class MisfitShineService extends Service {
 
     public void startButtonAnimation(byte animationId, byte numOfRepeats) {
         mShineProfile.startButtonAnimation(animationId, numOfRepeats, configurationCallback);
+    }
+
+    public void setActivityType(ActivityType activityType) {
+        mShineProfile.setActivityType(activityType, configurationCallback);
+    }
+
+    public void getActivityType() {
+        mShineProfile.getActivityType(configurationCallback);
     }
 
     public void startButtonAnimation(String paramsString) {

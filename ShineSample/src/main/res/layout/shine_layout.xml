@@ -336,6 +336,24 @@
                     android:text="@string/flash_button_mode" />
             </RelativeLayout>
 
+            <com.misfit.ble.sample.utils.FlexLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.misfit.ble.sample.view.NumberPreferenceEditText
+                    android:id="@+id/pref_activity_type"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    app:title_text="ActivityType:"/>
+
+                <Button
+                    android:id="@+id/btn_activity_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ActivityType"/>
+            </com.misfit.ble.sample.utils.FlexLayout>
+
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

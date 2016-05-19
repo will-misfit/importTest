@@ -25,8 +25,10 @@ import com.misfit.ble.sample.ui.BmwActivity;
 import com.misfit.ble.sample.ui.TestSyncAndConnectActivity;
 import com.misfit.ble.sample.utils.FileDialog;
 import com.misfit.ble.sample.utils.SharedPreferencesUtils;
+import com.misfit.ble.sample.view.NumberPreferenceEditText;
 import com.misfit.ble.setting.SDKSetting;
 import com.misfit.ble.setting.flashlink.CustomModeEnum;
+import com.misfit.ble.setting.speedo.ActivityType;
 import com.misfit.ble.shine.ShineAdapter;
 
 import java.io.ByteArrayOutputStream;
@@ -92,6 +94,9 @@ public class ShineActivity extends BaseActivity {
 
 	@Bind(R.id.cb_auto_retry_ota)
 	CheckBox mAutoRetryOtaCb;
+
+	@Bind(R.id.pref_activity_type)
+	NumberPreferenceEditText mActivityTypePref;
 
 	private Button mGetLapCountingStatusButton;
     private Button mSetLapCountingLicenseInfoButtonNotReady;
@@ -549,6 +554,16 @@ public class ShineActivity extends BaseActivity {
 	void gotoBmw() {
 		Intent intent = new Intent(this, BmwActivity.class);
 		startActivity(intent);
+	}
+
+	@OnClick(R.id.btn_activity_type)
+	void onClickedActivityType() {
+		if (mActivityTypePref.getValue() == null) {
+			mService.getActivityType();
+		} else {
+			ActivityType activityType = new ActivityType(mActivityTypePref.getValue().byteValue());
+			mService.setActivityType(activityType);
+		}
 	}
 
 	public void onTestBluetooth(View v) {

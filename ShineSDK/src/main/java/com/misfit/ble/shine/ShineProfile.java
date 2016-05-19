@@ -23,6 +23,7 @@ import com.misfit.ble.setting.pluto.GoalHitNotificationSettings;
 import com.misfit.ble.setting.pluto.InactivityNudgeSettings;
 import com.misfit.ble.setting.pluto.NotificationsSettings;
 import com.misfit.ble.setting.pluto.PlutoSequence;
+import com.misfit.ble.setting.speedo.ActivityType;
 import com.misfit.ble.shine.ShineProfileCore.ShineCoreCallback;
 import com.misfit.ble.shine.compatibility.FirmwareCompatibility;
 import com.misfit.ble.shine.controller.BoltControllers;
@@ -2229,6 +2230,41 @@ public final class ShineProfile {
 			return startPhaseController(mPlutoControllers.getCallTextNotifications(configurationCallback));
 		}
 	}
+
+    /**
+     * Set activity type, only for speedo
+     *
+     * @param activityType refer to {@link ActivityType}
+     * @return operation was started successfully
+     */
+    public boolean setActivityType(ActivityType activityType, ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_SET_ACTIVITY_TYPE);
+                Log.d(TAG, "setActivityType() return false: is not ready");
+                return false;
+            }
+
+            return startPhaseController(mShineControllers.setActivityType(activityType, configurationCallback));
+        }
+    }
+
+    /**
+     * Get activity type, only for speedo. If succeeded, will return {@link ActivityType} by key {@link ShineProperty#ACTIVITY_TYPE}
+     *
+     * @return operation was started successfully
+     */
+    public boolean getActivityType(ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_GET_ACTIVITY_TYPE);
+                Log.d(TAG, "getActivityType() return false: is not ready");
+                return false;
+            }
+
+            return startPhaseController(mShineControllers.getActivityType(configurationCallback));
+        }
+    }
 
 	/**
 	 * Disable all BLE notifications

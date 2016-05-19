@@ -27,4 +27,5 @@ dependencies {
     compile 'com.android.support:design:22.+'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'ru.bartwell:exfilepicker:1.8'
+    compile 'com.google.code.gson:gson:2.4'
 }

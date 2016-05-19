@@ -138,6 +138,10 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_SET_LAP_COUNTING_LICENSE_INFO = "setLapCountingLicenseInfo";
 	public static final String EVENT_SET_LAP_COUNTING_MODE = "setLapCountingMode";
 
+	// Speedo
+	public static final String EVENT_SET_ACTIVITY_TYPE = "setActivityType";
+	public static final String EVENT_GET_ACTIVITY_TYPE = "getActivityType";
+
 	public static class RequestStartedLog {
 		public long mTimeMillis;
 		public JSONObject mValue;

@@ -74,7 +74,7 @@ public class NumberPreferenceEditText extends EditText implements Preference<Int
         try {
             return Integer.valueOf(getText().toString());
         } catch (Exception ex) {
-            return 0;
+            return null;
         }
     }
 }

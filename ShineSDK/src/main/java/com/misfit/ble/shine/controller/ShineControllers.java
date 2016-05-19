@@ -2,6 +2,7 @@ package com.misfit.ble.shine.controller;
 
 import com.misfit.ble.setting.flashlink.FlashButtonMode;
 import com.misfit.ble.setting.lapCounting.LapCountingMode;
+import com.misfit.ble.setting.speedo.ActivityType;
 import com.misfit.ble.shine.ActionID;
 import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineConnectionParameters;
@@ -15,6 +16,7 @@ import com.misfit.ble.shine.request.DisplayPairAnimationRequest;
 import com.misfit.ble.shine.request.GetActivationStateRequest;
 import com.misfit.ble.shine.request.GetActivityPointRequest;
 import com.misfit.ble.shine.request.GetActivityTaggingStateRequest;
+import com.misfit.ble.shine.request.GetActivityTypeRequest;
 import com.misfit.ble.shine.request.GetBatteryRequest;
 import com.misfit.ble.shine.request.GetClockStateRequest;
 import com.misfit.ble.shine.request.GetConnectionParameterRequest;
@@ -27,6 +29,7 @@ import com.misfit.ble.shine.request.GetTripleTapEnableRequest;
 import com.misfit.ble.shine.request.Request;
 import com.misfit.ble.shine.request.SetActivityPointRequest;
 import com.misfit.ble.shine.request.SetActivityTaggingStateRequest;
+import com.misfit.ble.shine.request.SetActivityTypeRequest;
 import com.misfit.ble.shine.request.SetClockStateRequest;
 import com.misfit.ble.shine.request.SetExtraAdvDataStateRequest;
 import com.misfit.ble.shine.request.SetFlashButtonModeRequest;
@@ -318,6 +321,49 @@ public class ShineControllers {
             }
         });
     }
+
+	public PhaseController setActivityType(ActivityType activityType, final ShineProfile.ConfigurationCallback configurationCallback) {
+		SetActivityTypeRequest request = new SetActivityTypeRequest();
+		request.buildRequest(activityType);
+		Request[] requests = {request};
+
+		return new ControllerBuilder(ActionID.SET_ACTIVITY_TYPE,
+				LogEventItem.EVENT_SET_ACTIVITY_TYPE,
+				Arrays.asList(requests),
+				mPhaseControllerCallback, new ControllerBuilder.Callback() {
+			@Override
+			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+				configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, null);
+			}
+		});
+
+	}
+
+	public PhaseController getActivityType(final ShineProfile.ConfigurationCallback configurationCallback) {
+		final GetActivityTypeRequest request = new GetActivityTypeRequest();
+		request.buildRequest();
+		Request[] requests = {request};
+
+		return new ControllerBuilder(ActionID.GET_ACTIVITY_TYPE,
+				LogEventItem.EVENT_GET_ACTIVITY_TYPE,
+				Arrays.asList(requests),
+				mPhaseControllerCallback, new ControllerBuilder.Callback() {
+			@Override
+			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+				Hashtable<ShineProperty, Object> hashTable = new Hashtable<>();
+				if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
+					for (Request req : requests) {
+						if (req instanceof GetActivityTypeRequest) {
+							GetActivityTypeRequest.Response response = (GetActivityTypeRequest.Response) req.getResponse();
+							hashTable.put(ShineProperty.ACTIVITY_TYPE, response.activityType);
+						}
+					}
+				}
+				configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, hashTable);
+			}
+		});
+
+	}
 
 	public PhaseController setDeviceConfiguration(String firmwareVersion, String modelNumber, ConfigurationSession session, final ShineProfile.ConfigurationCallback configurationCallback) {
 		ConfigurationSession mSyncSession = session;

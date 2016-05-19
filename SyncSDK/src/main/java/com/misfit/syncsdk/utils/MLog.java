@@ -2,7 +2,7 @@ package com.misfit.syncsdk.utils;
 
 import android.util.Log;
 
-import com.misfit.ble.BuildConfig;
+import com.misfit.syncsdk.BuildConfig;
 
 import java.util.ArrayList;
 import java.util.List;
