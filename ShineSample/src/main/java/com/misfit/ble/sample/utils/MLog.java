@@ -16,6 +16,7 @@ public class MLog {
     private final static LogNode mLogCat;
 
     static {
+        logNodes = new ArrayList<>();
         mLogCat = new LogCat();
         registerLogNode(mLogCat);
     }
@@ -24,7 +25,7 @@ public class MLog {
         void printLog(int priority, String tag, String msg);
     }
 
-    private static List<LogNode> logNodes = new ArrayList<>();
+    private static List<LogNode> logNodes;
 
     public static void registerLogNode(LogNode node) {
         if (logNodes.contains(node)) {
