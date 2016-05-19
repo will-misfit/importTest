@@ -2,6 +2,7 @@ package com.misfit.ble.sample.ui;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,6 +18,7 @@ import com.misfit.ble.sample.model.SpecifiedAnimationSetting;
 import com.misfit.ble.sample.model.SpecifiedVibeSetting;
 import com.misfit.ble.sample.view.SpecifiedAnimationSettingView;
 import com.misfit.ble.sample.view.SpecifiedVibeSettingView;
+import com.misfit.ble.setting.pluto.PlutoSequence;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -88,9 +90,20 @@ public class BmwActivity extends BaseActivity {
         public View getParameterView() {
             if (mView == null) {
                 mView = new SpecifiedAnimationSettingView(BmwActivity.this);
+                mView.setValue(getDefaultAnimationSetting());
             }
             return mView;
         }
+    }
+
+    @NonNull
+    private SpecifiedAnimationSetting getDefaultAnimationSetting() {
+        SpecifiedAnimationSetting setting = new SpecifiedAnimationSetting();
+        setting.led = new PlutoSequence.LED(PlutoSequence.LED.SPECIFIED_SHORT);
+        setting.color = new PlutoSequence.Color(PlutoSequence.Color.SPECIFIED_GREEN);
+        setting.repeats = 1;
+        setting.timeBetweenRepeats = 1;
+        return setting;
     }
 
     class SpecifiedVibration extends Feature {
@@ -111,9 +124,19 @@ public class BmwActivity extends BaseActivity {
         public View getParameterView() {
             if (mView == null) {
                 mView = new SpecifiedVibeSettingView(BmwActivity.this);
+                mView.setValue(getDefaultVibeSetting());
             }
             return mView;
         }
+    }
+
+    @NonNull
+    private SpecifiedVibeSetting getDefaultVibeSetting() {
+        SpecifiedVibeSetting setting = new SpecifiedVibeSetting();
+        setting.vibe = new PlutoSequence.Vibe(PlutoSequence.Vibe.SPECIFIED_SHORT);
+        setting.repeats = 1;
+        setting.timeBetweenRepeats = 1;
+        return setting;
     }
 
     class SpecifiedNotification extends Feature {
@@ -148,6 +171,8 @@ public class BmwActivity extends BaseActivity {
                 mVibeView = new SpecifiedVibeSettingView(BmwActivity.this);
                 mContainer.addView(mAnimationView);
                 mContainer.addView(mVibeView);
+                mAnimationView.setValue(getDefaultAnimationSetting());
+                mVibeView.setValue(getDefaultVibeSetting());
             }
             return mContainer;
         }
