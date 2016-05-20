@@ -1373,6 +1373,9 @@ public final class ShineProfile {
         @Override
         public void onResponseReceivedResult(Request request, int result) {
             synchronized (ShineProfile.this.mShineProfileCore.lockObject) {
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, "received=" + request.getRequestName() + ", result=" + result);
+                }
                 //for dummy file list request
                 if(mState==State.CONNECTING && request instanceof FileListRequest){
                     mCurrentRequestLogItem.mResponseFinishedLog = new ResponseFinishedLog(result, request.getResponseDescriptionJSON());
@@ -1393,6 +1396,9 @@ public final class ShineProfile {
         @Override
 		public void onRequestSentResult(Request request, int result) {
 			synchronized (ShineProfile.this.mShineProfileCore.lockObject) {
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, "sent=" + request.getRequestName() + ", result=" + result);
+                }
                 //for dummy file list request
                 if (mState == State.CONNECTING && request instanceof FileListRequest) {
                     mCurrentRequestLogItem.mRequestFinishedLog = new RequestFinishedLog(result, request.getRequestDataJSON());

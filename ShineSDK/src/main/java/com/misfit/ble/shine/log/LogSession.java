@@ -1,5 +1,8 @@
 package com.misfit.ble.shine.log;
 
+import android.util.Log;
+
+import com.misfit.ble.BuildConfig;
 import com.misfit.ble.sdk.GlobalVars;
 import com.misfit.ble.setting.SDKSetting;
 
@@ -11,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class LogSession {
+
+	private final static String TAG = "LogSession";
 	
 	private String mUserId;
 	
@@ -88,6 +93,9 @@ public class LogSession {
 	}
 	
 	public void addLogItem(LogItem logItem) {
+		if (BuildConfig.DEBUG) {
+			Log.i(TAG, logItem.toJSONObject().toString());
+		}
 		if (mLogItems.contains(logItem))
 			return;
 		
