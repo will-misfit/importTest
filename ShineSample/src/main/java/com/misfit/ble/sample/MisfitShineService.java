@@ -30,7 +30,6 @@ import com.misfit.ble.shine.ShineConfiguration;
 import com.misfit.ble.shine.ShineConnectionParameters;
 import com.misfit.ble.shine.ShineDevice;
 import com.misfit.ble.shine.ShineEventAnimationMapping;
-import com.misfit.ble.shine.ShineLapCountingStatus;
 import com.misfit.ble.shine.ShineProfile;
 import com.misfit.ble.shine.ShineProperty;
 import com.misfit.ble.shine.ShineStreamingConfiguration;
@@ -161,12 +160,12 @@ public class MisfitShineService extends Service {
         @Override
         public void onOTACompleted(ShineProfile.ActionResult resultCode) {
             if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                mShineCallback_v1.onOTASucceeded();
+                onOperationCompleted("OTA COMPLETED - SHINE RESET");
             } else {
                 mAutoOtaCountDown--;
                 if (mAutoOtaCountDown < 0 || mTempOtaFile == null) {
                     Log.i(TAG, "auto continue ota, left try:" + mAutoOtaCountDown);
-                    mShineCallback_v1.onOTAFailed();
+                    onOperationCompleted("OTA FAILED");
                 } else {
                     mShineProfile.ota(mTempOtaFile, otaCallback);
                 }
@@ -175,19 +174,25 @@ public class MisfitShineService extends Service {
 
         @Override
         public void onOTAProgressChanged(float progress) {
-            mShineCallback_v1.onOTAProgressChanged(progress);
+            String message = "OTA PROGRESS: " + String.format("%.1f", progress * 100) + "%";
+            onOperationCompleted(SHINE_SERVICE_OTA_PROGRESS_CHANGED, message);
         }
     };
 
     private ShineProfile.SyncCallback syncCallback = new ShineProfile.SyncCallback() {
         @Override
         public void onSyncDataRead(Bundle extraInfo, MutableBoolean shouldStop) {
-            mShineCallback_v1.onSyncDataReadProgress(extraInfo, shouldStop);
+            onOperationCompleted("onSyncRead: "+ String.format("%.1f", extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY, 0) * 100) + "%");
         }
 
         @Override
         public void onSyncDataReadCompleted(List<SyncResult> syncResults, MutableBoolean shouldStop) {
-            mShineCallback_v1.onSyncDataReadCompleted(syncResults, shouldStop);
+            for(SyncResult syncResult : syncResults) {
+                mSummaryResult.mActivities.addAll(0, syncResult.mActivities);
+                mSummaryResult.mTapEventSummarys.addAll(0, syncResult.mTapEventSummarys);
+                mSummaryResult.mSessionEvents.addAll(0, syncResult.mSessionEvents);
+                mSummaryResult.mSwimSessions.addAll(0, syncResult.mSwimSessions);
+            }
         }
 
         @Override
@@ -198,9 +203,9 @@ public class MisfitShineService extends Service {
         @Override
         public void onSyncCompleted(ShineProfile.ActionResult resultCode) {
             if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                mShineCallback_v1.onSyncSucceeded();
+                onOperationCompleted("onSyncSucceeded:" + buildSyncResultString(mSummaryResult));
             } else {
-                mShineCallback_v1.onSyncFailed();
+                onOperationCompleted("onSyncFailed:" + buildSyncResultString(mSummaryResult));
             }
         }
     };
@@ -208,7 +213,8 @@ public class MisfitShineService extends Service {
     private ShineProfile.StreamingCallback streamingCallback = new ShineProfile.StreamingCallback() {
         @Override
         public void onStreamingButtonEvent(int eventID) {
-            mShineCallback_v1.onStreamingUserInputEventsReceivedEvent(eventID);
+            String message = "Received event: " + buildUserInputEventString(eventID);
+            onOperationCompleted(SHINE_SERVICE_STREAMING_USER_INPUT_EVENTS_RECEIVED_EVENT,eventID, message);
         }
 
         @Override
@@ -216,16 +222,16 @@ public class MisfitShineService extends Service {
             if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
                 onOperationCompleted("STREAMING USER INPUT EVENTS STARTED");
             } else {
-                mShineCallback_v1.onStreamingUserInputEventsFailed();
+                onOperationCompleted("STREAMING USER INPUT EVENTS FAILED");
             }
         }
 
         @Override
         public void onStreamingStopped(ShineProfile.ActionResult resultCode) {
             if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                mShineCallback_v1.onStreamingUserInputEventsEnded();
+                onOperationCompleted("STREAMING USER INPUT EVENTS ENDED");
             } else {
-                mShineCallback_v1.onStreamingUserInputEventsFailed();
+                onOperationCompleted("STREAMING USER INPUT EVENTS FAILED");
             }
         }
 
@@ -243,212 +249,26 @@ public class MisfitShineService extends Service {
         @Override
         public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
             switch (actionID) {
-                case GET_ACTIVITY_TYPE:
-                    ActivityType activityType = null;
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        if (data != null) {
-                            activityType = (ActivityType) data.get(ShineProperty.ACTIVITY_TYPE);
-                        }
-                    }
-                    buildMessage(actionID, resultCode, GsonUtils.getGon().toJson(activityType));
-                    break;
-                case GET_CONFIGURATION:
-                    ConfigurationSession session = null;
-                    if (data != null) {
-                        session = (ConfigurationSession) data.get(ShineProperty.SHINE_CONFIGURATION_SESSION);
-                    }
-
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onGettingDeviceConfigurationSucceeded(session);
-                    } else {
-                        mShineCallback_v1.onGettingDeviceConfigurationFailed(session);
-                    }
-                    break;
-                case SET_CONFIGURATION:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onSettingDeviceConfigurationSucceeded();
-                    } else {
-                        mShineCallback_v1.onSettingDeviceConfigurationFailed();
-                    }
-                    break;
-                case CHANGE_SERIAL_NUMBER:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onChangingSerialNumberSucceeded();
-                    } else {
-                        mShineCallback_v1.onChangingSerialNumberFailed();
-                    }
-                    break;
-                case SET_CONNECTION_PARAMETERS: {
-                    ShineConnectionParameters connectionParameters = null;
-                    if (data != null) {
-                        connectionParameters = (ShineConnectionParameters) data.get(ShineProperty.CONNECTION_PARAMETERS);
-                    }
-
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onSettingConnectionParametersSucceeded(connectionParameters);
-                    } else {
-                        mShineCallback_v1.onSettingConnectionParametersFailed(connectionParameters);
-                    }
-                    break;
-                }
-                case GET_CONNECTION_PARAMETERS: {
-                    ShineConnectionParameters connectionParameters = null;
-                    if (data != null) {
-                        connectionParameters = (ShineConnectionParameters) data.get(ShineProperty.CONNECTION_PARAMETERS);
-                    }
-
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onGettingConnectionParametersSucceeded(connectionParameters);
-                    } else {
-                        mShineCallback_v1.onGettingConnectionParametersFailed(connectionParameters);
-                    }
-                    break;
-                }
-                case GET_FLASH_BUTTON_MODE:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        FlashButtonMode flashButtonMode = null;
-                        if (data != null && data.get(ShineProperty.FLASH_BUTTON_MODE) != null) {
-                            flashButtonMode = (FlashButtonMode) data.get(ShineProperty.FLASH_BUTTON_MODE);
-                        }
-                        mShineCallback_v1.onGettingFlashButtonModeSucceeded(flashButtonMode);
-                    } else {
-                        mShineCallback_v1.onGettingFlashButtonModeFailed();
-                    }
-                    break;
-                case SET_FLASH_BUTTON_MODE:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onSettingFlashButtonModeSucceeded();
-                    } else {
-                        mShineCallback_v1.onSettingFlashButtonModeFailed();
-                    }
-                    break;
-                case ANIMATE:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onPlayAnimationSucceeded();
-                    } else {
-                        mShineCallback_v1.onPlayAnimationFailed();
-                    }
-                    break;
-                case ACTIVATE:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onActivateSucceeded();
-                    } else {
-                        mShineCallback_v1.onActivateFailed();
-                    }
-                    break;
-                case GET_ACTIVATION_STATE:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        boolean wasActivated = false;
-                        if (data != null && data.get(ShineProperty.ACTIVATION_STATE) != null) {
-                            wasActivated = (Boolean) data.get(ShineProperty.ACTIVATION_STATE);
-                        }
-                        mShineCallback_v1.onGettingActivationStateSucceeded(wasActivated);
-                    } else {
-                        mShineCallback_v1.onGettingActivationStateFailed();
-                    }
-                    break;
                 case READ_REMOTE_RSSI:
-                    int rssi = -1;
-                    if (data != null) {
-                        rssi = (int) data.get(ShineProperty.RSSI);
-                    }
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onReadRssiSucceeded(rssi);
-                    } else {
-                        mShineCallback_v1.onReadRssiFailed();
-                    }
-                    break;
-                case GET_STREAMING_CONFIGURATION:
-                    ShineStreamingConfiguration streamingConfiguration = null;
-                    if (data != null) {
-                        streamingConfiguration = (ShineStreamingConfiguration) data.get(ShineProperty.STREAMING_CONFIGURATION);
-                    }
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onGettingStreamingConfigurationSucceeded(streamingConfiguration);
-                    } else {
-                        mShineCallback_v1.onGettingStreamingConfigurationFailed();
-                    }
-                    break;
-                case SET_STREAMING_CONFIGURATION:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onSettingStreamingConfigurationSucceeded();
-                    } else {
-                        mShineCallback_v1.onSettingStreamingConfigurationFailed();
-                    }
-                    break;
-                case MAP_EVENT_ANIMATION:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onMapEventAnimationSucceeded();
-                    } else {
-                        mShineCallback_v1.onMapEventAnimationFailed();
-                    }
-                    break;
-                case START_BUTTON_ANIMATION:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onStartButtonAnimationSucceeded();
-                    } else {
-                        mShineCallback_v1.onStartButtonAnimationFailed();
-                    }
-                    break;
-                case UNMAP_ALL_EVENT_ANIMATION:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onUnmapAllEventAnimationSucceeded();
-                    } else {
-                        mShineCallback_v1.onUnmapAllEventAnimationFailed();
-                    }
-                    break;
-                case EVENT_MAPPING_SYSTEM_CONTROL:
-                    if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                        mShineCallback_v1.onSystemControlEventMappingSucceeded();
-                    } else {
-                        mShineCallback_v1.onSystemControlEventMappingFailed();
-                    }
-                    break;
-                case GET_EXTRA_ADV_DATA_STATE:
                     if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                        boolean enabled = false;
-                        if (data != null && data.get(ShineProperty.EXTRA_ADVERTISING_DATA_STATE) != null) {
-                            enabled = (Boolean) data.get(ShineProperty.EXTRA_ADVERTISING_DATA_STATE);
-                        }
-                        mShineCallback_v1.onGettingExtraAdvertisingDataStateRequestSucceeded(enabled);
+                        int rssi = (int) data.get(ShineProperty.RSSI);
+                        Bundle mBundle = new Bundle();
+                        mBundle.putInt(MisfitShineService.EXTRA_RSSI, rssi);
+
+                        Message msg = Message.obtain(mHandler, SHINE_SERVICE_RSSI_READ);
+                        msg.setData(mBundle);
+                        msg.sendToTarget();
                     } else {
-                        mShineCallback_v1.onGettingExtraAdvertisingDataStateRequestFailed();
-                    }
-                    break;
-                case SET_EXTRA_ADV_DATA_STATE:
-                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                        mShineCallback_v1.onSettingExtraAdvertisingDataStateRequestSucceeded();
-                    } else {
-                        mShineCallback_v1.onSettingExtraAdvertisingDataStateRequestFailed();
-                    }
-                    break;
-                case GET_LAP_COUNTING_STATUS:
-                    ShineLapCountingStatus shineLapCountingStatus = null;
-                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                        if (data != null) {
-                            shineLapCountingStatus = (ShineLapCountingStatus) data.get(ShineProperty.LAP_COUNTING_STATUS);
-                        }
-                        mShineCallback_v1.onGettingLapCountingStatusSucceeded(shineLapCountingStatus);
-                    } else {
-                        mShineCallback_v1.onGettingLapCountingStatusFailed();
-                    }
-                    break;
-                case SET_LAP_COUNTING_LICENSE_INFO:
-                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                        mShineCallback_v1.onSettingLapCountingLicenseInfoSucceeded();
-                    } else {
-                        mShineCallback_v1.onSettingLapCountingLicenseInfoFailed();
-                    }
-                    break;
-                case SET_LAP_COUNTING_MODE:
-                    if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
-                        mShineCallback_v1.onSettingLapCountingModeSucceeded();
-                    } else {
-                        mShineCallback_v1.onSettingLapCountingModeFailed();
+                        Bundle mBundle = new Bundle();
+                        mBundle.putInt(MisfitShineService.EXTRA_RSSI, -1);
+
+                        Message msg = Message.obtain(mHandler, SHINE_SERVICE_RSSI_READ);
+                        msg.setData(mBundle);
+                        msg.sendToTarget();
                     }
                     break;
                 default:
-                    onOperationCompleted("Received configurationCallback - action: " + actionID + ", result: " + resultCode + ", data: " + data);
+                    buildMessage(actionID, resultCode, GsonUtils.getGon().toJson(data));
                     break;
             }
         }
@@ -534,7 +354,34 @@ public class MisfitShineService extends Service {
                 @Override
                 public void onConnectionStateChanged(ShineProfile shineProfile, ShineProfile.State newState) {
                     boolean isConnected = (ShineProfile.State.CONNECTED == newState);
-                    mShineCallback_v1.onConnectionStateChanged(shineProfile, isConnected);
+                    if (isConnected) {
+                        stopConnectionTimeOutTimer();
+                        long connTimeInMilli = Calendar.getInstance().getTimeInMillis() - mConnTimerStartTime;
+                        int connTimeInSeconds = (int) (connTimeInMilli / 1000);
+                        //TODO:after connected
+                        String firmwareVersion = mShineProfile.getFirmwareVersion();
+                        String modelNumber = mShineProfile.getModelNumber();
+                        String deviceFamilyName = getDeviceFamilyName(mShineProfile.getDeviceFamily());
+
+                        Bundle mBundle = new Bundle();
+                        mBundle.putParcelable(MisfitShineService.EXTRA_DEVICE, mShineProfile.getDevice());
+                        mBundle.putString(MisfitShineService.EXTRA_MESSAGE, deviceFamilyName + " - " + firmwareVersion + " - " + modelNumber);
+
+                        mBundle.putInt(MisfitShineService.EXTRA_CONN_TIME, connTimeInSeconds);
+
+                        Message msg = Message.obtain(mHandler, SHINE_SERVICE_CONNECTED);
+                        msg.setData(mBundle);
+                        msg.sendToTarget();
+
+                        if (mExternalConnectTimeoutListener != null) {
+                            mExternalConnectTimeoutListener.onShineConnected();
+                        }
+                    } else {
+                        mShineProfile = null;
+
+                        Message msg = Message.obtain(mHandler, SHINE_SERVICE_CLOSED);
+                        msg.sendToTarget();
+                    }
                 }
 
                 @Override
@@ -723,16 +570,7 @@ public class MisfitShineService extends Service {
     }
 
     public void stopPlayingAnimation() {
-        mShineProfile.stopPlayingAnimation(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("stopPlayingAnimationSucceeded");
-                } else {
-                    onOperationCompleted("stopPlayingAnimationFailed");
-                }
-            }
-        });
+        mShineProfile.stopPlayingAnimation(configurationCallback);
     }
 
     public void startActivating() {
@@ -925,222 +763,63 @@ public class MisfitShineService extends Service {
      * Pluto
      */
     public boolean startSettingInactivityNudge(InactivityNudgeSettings inactivityNudgeSettings) {
-        return mShineProfile.setInactivityNudge(inactivityNudgeSettings, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSettingInactivityNudgeSucceed");
-                } else {
-                    onOperationCompleted("onSettingInactivityNudgeFailed");
-                }
-            }
-        });
+        return mShineProfile.setInactivityNudge(inactivityNudgeSettings, configurationCallback);
     }
 
     public boolean startGettingInactivityNudge() {
-        return mShineProfile.getInactivityNudge(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    if (data == null || data.get(ShineProperty.INACTIVITY_NUDGE_SETTINGS) == null) {
-                        Log.e(TAG, "startGettingInactivityNudge: no data");
-                        return;
-                    }
-
-                    InactivityNudgeSettings inactivityNudgeSettings = (InactivityNudgeSettings) data.get(ShineProperty.INACTIVITY_NUDGE_SETTINGS);
-                    onOperationCompleted("onGettingInactivityNudgeSucceed\n" + inactivityNudgeSettings.toString());
-                } else {
-                    onOperationCompleted("onGettingInactivityNudgeFailed");
-                }
-            }
-        });
+        return mShineProfile.getInactivityNudge(configurationCallback);
     }
 
     public boolean startSettingAlarm(AlarmSettings alarmSettings) {
-        return mShineProfile.setSingleAlarm(alarmSettings, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSettingAlarmSucceed");
-                } else {
-                    onOperationCompleted("onSettingAlarmFailed");
-                }
-            }
-        });
+        return mShineProfile.setSingleAlarm(alarmSettings, configurationCallback);
     }
 
     public boolean startGettingAlarm() {
-        return mShineProfile.getSingleAlarm(AlarmSettings.ALL_DAYS, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    if (data == null || data.get(ShineProperty.ALARM_SETTINGS) == null) {
-                        onOperationCompleted("onGettingAlarmSucceed\n" + "null alarmSetting");
-                        return;
-                    }
-
-                    AlarmSettings alarmSettings = (AlarmSettings) data.get(ShineProperty.ALARM_SETTINGS);
-                    onOperationCompleted("onGettingAlarmSucceed\n" + alarmSettings.toString());
-                } else {
-                    onOperationCompleted("onGettingAlarmFailed");
-                }
-            }
-        });
+        return mShineProfile.getSingleAlarm(AlarmSettings.ALL_DAYS, configurationCallback);
     }
 
     public boolean startClearingAllAlarms() {
-        return mShineProfile.clearAllAlarms(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onClearingAllAlarmsSucceed");
-                } else {
-                    onOperationCompleted("onClearingAllAlarmsFailed");
-                }
-            }
-        });
+        return mShineProfile.clearAllAlarms(configurationCallback);
     }
 
     public boolean startSettingGoalHitNotification(GoalHitNotificationSettings goalHitNotificationSettings) {
-        return mShineProfile.setGoalReachNotification(goalHitNotificationSettings, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSettingGoalHitNotificationSucceed");
-                } else {
-                    onOperationCompleted("onSettingGoalHitNotificationFailed");
-                }
-            }
-        });
+        return mShineProfile.setGoalReachNotification(goalHitNotificationSettings, configurationCallback);
     }
 
     public boolean startGettingGoalHitNotification() {
-        return mShineProfile.getGoalReachNotification(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    if (data == null || data.get(ShineProperty.GOAL_HIT_NOTIFICATION_SETTINGS) == null) {
-                        Log.e(TAG, "startGettingInactivityNudge: no data");
-                        return;
-                    }
-
-                    GoalHitNotificationSettings goalHitNotificationSettings = (GoalHitNotificationSettings) data.get(ShineProperty.GOAL_HIT_NOTIFICATION_SETTINGS);
-                    onOperationCompleted("onGettingGoalHitNotificationSucceed\n" + goalHitNotificationSettings.toString());
-                } else {
-                    onOperationCompleted("onGettingGoalHitNotificationFailed");
-                }
-            }
-        });
+        return mShineProfile.getGoalReachNotification(configurationCallback);
     }
 
     public boolean startSettingCallTextNotification(NotificationsSettings notificationsSettings) {
-        return mShineProfile.setCallTextNotifications(notificationsSettings, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSettingCallTextNotificationsSucceed");
-                } else {
-                    onOperationCompleted("onSettingCallTextNotificationsFailed");
-                }
-            }
-        });
+        return mShineProfile.setCallTextNotifications(notificationsSettings, configurationCallback);
     }
 
     public boolean startGettingCallTextNotification() {
-        return mShineProfile.getCallTextNotifications(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    if (data == null || data.get(ShineProperty.CALL_TEXT_NOTIFICATION_SETTINGS) == null) {
-                        Log.e(TAG, "startGettingInactivityNudge: no data");
-                        return;
-                    }
-
-                    NotificationsSettings notificationsSettings = (NotificationsSettings) data.get(ShineProperty.CALL_TEXT_NOTIFICATION_SETTINGS);
-                    onOperationCompleted("onGettingCallTextNotificationsSucceed\n" + notificationsSettings.toString());
-                } else {
-                    onOperationCompleted("onGettingCallTextNotificationsFailed");
-                }
-            }
-        });
+        return mShineProfile.getCallTextNotifications(configurationCallback);
     }
 
     public boolean startSendingCallNotification() {
-        return mShineProfile.sendCallNotification(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSendingCallNotificationSucceed");
-                } else {
-                    onOperationCompleted("onSendingCallNotificationFailed");
-                }
-            }
-        });
+        return mShineProfile.sendCallNotification(configurationCallback);
     }
 
     public boolean startSendingTextNofication() {
-        return mShineProfile.sendTextNotification(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSendingTextNotificationSucceed");
-                } else {
-                    onOperationCompleted("onSendingTextNotificationFailed");
-                }
-            }
-        });
+        return mShineProfile.sendTextNotification(configurationCallback);
     }
 
     public boolean startSendingStopNofication() {
-        return mShineProfile.sendStopNotification(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSendingStopNotificationSucceed");
-                } else {
-                    onOperationCompleted("onSendingStopNotificationFailed");
-                }
-            }
-        });
+        return mShineProfile.sendStopNotification(configurationCallback);
     }
 
     public boolean startDisablingAllNofications() {
-        return mShineProfile.disableAllCallTextNotifications(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onDisablingAllNotificationsSucceed");
-                } else {
-                    onOperationCompleted("onDisablingAllNotificationsFailed");
-                }
-            }
-        });
+        return mShineProfile.disableAllCallTextNotifications(configurationCallback);
     }
 
     public boolean startSpecifiedAnimation(PlutoSequence.LED led, byte repeats, short timeBetweenRepeats, PlutoSequence.Color color) {
-        return mShineProfile.startSpecifiedAnimation(led, repeats, timeBetweenRepeats, color, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onStartSpecifiedAnimationSucceed");
-                } else {
-                    onOperationCompleted("onStartSpecifiedAnimationFailed");
-                }
-            }
-        });
+        return mShineProfile.startSpecifiedAnimation(led, repeats, timeBetweenRepeats, color, configurationCallback);
     }
 
     public boolean startSpecifiedVibration(PlutoSequence.Vibe vibe, byte repeats, short timeBetweenRepeats) {
-        return mShineProfile.startSpecifiedVibration(vibe, repeats, timeBetweenRepeats, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onStartSpecifiedVibrationSucceed");
-                } else {
-                    onOperationCompleted("onStartSpecifiedVibrationFailed");
-                }
-            }
-        });
+        return mShineProfile.startSpecifiedVibration(vibe, repeats, timeBetweenRepeats, configurationCallback);
     }
 
 
@@ -1151,123 +830,39 @@ public class MisfitShineService extends Service {
                                               PlutoSequence.Vibe vibe,
                                               byte vibeRepeats,
                                               short timeBetweenVibeRepeats) {
-        return mShineProfile.startSpecifiedNotification(led, color, animationRepeats, timeBetweenAnimationRepeats, vibe, vibeRepeats, timeBetweenVibeRepeats, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onStartSpecifiedAnimationSucceed");
-                } else {
-                    onOperationCompleted("onStartSpecifiedAnimationFailed");
-                }
-            }
-        });
+        return mShineProfile.startSpecifiedNotification(led, color, animationRepeats, timeBetweenAnimationRepeats, vibe, vibeRepeats, timeBetweenVibeRepeats, configurationCallback);
     }
 
 
     public boolean playLEDAnimation(PlutoSequence.LED sequence, short mRepeat, int milliSecondsRepeat) {
-        return mShineProfile.playLEDAnimation(sequence, mRepeat, milliSecondsRepeat, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onPlayingLEDAnimationSucceed");
-                } else {
-                    onOperationCompleted("onPlayingLEDAnimationFailed");
-                }
-            }
-        });
+        return mShineProfile.playLEDAnimation(sequence, mRepeat, milliSecondsRepeat, configurationCallback);
     }
 
     public boolean playVibration(PlutoSequence.Vibe sequence, short mRepeat, int milliSecondsRepeat) {
-        return mShineProfile.playVibration(sequence, mRepeat, milliSecondsRepeat, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onPlayingVibrationSucceed");
-                } else {
-                    onOperationCompleted("onPlayingVibrationFailed");
-                }
-            }
-        });
+        return mShineProfile.playVibration(sequence, mRepeat, milliSecondsRepeat, configurationCallback);
     }
 
     public boolean playSound(PlutoSequence.Sound sequence, short mRepeat, int milliSecondsRepeat) {
-        return mShineProfile.playSound(sequence, mRepeat, milliSecondsRepeat, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onPlayingSoundSucceed");
-                } else {
-                    onOperationCompleted("onPlayingSoundFailed");
-                }
-            }
-        });
+        return mShineProfile.playSound(sequence, mRepeat, milliSecondsRepeat, configurationCallback);
     }
 
     /**
      * Bolt
      */
     public boolean addGroupId(short groupId) {
-        return mShineProfile.addGroupId(groupId, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("addGroupIdSucceed");
-                } else {
-                    onOperationCompleted("addGroupIdFailed");
-                }
-            }
-        });
+        return mShineProfile.addGroupId(groupId, configurationCallback);
     }
 
     public boolean getGroupId() {
-        return mShineProfile.getGroupId(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    if (data == null || data.get(ShineProperty.GROUP_ID) == null) {
-                        Log.e(TAG, "getGroupId: no data");
-                        return;
-                    }
-
-                    short groupId = (short) data.get(ShineProperty.GROUP_ID);
-                    onOperationCompleted("getGroupIdSucceeded\n" + groupId);
-                } else {
-                    onOperationCompleted("getGroupIdFailed");
-                }
-            }
-        });
+        return mShineProfile.getGroupId(configurationCallback);
     }
 
     public boolean setPasscode(byte[] passcode) {
-        return mShineProfile.setPasscode(passcode, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("setPasscodeSucceed");
-                } else {
-                    onOperationCompleted("setPasscodeFailed");
-                }
-            }
-        });
+        return mShineProfile.setPasscode(passcode, configurationCallback);
     }
 
     public boolean getPasscode() {
-        return mShineProfile.getPasscode(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    if (data == null || data.get(ShineProperty.PASSCODE) == null) {
-                        Log.e(TAG, "getPasscode: no data");
-                        return;
-                    }
-
-                    byte[] passcode = (byte[]) data.get(ShineProperty.PASSCODE);
-                    onOperationCompleted("getPasscodeSucceeded\n" + Convertor.bytesToHex(passcode));
-                } else {
-                    onOperationCompleted("getPasscodeFailed");
-                }
-            }
-        });
+        return mShineProfile.getPasscode(configurationCallback);
     }
 
 
@@ -1350,37 +945,6 @@ public class MisfitShineService extends Service {
             }
             stringBuilder.append("\nActivity - totalPoint:" + totalPoint + " totalSteps:" + totalSteps);
         }
-        return stringBuilder.toString();
-    }
-
-    private String buildShineConfigurationString(ConfigurationSession session) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\nTimeStamp: " + session.mTimestamp);
-        stringBuilder.append("\nPartialSecond: " + session.mPartialSecond);
-        stringBuilder.append("\nTimeZoneOffset: " + session.mTimeZoneOffset);
-
-        stringBuilder.append("\nActivityPoint: " + session.mShineConfiguration.mActivityPoint);
-        stringBuilder.append("\nGoalValue: " + session.mShineConfiguration.mGoalValue);
-        stringBuilder.append("\nClockState: " + session.mShineConfiguration.mClockState);
-        stringBuilder.append("\nTripleTapState: " + session.mShineConfiguration.mTripleTapState);
-        stringBuilder.append("\nActivityTaggingState: " + session.mShineConfiguration.mActivityTaggingState);
-        stringBuilder.append("\nBatteryLevel: " + session.mShineConfiguration.mBatteryLevel);
-
-        return stringBuilder.toString();
-    }
-
-    private String buildConnectionParametersString(ShineConnectionParameters connectionParameters) {
-        if (connectionParameters == null) {
-            return "";
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\nConnection Interval: " + connectionParameters.getConnectionInterval());
-        stringBuilder.append("\nConnection Latency: " + connectionParameters.getConnectionLatency());
-        stringBuilder.append("\nSupervision Timeout: " + connectionParameters.getSupervisionTimeout());
-
         return stringBuilder.toString();
     }
 
@@ -1487,17 +1051,6 @@ public class MisfitShineService extends Service {
         return deviceFamilyName;
     }
 
-    private String buildStreamingConfigurationString(ShineStreamingConfiguration streamingConfiguration) {
-        if (streamingConfiguration == null) {
-            return "";
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("\nNumber of Mapped Event Packets: " + streamingConfiguration.mNumberOfMappedEventPackets);
-        stringBuilder.append("\nConnection Heartbeat Interval: " + streamingConfiguration.mConnectionHeartbeatInterval);
-        return stringBuilder.toString();
-    }
-
     private void onOperationCompleted(int eventId, String message) {
         Bundle mBundle = new Bundle();
         mBundle.putString(EXTRA_MESSAGE, message);
@@ -1533,372 +1086,20 @@ public class MisfitShineService extends Service {
         MisfitShineService.sConnectingTimeout = 80000;
     }
 
-    /*
-         * Old Interface
-         */
-    private ShineCallback_v1 mShineCallback_v1 = new ShineCallback_v1() {
-        @Override
-        public void onConnectionStateChanged(ShineProfile shineProfile, boolean isConnected) {
-
-            if (isConnected) {
-                stopConnectionTimeOutTimer();
-                long connTimeInMilli = Calendar.getInstance().getTimeInMillis() - mConnTimerStartTime;
-                int connTimeInSeconds = (int) (connTimeInMilli / 1000);
-                //TODO:after connected
-                String firmwareVersion = mShineProfile.getFirmwareVersion();
-                String modelNumber = mShineProfile.getModelNumber();
-                String deviceFamilyName = getDeviceFamilyName(mShineProfile.getDeviceFamily());
-
-                Bundle mBundle = new Bundle();
-                mBundle.putParcelable(MisfitShineService.EXTRA_DEVICE, mShineProfile.getDevice());
-                mBundle.putString(MisfitShineService.EXTRA_MESSAGE, deviceFamilyName + " - " + firmwareVersion + " - " + modelNumber);
-
-                mBundle.putInt(MisfitShineService.EXTRA_CONN_TIME, connTimeInSeconds);
-
-                Message msg = Message.obtain(mHandler, SHINE_SERVICE_CONNECTED);
-                msg.setData(mBundle);
-                msg.sendToTarget();
-
-                if (mExternalConnectTimeoutListener != null) {
-                    mExternalConnectTimeoutListener.onShineConnected();
-                }
-            } else {
-                mShineProfile = null;
-
-                Message msg = Message.obtain(mHandler, SHINE_SERVICE_CLOSED);
-                msg.sendToTarget();
-            }
-        }
-
-        @Override
-        public void onSyncFailed() {
-            onOperationCompleted("onSyncFailed:" + buildSyncResultString(mSummaryResult));
-        }
-
-        ;
-
-        @Override
-        public void onSyncSucceeded() {
-            onOperationCompleted("onSyncSucceeded:" + buildSyncResultString(mSummaryResult));
-        }
-
-        @Override
-        public void onSyncDataReadProgress(Bundle extraInfo, MutableBoolean shouldStop) {
-            onOperationCompleted("onSyncRead: "+ String.format("%.1f", extraInfo.getFloat(ShineProfile.SYNC_PROGRESS_KEY, 0) * 100) + "%");
-        }
-
-        @Override
-        public void onSyncDataReadCompleted(List<SyncResult> results, MutableBoolean shouldStop) {
-            for(SyncResult syncResult : results) {
-                mSummaryResult.mActivities.addAll(0, syncResult.mActivities);
-                mSummaryResult.mTapEventSummarys.addAll(0, syncResult.mTapEventSummarys);
-                mSummaryResult.mSessionEvents.addAll(0, syncResult.mSessionEvents);
-                mSummaryResult.mSwimSessions.addAll(0, syncResult.mSwimSessions);
-            }
-        }
-
-        @Override
-        public void onGettingDeviceConfigurationFailed(ConfigurationSession session) {
-            onOperationCompleted("onGettingDeviceConfigurationFailed:" + buildShineConfigurationString(session));
-        }
-
-        @Override
-        public void onGettingDeviceConfigurationSucceeded(ConfigurationSession session) {
-            onOperationCompleted("onGettingDeviceConfigurationSucceeded:" + buildShineConfigurationString(session));
-        }
-
-        @Override
-        public void onSettingDeviceConfigurationFailed() {
-            onOperationCompleted("onSettingDeviceConfigurationFailed");
-        }
-
-        ;
-
-        @Override
-        public void onSettingDeviceConfigurationSucceeded() {
-            onOperationCompleted("onSettingDeviceConfigurationSucceeded");
-        }
-
-        ;
-
-        @Override
-        public void onOTAFailed() {
-            onOperationCompleted("OTA FAILED");
-        }
-
-        @Override
-        public void onOTASucceeded() {
-            onOperationCompleted("OTA COMPLETED - SHINE RESET");
-        }
-
-        @Override
-        public void onOTAProgressChanged(float progress) {
-            String message = "OTA PROGRESS: " + String.format("%.1f", progress * 100) + "%";
-            onOperationCompleted(SHINE_SERVICE_OTA_PROGRESS_CHANGED, message);
-        }
-
-        public void onPlayAnimationSucceeded() {
-            onOperationCompleted("PLAY ANIMATION SUCCEEDED");
-        }
-
-        ;
-
-        public void onPlayAnimationFailed() {
-            onOperationCompleted("PLAY ANIMATION FAILED");
-        }
-
-        @Override
-        public void onChangingSerialNumberSucceeded() {
-            onOperationCompleted("CHANGE SERIAL NUMBER SUCCEEDED");
-        }
-
-        @Override
-        public void onChangingSerialNumberFailed() {
-            onOperationCompleted("CHANGE SERIAL NUMBER FAILED");
-        }
-
-        @Override
-        public void onSettingConnectionParametersSucceeded(ShineConnectionParameters connectionParameters) {
-            String message = "SET CONNECTION PARAMETERS SUCCEEDED" + buildConnectionParametersString(connectionParameters);
-            onOperationCompleted(message);
-        }
-
-        @Override
-        public void onSettingConnectionParametersFailed(ShineConnectionParameters connectionParameters) {
-            String message = "SET CONNECTION PARAMETERS FAILED" + buildConnectionParametersString(connectionParameters);
-            onOperationCompleted(message);
-        }
-
-        @Override
-        public void onActivateSucceeded() {
-            onOperationCompleted("ACTIVATE SUCCEEDED");
-        }
-
-        @Override
-        public void onActivateFailed() {
-            onOperationCompleted("ACTIVATE FAILED");
-        }
-
-        @Override
-        public void onGettingActivationStateSucceeded(boolean isActivated) {
-            onOperationCompleted("Activated:" + String.valueOf(isActivated));
-        }
-
-        @Override
-        public void onGettingActivationStateFailed() {
-            onOperationCompleted("GET ACTIVATION STATE FAILED");
-        }
-
-        public void onStreamingUserInputEventsEnded() {
-            onOperationCompleted("STREAMING USER INPUT EVENTS ENDED");
-        }
-
-        public void onStreamingUserInputEventsFailed() {
-            onOperationCompleted("STREAMING USER INPUT EVENTS FAILED");
-        }
-
-        public void onStreamingUserInputEventsReceivedEvent(int eventID) {
-            String message = "Received event: " + buildUserInputEventString(eventID);
-            onOperationCompleted(SHINE_SERVICE_STREAMING_USER_INPUT_EVENTS_RECEIVED_EVENT,eventID, message);
-        }
-
-        @Override
-        public void onReadRssiSucceeded(int rssi) {
-            Bundle mBundle = new Bundle();
-            mBundle.putInt(MisfitShineService.EXTRA_RSSI, rssi);
-
-            Message msg = Message.obtain(mHandler, SHINE_SERVICE_RSSI_READ);
-            msg.setData(mBundle);
-            msg.sendToTarget();
-        }
-
-        public void onReadRssiFailed() {
-            Bundle mBundle = new Bundle();
-            mBundle.putInt(MisfitShineService.EXTRA_RSSI, -1);
-
-            Message msg = Message.obtain(mHandler, SHINE_SERVICE_RSSI_READ);
-            msg.setData(mBundle);
-            msg.sendToTarget();
-        }
-
-        public void onGettingStreamingConfigurationSucceeded(ShineStreamingConfiguration streamingConfiguration) {
-            onOperationCompleted("onGettingStreamingConfigurationSucceeded: " + buildStreamingConfigurationString(streamingConfiguration));
-        }
-
-        public void onGettingStreamingConfigurationFailed() {
-            onOperationCompleted("onGettingStreamingConfigurationFailed");
-        }
-
-        public void onSettingStreamingConfigurationSucceeded() {
-            onOperationCompleted("onSettingStreamingConfigurationSucceeded");
-        }
-
-        public void onSettingStreamingConfigurationFailed() {
-            onOperationCompleted("onSettingStreamingConfigurationFailed");
-        }
-
-        @Override
-        public void onMapEventAnimationFailed() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onMapEventAnimationFailed");
-        }
-
-        @Override
-        public void onMapEventAnimationSucceeded() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onMapEventAnimationSucceeded");
-        }
-
-        @Override
-        public void onStartButtonAnimationFailed() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onStartButtonAnimationFailed");
-        }
-
-        @Override
-        public void onStartButtonAnimationSucceeded() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onStartButtonAnimationSucceeded");
-        }
-
-        @Override
-        public void onUnmapAllEventAnimationFailed() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onUnmapAllEventAnimationFailed");
-        }
-
-        @Override
-        public void onUnmapAllEventAnimationSucceeded() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onUnmapAllEventAnimationSucceeded");
-        }
-
-        @Override
-        public void onSystemControlEventMappingFailed() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onEventMappingSystemControlFailed");
-        }
-
-        @Override
-        public void onSystemControlEventMappingSucceeded() {
-            onOperationCompleted(SHINE_SERVICE_BUTTON_EVENTS, "onEventMappingSystemControlSucceeded");
-        }
-
-        public void onGettingConnectionParametersSucceeded(ShineConnectionParameters connectionParameters) {
-            String message = "GET CONNECTION PARAMETERS SUCCEEDED" + buildConnectionParametersString(connectionParameters);
-            onOperationCompleted(message);
-        }
-
-        @Override
-        public void onGettingConnectionParametersFailed(ShineConnectionParameters connectionParameters) {
-            String message = "GET CONNECTION PARAMETERS FAILED" + buildConnectionParametersString(connectionParameters);
-            onOperationCompleted(message);
-        }
-
-        @Override
-        public void onGettingExtraAdvertisingDataStateRequestFailed() {
-            onOperationCompleted("onGettingExtraAdvertisingDataStateRequestFailed");
-        }
-
-        @Override
-        public void onGettingExtraAdvertisingDataStateRequestSucceeded(boolean enable) {
-            onOperationCompleted("onGettingExtraAdvertisingDataStateRequestSucceeded - enable: " + enable);
-        }
-
-        @Override
-        public void onGettingFlashButtonModeFailed() {
-            onOperationCompleted("onGettingFlashButtonModeFailed");
-        }
-
-        @Override
-        public void onGettingFlashButtonModeSucceeded(FlashButtonMode flashButtonMode) {
-            onOperationCompleted("onGettingFlashButtonModeSucceeded - flashButtonMode: " + flashButtonMode.getId());
-        }
-
-        @Override
-        public void onSettingExtraAdvertisingDataStateRequestFailed() {
-            onOperationCompleted("onSettingExtraAdvertisingDataStateRequestFailed");
-        }
-
-        @Override
-        public void onSettingExtraAdvertisingDataStateRequestSucceeded() {
-            onOperationCompleted("onSettingExtraAdvertisingDataStateRequestSucceeded");
-        }
-
-        @Override
-        public void onSettingFlashButtonModeFailed() {
-            onOperationCompleted("onSettingFlashButtonModeFailed");
-        }
-
-        @Override
-        public void onSettingFlashButtonModeSucceeded() {
-            onOperationCompleted("onSettingFlashButtonModeSucceeded");
-        }
-
-        @Override
-        public void onGettingLapCountingStatusSucceeded(ShineLapCountingStatus status) {
-            onOperationCompleted("onGettingLapCountingStatusSucceeded " + status.toString());
-        }
-
-        @Override
-        public void onGettingLapCountingStatusFailed() {
-            onOperationCompleted("onGettingLapCountingStatusFailed");
-        }
-
-        @Override
-        public void onSettingLapCountingLicenseInfoSucceeded() {
-            onOperationCompleted("onSettingLapCountingLicenseInfoSucceeded");
-        }
-
-        @Override
-        public void onSettingLapCountingLicenseInfoFailed() {
-            onOperationCompleted("onSettingLapCountingLicenseInfoFailed");
-        }
-
-        @Override
-        public void onSettingLapCountingModeSucceeded() {
-            onOperationCompleted("onSettingLapCountingModeSucceeded");
-        }
-
-        @Override
-        public void onSettingLapCountingModeFailed() {
-            onOperationCompleted("onSettingLapCountingModeFailed");
-        }
-    };
 
     /* Flash Link */
     public void unmapAllEvents() {
-        mShineProfile.unmapAllEvents(new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("unmapAllEventsSucceeded");
-                } else {
-                    onOperationCompleted("unmapAllEventsFailed");
-                }
-            }
-        });
+        mShineProfile.unmapAllEvents(configurationCallback);
     }
 
     public void unmapEvent(CustomModeEnum.MemEventNumber eventNumber) {
-        mShineProfile.unmapEvent(eventNumber, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("unmapEventSucceeded");
-                } else {
-                    onOperationCompleted("unmapEventFailed");
-                }
-            }
-        });
+        mShineProfile.unmapEvent(eventNumber, configurationCallback);
     }
 
     public void setCustomMode(CustomModeEnum.ActionType actionType, CustomModeEnum.MemEventNumber eventNumber,
                               CustomModeEnum.AnimNumber animNumber, CustomModeEnum.KeyCode keyCode,
                               boolean releaseEnable) {
-        mShineProfile.setCustomMode(actionType, eventNumber, animNumber, keyCode, releaseEnable, new ShineProfile.ConfigurationCallback() {
-            @Override
-            public void onConfigCompleted(ActionID actionID, ShineProfile.ActionResult resultCode, Hashtable<ShineProperty, Object> data) {
-                if (resultCode == ShineProfile.ActionResult.SUCCEEDED) {
-                    onOperationCompleted("onSettingCustomModeSucceeded");
-                } else {
-                    onOperationCompleted("onSettingCustomModeFailed");
-                }
-            }
-        });
+        mShineProfile.setCustomMode(actionType, eventNumber, animNumber, keyCode, releaseEnable, configurationCallback);
     }
 
     public interface ConnectTimeoutListener {

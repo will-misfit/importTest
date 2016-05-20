@@ -13,8 +13,6 @@ import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -37,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -48,322 +47,92 @@ import ru.bartwell.exfilepicker.ExFilePickerParcelObject;
 
 public class ShineActivity extends BaseActivity {
 
-	public static final String TAG = "ShineActivity";
+    public static final String TAG = "ShineActivity";
 
-	public static final String CONFIG_LAST_OPEN_DIR = "last_open_dir";
+    public static final String CONFIG_LAST_OPEN_DIR = "last_open_dir";
 
-	private static final int REQUEST_SELECT_DEVICE = 1;
-	private static final int REQUEST_ENABLE_BT = 2;
-	private static final int REQUEST_FIRMWARE_SELECTION = 3;
+    private static final int REQUEST_SELECT_DEVICE = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
+    private static final int REQUEST_FIRMWARE_SELECTION = 3;
 
-	private Button mScanButton, mConnectButton, mCloseButton;
-	private Button mHIDConnectButton, mHIDDisconnectButton, mInputMethodButton;
-	private Button mAnimateButton, mStopAnimationButton, mConfigButton, mSyncButton, mOTAButton;
+    @Bind(R.id.btn_start_or_stop_scan)
+    Button mScanButton;
 
-	private Button mActivateButton, mActivateStateButton, mStreamUserInputEventsButton;
-	private Button mChangeSNButton, mConnectionParametersButton;
-	private EditText mConfigurationEditText, mSerialNumberEditText, mConnectionParamsEditText;
+    @Bind(R.id.btn_connect_or_disconnect)
+    Button mConnectButton;
 
-	private Button mFlashButtonModeButton;
-	private EditText mFlashButtonModeEditText;
+    @Bind(R.id.btn_close)
+    Button mCloseButton;
 
-	private Button mCreateBondButton, mClearBondButton;
+    @Bind(R.id.edit_set_configuration)
+    EditText mConfigurationEditText;
 
-	private Button mGetStreamConfigButton, mSetStreamConfigButton;
-	private EditText mStreamingConfigurationEditText;
+    @Bind(R.id.edit_set_serial_string)
+    EditText mSerialNumberEditText;
 
-	private Button mMapEventAnimationButton, mUnmapEventAnimationMapping, mButtonAnimationButton, mSystemControlButton;
-	private EditText mButtonAnimationEditText, mEventAnimationMappingEditText, mSystemControlEditText;
+    @Bind(R.id.edit_set_connection_parameters)
+    EditText mConnectionParamsEditText;
 
-	private TextView mDeviceLabel, mShineApiInfoTextView;
+    @Bind(R.id.edit_set_flash_button_mode)
+    EditText mFlashButtonModeEditText;
 
-	private Button mAdStateButton;
-	private CheckBox mGetSetAdvStateCheckBox;
-	private EditText mAdvFlagEditText;
+    @Bind(R.id.edit_set_streaming_configuration)
+    EditText mStreamingConfigurationEditText;
 
-	private Button mInterruptButton;
+    @Bind(R.id.edit_event_animation_mapping)
+    EditText mEventAnimationMappingEditText;
 
-	private Button mShineToPlutoButton;
-	private Button mShineToBoltButton;
+    @Bind(R.id.edit_event_mapping_system_control)
+    EditText mSystemControlEditText;
 
-	private TextView mSDKVersion;
+    @Bind(R.id.edit_button_animation)
+    EditText mButtonAnimationEditText;
 
-	private Button mUnmapAllEventsButton;
-	private Button mUnmapSpecificEventButton;
-	private Button mCustomModeButton;
+    @Bind(R.id.deviceName)
+    TextView mDeviceLabel;
 
-	@Bind(R.id.cb_auto_retry_ota)
-	CheckBox mAutoRetryOtaCb;
+    @Bind(R.id.textView)
+    TextView mShineApiInfoTextView;
 
-	@Bind(R.id.pref_activity_type)
-	NumberPreferenceEditText mActivityTypePref;
+    @Bind(R.id.txtAdvFlag)
+    EditText mAdvFlagEditText;
 
-	private Button mGetLapCountingStatusButton;
-    private Button mSetLapCountingLicenseInfoButtonNotReady;
-    private Button mSetLapCountingLicenseInfoButtonReady;
-    private Button mSetLapCountingModeButton;
-    private EditText mSetLapCountingModeEditText;
+    @Bind(R.id.sdk_version)
+    TextView mSDKVersion;
 
+    @Bind(R.id.cb_auto_retry_ota)
+    CheckBox mAutoRetryOtaCb;
 
-	/**
-	 * Activity Events
-	 */
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.shine_layout);
+    @Bind(R.id.pref_activity_type)
+    NumberPreferenceEditText mActivityTypePref;
 
-		mScanButton = (Button) findViewById(R.id.btn_start_or_stop_scan);
-		mScanButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mState == BTLE_STATE_IDLE) {
-                    if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-                        Log.i(TAG, "onClick - BT not enabled yet");
-                        Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-                    } else {
-                        Intent newIntent = new Intent(ShineActivity.this, DeviceListActivity.class);
-                        startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+    @Bind(R.id.edit_lap_counting_mode)
+    EditText mSetLapCountingModeEditText;
 
-                        setState(BTLE_STATE_SCANNING);
-                        setMessage("SCANNING");
-                    }
-                }
-            }
-        });
+    @Bind(R.id.btn_stop_animation)
+    Button mStopAnimationButton;
 
-		mAnimateButton = (Button) findViewById(R.id.btn_animate);
-		mAnimateButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("PLAY ANIMATION");
-				mService.playAnimation();
-			}
-		});
+    @Bind(R.id.btn_interrupt)
+    Button mInterruptButton;
 
+    /**
+     * Activity Events
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.shine_layout);
+        ButterKnife.bind(this);
 
-		mStopAnimationButton = (Button) findViewById(R.id.btn_stop_animation);
-		mStopAnimationButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setMessage("STOP PLAYING ANIMATION");
-                mService.stopPlayingAnimation();
-            }
-        });
+        mShineApiInfoTextView = (TextView) findViewById(R.id.textView);
+        mShineApiInfoTextView.setVerticalScrollBarEnabled(true);
+        mShineApiInfoTextView.setHorizontallyScrolling(true);
+        mShineApiInfoTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
+        mDeviceLabel = (TextView) findViewById(R.id.deviceName);
+        mSDKVersion.setText(SDKSetting.getSDKVersion());
 
-		mConnectButton = (Button) findViewById(R.id.btn_connect_or_disconnect);
-		mConnectButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mState == BTLE_STATE_IDLE || mState == BTLE_STATE_CLOSED) {
-					if (mService.connect(mDevice, null)) {
-						setState(BTLE_STATE_CONNECTING);
-						setMessage("CONNECTING");
-					} else {
-						setMessage("CONNECTING FAILED.\nDEVICE WAS INVALIDATED, PLEASE SCAN AGAIN.");
-					}
-				}
-			}
-		});
-
-		mCloseButton = (Button) findViewById(R.id.btn_close);
-		mCloseButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mState >= BTLE_STATE_CLOSED) {
-					mService.close();
-				}
-			}
-		});
-
-		mConfigButton = (Button) findViewById(R.id.btn_configuration);
-		mConfigButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String paramsString = mConfigurationEditText.getText().toString();
-				if (TextUtils.isEmpty(paramsString)) {
-					setMessage("GETTING CONFIGURATION");
-					mService.startGettingDeviceConfiguration();
-				} else {
-					setMessage("SETTING CONFIGURATION");
-					mService.startSettingDeviceConfiguration(paramsString);
-				}
-			}
-		});
-
-		mChangeSNButton = (Button) findViewById(R.id.btn_change_serial_number);
-		mChangeSNButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String serialNumber = mSerialNumberEditText.getText().toString();
-
-				setMessage("CHANGING SERIAL NUMBER");
-				mService.startChangingSerialNumber(serialNumber);
-			}
-		});
-
-		mConnectionParametersButton = (Button) findViewById(R.id.btn_set_connection_parameters);
-		mConnectionParametersButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String parameters = mConnectionParamsEditText.getText().toString().trim();
-
-				if (TextUtils.isEmpty(parameters)) {
-					setMessage("GETTING CONNECTION PARAMETERS");
-					mService.startGettingConnectionParameters();
-				} else {
-					setMessage("SETTING CONNECTION PARAMETERS");
-					mService.startSettingConnectionParameters(parameters);
-				}
-			}
-		});
-
-		mFlashButtonModeButton = (Button) findViewById(R.id.btn_set_flash_button_mode);
-		mFlashButtonModeButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String parameters = mFlashButtonModeEditText.getText().toString();
-
-				if (TextUtils.isEmpty(parameters)) {
-					setMessage("GETTING FLASH BUTTON MODE");
-					mService.startGettingFlashButtonMode();
-				} else {
-					setMessage("SETTING FLASH BUTTON MODE");
-					mService.startSettingFlashButtonMode(parameters);
-				}
-			}
-		});
-
-		mCreateBondButton = (Button) findViewById(R.id.btn_create_bond);
-		mCreateBondButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mDevice != null) {
-					setMessage("CREATE BOND - success:" + mService.createBond(mDevice));
-				}
-			}
-		});
-
-		mClearBondButton = (Button) findViewById(R.id.btn_clear_bond);
-		mClearBondButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mDevice != null) {
-					setMessage("REMOVE BOND - success:" + mService.removeBond(mDevice));
-				}
-			}
-		});
-
-		mSyncButton = (Button) findViewById(R.id.btn_sync);
-		mSyncButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("SYNCING");
-				mService.startSync();
-			}
-		});
-
-		mStreamingConfigurationEditText = (EditText) findViewById(R.id.edit_set_streaming_configuration);
-
-		mGetStreamConfigButton = (Button) findViewById(R.id.btn_get_streaming_config);
-		mGetStreamConfigButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("GET STREAMING CONFIG");
-				mService.startGettingStreamingConfig();
-			}
-		});
-
-		mSetStreamConfigButton = (Button) findViewById(R.id.btn_set_streaming_configuration);
-		mSetStreamConfigButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String parameters = mStreamingConfigurationEditText.getText().toString();
-
-				setMessage("SET STREAMING CONFIG");
-				mService.startSettingStreamingConfig(parameters);
-			}
-		});
-
-		mButtonAnimationEditText = (EditText) findViewById(R.id.edit_button_animation);
-
-		mButtonAnimationButton = (Button) findViewById(R.id.btn_button_animation);
-		mButtonAnimationButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String parameters = mButtonAnimationEditText.getText().toString();
-
-				setMessage("START BUTTON ANIMATION");
-				mService.startButtonAnimation(parameters);
-			}
-		});
-
-		mEventAnimationMappingEditText = (EditText) findViewById(R.id.edit_event_animation_mapping);
-
-		mMapEventAnimationButton = (Button) findViewById(R.id.btn_map_event_animation);
-		mMapEventAnimationButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String parameters = mEventAnimationMappingEditText.getText().toString();
-
-				setMessage("MAPPING EVENT ANIMATION");
-				mService.mapEventAnimation(parameters);
-			}
-		});
-
-		mUnmapEventAnimationMapping = (Button) findViewById(R.id.btn_unmap_event_animation);
-		mUnmapEventAnimationMapping.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("UNMAPPING EVENT ANIMATION");
-				mService.unmapEventAnimation();
-			}
-		});
-
-		mSystemControlEditText = (EditText) findViewById(R.id.edit_event_mapping_system_control);
-
-		mSystemControlButton = (Button) findViewById(R.id.btn_event_mapping_system_control);
-		mSystemControlButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String parameters = mSystemControlEditText.getText().toString();
-
-				setMessage("SYSTEM CONTROL EVENT MAPPING");
-				mService.systemControlEventMapping(parameters);
-			}
-		});
-
-		mOTAButton = (Button) findViewById(R.id.btn_ota);
-		mOTAButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showFileChooser();
-			}
-		});
-
-		mStreamUserInputEventsButton = (Button) findViewById(R.id.btn_stream_user_input_events);
-		mStreamUserInputEventsButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mService.startStreamingUserInputEvents();
-			}
-		});
-
-
-		mConfigurationEditText = (EditText) findViewById(R.id.edit_set_configuration);
-		mSerialNumberEditText = (EditText) findViewById(R.id.edit_set_serial_string);
-		mConnectionParamsEditText = (EditText) findViewById(R.id.edit_set_connection_parameters);
-		mFlashButtonModeEditText = (EditText) findViewById(R.id.edit_set_flash_button_mode);
-
-		mShineApiInfoTextView = (TextView) findViewById(R.id.textView);
-		mShineApiInfoTextView.setVerticalScrollBarEnabled(true);
-		mShineApiInfoTextView.setHorizontallyScrolling(true);
-		mShineApiInfoTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
-		mDeviceLabel = (TextView) findViewById(R.id.deviceName);
-
-		Timer rssiTimer = new Timer();
-		rssiTimer.schedule(new TimerTask() {
+        Timer rssiTimer = new Timer();
+        rssiTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (mState >= BTLE_STATE_CONNECTED) {
@@ -371,491 +140,570 @@ public class ShineActivity extends BaseActivity {
                 }
             }
         }, 1000, 1000);
+    }
 
-		mActivateButton = (Button) findViewById(R.id.btn_start_or_stop_activating);
-		mActivateButton.setOnClickListener(new OnClickListener() {
+    @OnClick(R.id.btn_is_streaming)
+    void isStreaming() {
+        setMessage("isStreaming=" + mService.isUserEventStreaming());
+    }
 
-            @Override
-            public void onClick(View v) {
-                setMessage("ACTIVATING");
-                mService.startActivating();
+    @OnClick(R.id.btn_bmw)
+    void gotoBmw() {
+        Intent intent = new Intent(this, BmwActivity.class);
+        startActivity(intent);
+    }
 
+    @OnClick(R.id.btn_activity_type)
+    void onClickedActivityType() {
+        if (mActivityTypePref.getValue() == null) {
+            mService.getActivityType();
+        } else {
+            ActivityType activityType = new ActivityType(mActivityTypePref.getValue().byteValue());
+            mService.setActivityType(activityType);
+        }
+    }
+
+    @OnClick(R.id.btn_animate)
+    void playAnimateion() {
+        setMessage("PLAY ANIMATION");
+        mService.playAnimation();
+    }
+
+    @OnClick(R.id.btn_stop_animation)
+    void stopAnimation() {
+        setMessage("STOP PLAYING ANIMATION");
+        mService.stopPlayingAnimation();
+    }
+
+    @OnClick(R.id.btn_start_or_stop_scan)
+    void startOrStopScan() {
+        if (mState == BTLE_STATE_IDLE) {
+            if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                Log.i(TAG, "onClick - BT not enabled yet");
+                Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            } else {
+                Intent newIntent = new Intent(ShineActivity.this, DeviceListActivity.class);
+                startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+
+                setState(BTLE_STATE_SCANNING);
+                setMessage("SCANNING");
             }
-        });
+        }
+    }
 
-		mActivateStateButton = (Button) findViewById(R.id.btn_activation_state);
-		mActivateStateButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                setMessage("GETTING ACTIVATION STATE");
-                mService.startGettingActivationState();
-
+    @OnClick(R.id.btn_connect_or_disconnect)
+    void connectOrDisconnect() {
+        if (mState == BTLE_STATE_IDLE || mState == BTLE_STATE_CLOSED) {
+            if (mService.connect(mDevice, null)) {
+                setState(BTLE_STATE_CONNECTING);
+                setMessage("CONNECTING");
+            } else {
+                setMessage("CONNECTING FAILED.\nDEVICE WAS INVALIDATED, PLEASE SCAN AGAIN.");
             }
-        });
+        }
+    }
 
-		mHIDConnectButton = (Button) findViewById(R.id.hidConnectButton);
-		mHIDConnectButton.setOnClickListener(new OnClickListener() {
+    @OnClick(R.id.btn_close)
+    void close() {
+        if (mState >= BTLE_STATE_CLOSED) {
+            mService.close();
+        }
+    }
 
-            @Override
-            public void onClick(View v) {
-                if (mDevice != null) {
-                    setMessage("HID CONNECT - success=" + mService.hidConnect(mDevice));
-                }
-            }
-        });
+    @OnClick(R.id.btn_configuration)
+    void configuration() {
+        String paramsString = mConfigurationEditText.getText().toString();
+        if (TextUtils.isEmpty(paramsString)) {
+            setMessage("GETTING CONFIGURATION");
+            mService.startGettingDeviceConfiguration();
+        } else {
+            setMessage("SETTING CONFIGURATION");
+            mService.startSettingDeviceConfiguration(paramsString);
+        }
+    }
 
-		mHIDDisconnectButton = (Button) findViewById(R.id.hidDisconnectButton);
-		mHIDDisconnectButton.setOnClickListener(new OnClickListener() {
+    @OnClick(R.id.btn_change_serial_number)
+    void changeSerialNumber() {
+        String serialNumber = mSerialNumberEditText.getText().toString();
 
-			@Override
-			public void onClick(View v) {
-				if (mDevice != null) {
-					setMessage("HID DISCONNECT - success=" + mService.hidDisconnect(mDevice));
-				}
-			}
-		});
+        setMessage("CHANGING SERIAL NUMBER");
+        mService.startChangingSerialNumber(serialNumber);
+    }
 
-		mInputMethodButton = (Button) findViewById(R.id.inputMethodButton);
-		mInputMethodButton.setOnClickListener(new OnClickListener() {
+    @OnClick(R.id.btn_set_connection_parameters)
+    void connectionParameters() {
+        String parameters = mConnectionParamsEditText.getText().toString().trim();
 
-			@Override
-			public void onClick(View v) {
-				InputMethodManager imeManager = (InputMethodManager) getApplicationContext().getSystemService(INPUT_METHOD_SERVICE);
-				if (imeManager != null) {
-					imeManager.showInputMethodPicker();
-				} else {
-					Toast.makeText(ShineActivity.this, "Can NOT show InputMethodPicker", Toast.LENGTH_LONG).show();
-				}
-			}
-		});
+        if (TextUtils.isEmpty(parameters)) {
+            setMessage("GETTING CONNECTION PARAMETERS");
+            mService.startGettingConnectionParameters();
+        } else {
+            setMessage("SETTING CONNECTION PARAMETERS");
+            mService.startSettingConnectionParameters(parameters);
+        }
+    }
 
-		// Quoc-Hung Le
-		mAdvFlagEditText = (EditText) findViewById(R.id.txtAdvFlag);
-		mGetSetAdvStateCheckBox = (CheckBox) findViewById(R.id.cbGetSetAdvState);
+    @OnClick(R.id.btn_set_flash_button_mode)
+    void flashButtonMode() {
+        String parameters = mFlashButtonModeEditText.getText().toString();
 
-		mAdStateButton = (Button) findViewById(R.id.btnAdvState);
-		mAdStateButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mGetSetAdvStateCheckBox.isChecked()) {
-					setMessage("SET EXTRA AD DATA STATE");
-					mService.startSettingAdvEventState(Boolean.parseBoolean(mAdvFlagEditText.getText().toString()));
-				} else {
-					setMessage("GET EXTRA AD DATA STATE");
-					mService.startGettingAdvEventState();
-				}
-			}
-		});
+        if (TextUtils.isEmpty(parameters)) {
+            setMessage("GETTING FLASH BUTTON MODE");
+            mService.startGettingFlashButtonMode();
+        } else {
+            setMessage("SETTING FLASH BUTTON MODE");
+            mService.startSettingFlashButtonMode(parameters);
+        }
+    }
 
-		mInterruptButton = (Button) findViewById(R.id.btnShineInterrupt);
-		mInterruptButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				stopCurrentOperation();
-			}
-		});
+    @OnClick(R.id.btn_create_bond)
+    void createBond() {
+        if (mDevice != null) {
+            setMessage("CREATE BOND - success:" + mService.createBond(mDevice));
+        }
+    }
 
-		mShineToPlutoButton = (Button) findViewById(R.id.btnShineToPluto);
-		mShineToPlutoButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent i = new Intent(ShineActivity.this, PlutoActivity.class);
-				startActivity(i);
-				finish();
-			}
-		});
+    @OnClick(R.id.btn_clear_bond)
+    void clearBond() {
+        if (mDevice != null) {
+            setMessage("REMOVE BOND - success:" + mService.removeBond(mDevice));
+        }
+    }
 
-		mShineToBoltButton = (Button) findViewById(R.id.btnPlutoToBolt);
-		mShineToBoltButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent i = new Intent(ShineActivity.this, BoltActivity.class);
-				startActivity(i);
-				finish();
-			}
-		});
+    @OnClick(R.id.btn_sync)
+    void sync() {
+        setMessage("SYNCING");
+        mService.startSync();
+    }
 
-		mSDKVersion = (TextView)findViewById(R.id.sdk_version);
-		mSDKVersion.setText(SDKSetting.getSDKVersion());
+    @OnClick(R.id.btn_get_streaming_config)
+    void getStreamingConfig() {
+        setMessage("GET STREAMING CONFIG");
+        mService.startGettingStreamingConfig();
+    }
 
-		mUnmapAllEventsButton = (Button) findViewById(R.id.btn_unmap_all_events);
-		mUnmapAllEventsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setMessage("UNMAP ALL EVENTS");
-                mService.unmapAllEvents();
-            }
-        });
+    @OnClick(R.id.btn_set_streaming_configuration)
+    void setStreamingConfig() {
+        String parameters = mStreamingConfigurationEditText.getText().toString();
 
-		mUnmapSpecificEventButton = (Button) findViewById(R.id.btn_unmap_specific_event);
-		mUnmapSpecificEventButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setMessage("UNMAP SPECIFIC EVENT");
-				mService.unmapEvent(CustomModeEnum.MemEventNumber.DOUBLE_PRESS_N_HOLD);
-			}
-		});
+        setMessage("SET STREAMING CONFIG");
+        mService.startSettingStreamingConfig(parameters);
+    }
 
+    @OnClick(R.id.btn_button_animation)
+    void startButtonAnimation() {
+        String parameters = mButtonAnimationEditText.getText().toString();
 
-		mCustomModeButton = (Button) findViewById(R.id.btn_custom_mode);
-		mCustomModeButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setMessage("SET CUSTOM MODE");
-                mService.setCustomMode(CustomModeEnum.ActionType.HID_MEDIA, CustomModeEnum.MemEventNumber.PLUTO_TRIPLE_TAP,
-                        CustomModeEnum.AnimNumber.TRIPLE_PRESS_SUCCEEDED, CustomModeEnum.KeyCode.MEDIA_VOLUME_UP_OR_SELFIE, true);
-            }
-        });
+        setMessage("START BUTTON ANIMATION");
+        mService.startButtonAnimation(parameters);
+    }
 
-        mGetLapCountingStatusButton = (Button) findViewById(R.id.btn_get_lap_counting_status);
-        mGetLapCountingStatusButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setMessage("GET LAP COUNTING STATUS");
-                mService.startGettingLapCountingStatus();
-            }
-        });
+    @OnClick(R.id.btn_map_event_animation)
+    void mapEventAnimation() {
+        String parameters = mEventAnimationMappingEditText.getText().toString();
 
-        mSetLapCountingLicenseInfoButtonReady = (Button) findViewById(R.id.btn_set_lap_counting_license_info_ready);
-        mSetLapCountingLicenseInfoButtonReady.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mService.startSettingLapCountingLicenseInfo(mDevice.getSerialNumber(), true);
-            }
-        });
+        setMessage("MAPPING EVENT ANIMATION");
+        mService.mapEventAnimation(parameters);
+    }
 
-        mSetLapCountingLicenseInfoButtonNotReady = (Button) findViewById(R.id.btn_set_lap_counting_license_info_not_ready);
-        mSetLapCountingLicenseInfoButtonNotReady.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mService.startSettingLapCountingLicenseInfo(mDevice.getSerialNumber(), false);
-            }
-        });
+    @OnClick(R.id.btn_unmap_event_animation)
+    void unmapEventAnimation() {
+        setMessage("UNMAPPING EVENT ANIMATION");
+        mService.unmapEventAnimation();
+    }
 
-        mSetLapCountingModeEditText = (EditText) findViewById(R.id.edit_lap_counting_mode);
-        mSetLapCountingModeButton = (Button) findViewById(R.id.btn_set_lap_counting_mode);
-        mSetLapCountingModeButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String modeStr = mSetLapCountingModeEditText.getText().toString().trim();
-                mService.startSettingLapCountingMode(modeStr);
-            }
-        });
-		ButterKnife.bind(this);
-	}
+    @OnClick(R.id.btn_event_mapping_system_control)
+    void systemControlEventMapping() {
+        String parameters = mSystemControlEditText.getText().toString();
 
-	@OnClick(R.id.btn_is_streaming)
-	void isStreaming(){
-		setMessage("isStreaming="+mService.isUserEventStreaming());
-	}
+        setMessage("SYSTEM CONTROL EVENT MAPPING");
+        mService.systemControlEventMapping(parameters);
+    }
 
-	@OnClick(R.id.btn_bmw)
-	void gotoBmw() {
-		Intent intent = new Intent(this, BmwActivity.class);
-		startActivity(intent);
-	}
+    @OnClick(R.id.btn_ota)
+    void ota() {
+        showFileChooser();
+    }
 
-	@OnClick(R.id.btn_activity_type)
-	void onClickedActivityType() {
-		if (mActivityTypePref.getValue() == null) {
-			mService.getActivityType();
-		} else {
-			ActivityType activityType = new ActivityType(mActivityTypePref.getValue().byteValue());
-			mService.setActivityType(activityType);
-		}
-	}
+    @OnClick(R.id.btn_stream_user_input_events)
+    void startStreamingUserInputEvents() {
+        mService.startStreamingUserInputEvents();
+    }
 
-	public void onTestBluetooth(View v) {
-		switch (v.getId()) {
-			case R.id.btn_enable_bt:
-				if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-					ShineAdapter.getDefaultAdapter(this).disableBluetooth();
-				} else {
-					ShineAdapter.getDefaultAdapter(this).enableBluetooth();
-				}
-				Toast.makeText(this, R.string.enable_bluetooth, Toast.LENGTH_SHORT).show();
-				break;
-		}
-	}
+    @OnClick(R.id.btn_start_or_stop_activating)
+    void startActivating() {
+        setMessage("ACTIVATING");
+        mService.startActivating();
+    }
 
-    public void openTestConnect(View v){
+    @OnClick(R.id.btn_activation_state)
+    void startGettingActivationState() {
+        setMessage("GETTING ACTIVATION STATE");
+        mService.startGettingActivationState();
+    }
+
+    @OnClick(R.id.hidConnectButton)
+    void hidConnect() {
+        if (mDevice != null) {
+            setMessage("HID CONNECT - success=" + mService.hidConnect(mDevice));
+        }
+    }
+
+    @OnClick(R.id.hidDisconnectButton)
+    void hidDisconnect() {
+        if (mDevice != null) {
+            setMessage("HID DISCONNECT - success=" + mService.hidDisconnect(mDevice));
+        }
+    }
+
+    @OnClick(R.id.btnAdvState)
+    void getOrSetAdvEventState() {
+        if (mAdvFlagEditText.getText().length() > 0) {
+            setMessage("SET EXTRA AD DATA STATE");
+            mService.startSettingAdvEventState(Boolean.parseBoolean(mAdvFlagEditText.getText().toString()));
+        } else {
+            setMessage("GET EXTRA AD DATA STATE");
+            mService.startGettingAdvEventState();
+        }
+    }
+
+    @OnClick(R.id.btn_interrupt)
+    void intterupt() {
+        stopCurrentOperation();
+    }
+
+    @OnClick(R.id.btnShineToPluto)
+    void plutoPage() {
+        Intent i = new Intent(ShineActivity.this, PlutoActivity.class);
+        startActivity(i);
+        finish();
+    }
+
+    @OnClick(R.id.btnPlutoToBolt)
+    void boltPage() {
+        Intent i = new Intent(ShineActivity.this, BoltActivity.class);
+        startActivity(i);
+        finish();
+    }
+
+    @OnClick(R.id.btn_unmap_all_events)
+    void unmapAllEvents() {
+        setMessage("UNMAP ALL EVENTS");
+        mService.unmapAllEvents();
+    }
+
+    @OnClick(R.id.btn_unmap_specific_event)
+    void unmapEvent() {
+        setMessage("UNMAP SPECIFIC EVENT");
+        mService.unmapEvent(CustomModeEnum.MemEventNumber.DOUBLE_PRESS_N_HOLD);
+    }
+
+    @OnClick(R.id.btn_custom_mode)
+    void setCustomMode() {
+        setMessage("SET CUSTOM MODE");
+        mService.setCustomMode(CustomModeEnum.ActionType.HID_MEDIA, CustomModeEnum.MemEventNumber.PLUTO_TRIPLE_TAP,
+                CustomModeEnum.AnimNumber.TRIPLE_PRESS_SUCCEEDED, CustomModeEnum.KeyCode.MEDIA_VOLUME_UP_OR_SELFIE, true);
+    }
+
+    @OnClick(R.id.btn_get_lap_counting_status)
+    void startGettingLapCountingStatus() {
+        setMessage("GET LAP COUNTING STATUS");
+        mService.startGettingLapCountingStatus();
+    }
+
+    @OnClick(R.id.btn_set_lap_counting_license_info_ready)
+    void setLapCountingLicenseReady() {
+        mService.startSettingLapCountingLicenseInfo(mDevice.getSerialNumber(), true);
+    }
+
+    @OnClick(R.id.btn_set_lap_counting_license_info_not_ready)
+    void setLapCountingLicenseNotReady() {
+        mService.startSettingLapCountingLicenseInfo(mDevice.getSerialNumber(), false);
+    }
+
+    @OnClick(R.id.btn_set_lap_counting_mode)
+    void startSettingLapCountingMode() {
+        String modeStr = mSetLapCountingModeEditText.getText().toString().trim();
+        mService.startSettingLapCountingMode(modeStr);
+    }
+
+    @OnClick(R.id.btn_enable_bt)
+    void enableOrDisableBluetooth() {
+        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+            ShineAdapter.getDefaultAdapter(this).disableBluetooth();
+        } else {
+            ShineAdapter.getDefaultAdapter(this).enableBluetooth();
+        }
+        Toast.makeText(this, R.string.enable_bluetooth, Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.btn_test_connect)
+    public void openTestConnect() {
         Intent intent = new Intent(this, TestSyncAndConnectActivity.class);
         intent.putExtras(TestSyncAndConnectActivity.getOpenBundle(mDevice));
         startActivity(intent);
     }
 
-	public void getLastErrorCode(View v) {
-		int connErrCode = mService.getLastConnectionErrorCode();
-		StringBuilder msgBuilder = new StringBuilder();
-		switch(connErrCode) {
-			case -1:
-				msgBuilder.append("Sorry, ShineProfile is null");
-				break;
-			case 0:
-				msgBuilder.append("Connect Success");
-				break;
-			case 10:
-				msgBuilder.append("Connect Fail: Gatt callback is not received");
-				break;
-			case 11:
-				msgBuilder.append("Connect Fail: Gatt Error");
-				break;
-			case 12:
-				msgBuilder.append("Connect Fail: Gatt Conn Terminate Peer User");
-				break;
-			case 13:
-				msgBuilder.append("Connect Fail: Gatt Conn Terminate Local User");
-				break;
-			case 14:
-				msgBuilder.append("Connect Fail: Gatt Conn Timeout");
-				break;
-			case 15:
-				msgBuilder.append("Connect Fail: Gatt Others");
-				break;
-			case 20:
-				msgBuilder.append("Connect Fail: Handshake Discover Services");
-				break;
-			case 21:
-				msgBuilder.append("Connect Fail: Handshake Subscribe Characteristics");
-				break;
-			case 22:
-				msgBuilder.append("Connect Fail: Handshake Get Serial Number");
-				break;
-			case 23:
-				msgBuilder.append("Connect Fail: Handshake Get Model Name");
-				break;
-			case 24:
-				msgBuilder.append("Connect Fail: Handshake Get Firmware Version");
-				break;
-			case 50:
-			default:
-				msgBuilder.append("Connect Fail: Unknown");
-		}
-		setMessage(msgBuilder.toString());
-	}
+    public void getLastErrorCode(View v) {
+        int connErrCode = mService.getLastConnectionErrorCode();
+        StringBuilder msgBuilder = new StringBuilder();
+        switch (connErrCode) {
+            case -1:
+                msgBuilder.append("Sorry, ShineProfile is null");
+                break;
+            case 0:
+                msgBuilder.append("Connect Success");
+                break;
+            case 10:
+                msgBuilder.append("Connect Fail: Gatt callback is not received");
+                break;
+            case 11:
+                msgBuilder.append("Connect Fail: Gatt Error");
+                break;
+            case 12:
+                msgBuilder.append("Connect Fail: Gatt Conn Terminate Peer User");
+                break;
+            case 13:
+                msgBuilder.append("Connect Fail: Gatt Conn Terminate Local User");
+                break;
+            case 14:
+                msgBuilder.append("Connect Fail: Gatt Conn Timeout");
+                break;
+            case 15:
+                msgBuilder.append("Connect Fail: Gatt Others");
+                break;
+            case 20:
+                msgBuilder.append("Connect Fail: Handshake Discover Services");
+                break;
+            case 21:
+                msgBuilder.append("Connect Fail: Handshake Subscribe Characteristics");
+                break;
+            case 22:
+                msgBuilder.append("Connect Fail: Handshake Get Serial Number");
+                break;
+            case 23:
+                msgBuilder.append("Connect Fail: Handshake Get Model Name");
+                break;
+            case 24:
+                msgBuilder.append("Connect Fail: Handshake Get Firmware Version");
+                break;
+            case 50:
+            default:
+                msgBuilder.append("Connect Fail: Unknown");
+        }
+        setMessage(msgBuilder.toString());
+    }
 
-	/**
-	 * Activity Result
-	 */
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-			case REQUEST_SELECT_DEVICE:
-				if (resultCode == Activity.RESULT_OK && data != null) {
-					mDevice = data.getParcelableExtra(MisfitShineService.EXTRA_DEVICE);
-					Log.d(TAG, "... onActivityResultdevice.address==" + mDevice + "mserviceValue" + mService);
-				}
+    /**
+     * Activity Result
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_SELECT_DEVICE:
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    mDevice = data.getParcelableExtra(MisfitShineService.EXTRA_DEVICE);
+                    Log.d(TAG, "... onActivityResultdevice.address==" + mDevice + "mserviceValue" + mService);
+                }
 
-				mService.stopScanning();
+                mService.stopScanning();
 
-				setState(BTLE_STATE_IDLE);
-				setMessage("SCANNING STOPPED");
-				break;
-			case REQUEST_ENABLE_BT:
-				// When the request to enable Bluetooth returns
-				if (resultCode == Activity.RESULT_OK) {
-					Toast.makeText(this, "Bluetooth has turned on ", Toast.LENGTH_SHORT).show();
-				} else {
-					// User did not enable Bluetooth or an error occurred
-					Log.d(TAG, "BT not enabled");
-					Toast.makeText(this, "Problem in BT Turning ON ", Toast.LENGTH_SHORT).show();
-					finish();
-				}
-				break;
-			case REQUEST_FIRMWARE_SELECTION:
-				if (data != null) {
-					ExFilePickerParcelObject object = data.getParcelableExtra(ExFilePickerParcelObject.class.getCanonicalName());
-					if (object.count > 0) {
-						onFirmwareSelected(object.path+object.names.get(0));
-					}
-				}
-				break;
-			default:
-				Log.e(TAG, "wrong request Code");
-				break;
-		}
-	}
-
-	@Override
-	protected void setUiState() {
-		super.setUiState();
-
-		mScanButton.setEnabled(mState <= BTLE_STATE_SCANNING);
-		mScanButton.setText(mState != BTLE_STATE_SCANNING ? R.string.scan : R.string.stop_scan);
-
-		mConnectButton.setEnabled(mDevice != null && mState < BTLE_STATE_CLOSED);
-
-		mCloseButton.setEnabled(mState >= BTLE_STATE_CLOSED);
-
-		mCreateBondButton.setEnabled(mDevice != null);
-		mClearBondButton.setEnabled(mDevice != null);
-
-		mHIDConnectButton.setEnabled(mDevice != null);
-		mHIDDisconnectButton.setEnabled(mDevice != null);
-
-		mAnimateButton.setEnabled(isReady);
-
-		mConfigButton.setEnabled(isReady);
-
-		mGetStreamConfigButton.setEnabled(isReady);
-		mSetStreamConfigButton.setEnabled(isReady);
-
-		mChangeSNButton.setEnabled(isReady);
-
-		mConnectionParametersButton.setEnabled(isReady);
-
-		mFlashButtonModeButton.setEnabled(isReady);
-
-		mSyncButton.setEnabled(isReady);
-
-		mOTAButton.setEnabled(isReady);
-
-		mStreamUserInputEventsButton.setEnabled(isReady);
-
-		mButtonAnimationButton.setEnabled(isReady);
-
-		mMapEventAnimationButton.setEnabled(isReady);
-		mUnmapEventAnimationMapping.setEnabled(isReady);
-
-		mSystemControlButton.setEnabled(isReady);
-
-		mActivateButton.setEnabled(isReady);
-		mActivateStateButton.setEnabled(isReady);
-
-		mCustomModeButton.setEnabled(isReady);
-		mUnmapSpecificEventButton.setEnabled(isReady);
-		mUnmapAllEventsButton.setEnabled(isReady);
-
-		mAdStateButton.setEnabled(isReady);
-		mGetSetAdvStateCheckBox.setEnabled(isReady);
-
-		mStopAnimationButton.setEnabled(mState >= BTLE_STATE_CLOSED);
-
-		mShineToPlutoButton.setEnabled(isReady);
-		mShineToBoltButton.setEnabled(isReady);
-
-        mGetLapCountingStatusButton.setEnabled(isReady);
-        mSetLapCountingLicenseInfoButtonReady.setEnabled(isReady);
-        mSetLapCountingModeButton.setEnabled(isReady);
-
-		boolean isUserEventStreaming = mService != null && mService.isStreaming();
-		mInterruptButton.setEnabled(isReady || isUserEventStreaming);
-
-		if (mDevice != null) {
-			mDeviceLabel.setText(mDevice.getName() + " - " + mDevice.getSerialNumber() + " - rssi:  " + mRssi);
-		} else {
-			mDeviceLabel.setText("");
-		}
+                setState(BTLE_STATE_IDLE);
+                setMessage("SCANNING STOPPED");
+                break;
+            case REQUEST_ENABLE_BT:
+                // When the request to enable Bluetooth returns
+                if (resultCode == Activity.RESULT_OK) {
+                    Toast.makeText(this, "Bluetooth has turned on ", Toast.LENGTH_SHORT).show();
+                } else {
+                    // User did not enable Bluetooth or an error occurred
+                    Log.d(TAG, "BT not enabled");
+                    Toast.makeText(this, "Problem in BT Turning ON ", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            case REQUEST_FIRMWARE_SELECTION:
+                if (data != null) {
+                    ExFilePickerParcelObject object = data.getParcelableExtra(ExFilePickerParcelObject.class.getCanonicalName());
+                    if (object.count > 0) {
+                        onFirmwareSelected(object.path + object.names.get(0));
+                    }
+                }
+                break;
+            default:
+                Log.e(TAG, "wrong request Code");
+                break;
+        }
+    }
 
 
-		updateMessage();
-	}
+    @Bind({R.id.btn_create_bond,
+            R.id.btn_clear_bond,
+            R.id.hidConnectButton,
+            R.id.hidDisconnectButton})
+    List<View> viewsEnabledWhenHaveDevice;
 
-	private void updateMessage() {
-		if(TextUtils.isEmpty(mMessage)){
-			return;
-		}
-		if(mShineApiInfoTextView.getText().length()>500){
-			String msg = mShineApiInfoTextView.getText().toString();
-			mShineApiInfoTextView.setText(msg.substring(300, msg.length()));
-			mShineApiInfoTextView.scrollTo(0,0);
-		}
-		mShineApiInfoTextView.append(mMessage+"\n");
-		int offset = mShineApiInfoTextView.getLineCount() * mShineApiInfoTextView.getLineHeight();
-		if (offset > mShineApiInfoTextView.getHeight()) {
-			mShineApiInfoTextView.scrollTo(0, offset - mShineApiInfoTextView.getHeight());
-		}
-		mMessage = "";
-	}
+    @Bind({R.id.btn_animate,
+            R.id.btn_configuration,
+            R.id.btn_get_streaming_config,
+            R.id.btn_set_streaming_configuration,
+            R.id.btn_change_serial_number,
+            R.id.btn_set_connection_parameters,
+            R.id.btn_set_flash_button_mode,
+            R.id.btn_sync,
+            R.id.btn_ota,
+            R.id.btn_stream_user_input_events,
+            R.id.btn_button_animation,
+            R.id.btn_map_event_animation,
+            R.id.btn_unmap_event_animation,
+            R.id.btn_event_mapping_system_control,
+            R.id.btn_start_or_stop_activating,
+            R.id.btn_activation_state,
+            R.id.btn_custom_mode,
+            R.id.btn_unmap_specific_event,
+            R.id.btn_unmap_all_events,
+            R.id.btnAdvState,
+            R.id.btnShineToPluto,
+            R.id.btnPlutoToBolt,
+            R.id.btn_bmw,
+            R.id.btn_get_lap_counting_status,
+            R.id.btn_set_lap_counting_license_info_ready,
+            R.id.btn_set_lap_counting_license_info_not_ready,
+            R.id.btn_set_lap_counting_mode})
+    List<View> viewsEnabledWhenReady;
 
-	private byte[] readRawResourceFile(String path) {
-		byte[] bytes = null;
+    @Override
+    protected void setUiState() {
+        super.setUiState();
 
-		try {
-			FileInputStream fis = new FileInputStream(new File(path));
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        mScanButton.setEnabled(mState <= BTLE_STATE_SCANNING);
+        mScanButton.setText(mState != BTLE_STATE_SCANNING ? R.string.scan : R.string.stop_scan);
 
-			byte data[] = new byte[1024];
-			int count;
+        mConnectButton.setEnabled(mDevice != null && mState < BTLE_STATE_CLOSED);
 
-			while ((count = fis.read(data)) != -1) {
-				bos.write(data, 0, count);
-			}
+        mCloseButton.setEnabled(mState >= BTLE_STATE_CLOSED);
 
-			bos.flush();
-			bos.close();
-			fis.close();
+        for (View view : viewsEnabledWhenHaveDevice) {
+            view.setEnabled(mDevice != null);
+        }
 
-			bytes = bos.toByteArray();
-		} catch (FileNotFoundException e) {
-			Log.e(TAG, "FileNotFoundException");
-		} catch (IOException ioe) {
-			Log.e(TAG, "IOException");
-		} catch (NullPointerException npe) {
-			Log.e(TAG, "NullPointerException");
-		}
+        for (View view : viewsEnabledWhenReady) {
+            view.setEnabled(isReady);
+        }
 
-		return bytes;
-	}
+        mStopAnimationButton.setEnabled(mState >= BTLE_STATE_CLOSED);
 
-	private void showFileChooser() {
-		try {
-			Intent intent = new Intent(getApplicationContext(), ru.bartwell.exfilepicker.ExFilePickerActivity.class);
-			intent.putExtra(ExFilePicker.SET_ONLY_ONE_ITEM, true);
-			intent.putExtra(ExFilePicker.SET_START_DIRECTORY, SharedPreferencesUtils.readConfig(this, CONFIG_LAST_OPEN_DIR, Environment.getExternalStorageDirectory().getAbsolutePath()));
-			startActivityForResult(intent, REQUEST_FIRMWARE_SELECTION);
-//			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//			// intent.setType("*/*"); // this setup needs to test on many kinds of devices
-//			startActivityForResult(intent, REQUEST_FIRMWARE_SELECTION);
-		} catch (android.content.ActivityNotFoundException ex) {	// If there is no a File Explorer
-			showHandmadeFileChooser();
-		}
-	}
+        boolean isUserEventStreaming = mService != null && mService.isStreaming();
+        mInterruptButton.setEnabled(isReady || isUserEventStreaming);
 
-	/**
-	 * A handmade file chooser by myself
-	 */
-	private void showHandmadeFileChooser() {
-		File mPath = new File(Environment.getExternalStorageDirectory().getPath());
-		FileDialog fileDialog = new FileDialog(this, mPath);
-		fileDialog.setFileEndsWith(".bin");
-		fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
-			public void fileSelected(File file) {
-				onFirmwareSelected(file.getPath());
-			}
-		});
+        if (mDevice != null) {
+            mDeviceLabel.setText(mDevice.getName() + " - " + mDevice.getSerialNumber() + " - rssi:  " + mRssi);
+        } else {
+            mDeviceLabel.setText("");
+        }
 
-		fileDialog.showDialog();
-	}
 
-	private static String getPath(Context context, Uri uri) throws URISyntaxException {
-		String result;
-		Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-		if (cursor == null) {
-			result = uri.getPath();
-		} else {
-			cursor.moveToFirst();
-			int idx = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
-			result = cursor.getString(idx);
-			cursor.close();
-		}
-		return result;
-	}
+        updateMessage();
+    }
 
-	private void onFirmwareSelected(String path) {
-		File file = new File(path).getParentFile();
-		if (file.isDirectory()) {
-			SharedPreferencesUtils.writeConfig(this, CONFIG_LAST_OPEN_DIR, file.getAbsolutePath());
-		}
-		byte[] firmwareData = readRawResourceFile(path);
+    private void updateMessage() {
+        if (TextUtils.isEmpty(mMessage)) {
+            return;
+        }
+        if (mShineApiInfoTextView.getText().length() > 500) {
+            String msg = mShineApiInfoTextView.getText().toString();
+            mShineApiInfoTextView.setText(msg.substring(300, msg.length()));
+            mShineApiInfoTextView.scrollTo(0, 0);
+        }
+        mShineApiInfoTextView.append(mMessage + "\n");
+        int offset = mShineApiInfoTextView.getLineCount() * mShineApiInfoTextView.getLineHeight();
+        if (offset > mShineApiInfoTextView.getHeight()) {
+            mShineApiInfoTextView.scrollTo(0, offset - mShineApiInfoTextView.getHeight());
+        }
+        mMessage = "";
+    }
 
-		if (firmwareData == null || firmwareData.length <= 0) {
-			Toast.makeText(ShineActivity.this, "Invalid data", Toast.LENGTH_SHORT).show();
-			return;
-		}
+    private byte[] readRawResourceFile(String path) {
+        byte[] bytes = null;
 
-		setMessage(path.substring(path.lastIndexOf("/") + 1));
-		mService.startOTAing(firmwareData, mAutoRetryOtaCb.isChecked());
-	}
+        try {
+            FileInputStream fis = new FileInputStream(new File(path));
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            byte data[] = new byte[1024];
+            int count;
+
+            while ((count = fis.read(data)) != -1) {
+                bos.write(data, 0, count);
+            }
+
+            bos.flush();
+            bos.close();
+            fis.close();
+
+            bytes = bos.toByteArray();
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "FileNotFoundException");
+        } catch (IOException ioe) {
+            Log.e(TAG, "IOException");
+        } catch (NullPointerException npe) {
+            Log.e(TAG, "NullPointerException");
+        }
+
+        return bytes;
+    }
+
+    private void showFileChooser() {
+        Intent intent = new Intent(getApplicationContext(), ru.bartwell.exfilepicker.ExFilePickerActivity.class);
+        intent.putExtra(ExFilePicker.SET_ONLY_ONE_ITEM, true);
+        intent.putExtra(ExFilePicker.SET_START_DIRECTORY, SharedPreferencesUtils.readConfig(this, CONFIG_LAST_OPEN_DIR, Environment.getExternalStorageDirectory().getAbsolutePath()));
+        startActivityForResult(intent, REQUEST_FIRMWARE_SELECTION);
+    }
+
+    /**
+     * A handmade file chooser by myself
+     */
+    private void showHandmadeFileChooser() {
+        File mPath = new File(Environment.getExternalStorageDirectory().getPath());
+        FileDialog fileDialog = new FileDialog(this, mPath);
+        fileDialog.setFileEndsWith(".bin");
+        fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
+            public void fileSelected(File file) {
+                onFirmwareSelected(file.getPath());
+            }
+        });
+
+        fileDialog.showDialog();
+    }
+
+    private static String getPath(Context context, Uri uri) throws URISyntaxException {
+        String result;
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        if (cursor == null) {
+            result = uri.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
+    private void onFirmwareSelected(String path) {
+        File file = new File(path).getParentFile();
+        if (file.isDirectory()) {
+            SharedPreferencesUtils.writeConfig(this, CONFIG_LAST_OPEN_DIR, file.getAbsolutePath());
+        }
+        byte[] firmwareData = readRawResourceFile(path);
+
+        if (firmwareData == null || firmwareData.length <= 0) {
+            Toast.makeText(ShineActivity.this, "Invalid data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        setMessage(path.substring(path.lastIndexOf("/") + 1));
+        mService.startOTAing(firmwareData, mAutoRetryOtaCb.isChecked());
+    }
 }
