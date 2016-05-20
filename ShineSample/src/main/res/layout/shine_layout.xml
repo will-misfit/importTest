@@ -111,7 +111,6 @@
             android:id="@+id/btn_test_connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="openTestConnect"
             android:text="@string/n_connect" />
 
         <Button
@@ -149,7 +148,6 @@
                     android:id="@+id/btn_enable_bt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="onTestBluetooth"
                     android:text="@string/enable_bluetooth" />
 
                 <Button
@@ -170,7 +168,6 @@
                     android:id="@+id/btn_ota"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/btn_close"
                     android:text="@string/start_ota" />
 
                 <CheckBox
@@ -183,56 +180,42 @@
                     android:id="@+id/btn_close"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:text="@string/close" />
 
                 <Button
                     android:id="@+id/hidConnectButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:text="@string/hid_connect" />
 
                 <Button
                     android:id="@+id/hidDisconnectButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/inputMethodButton"
                     android:text="@string/hid_disconnect" />
-
-                <Button
-                    android:id="@+id/inputMethodButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:text="@string/input_method" />
 
                 <Button
                     android:id="@+id/btn_animate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:text="@string/animate" />
 
                 <Button
                     android:id="@+id/btn_stop_animation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@+id/btn_animate"
                     android:text="@string/stop_animate" />
 
                 <Button
                     android:id="@+id/btn_create_bond"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/btn_clear_bond"
                     android:text="@string/bond" />
 
                 <Button
                     android:id="@+id/btn_clear_bond"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:text="@string/clear_bond" />
             </com.misfit.ble.sample.utils.FlexLayout>
 
@@ -430,7 +413,7 @@
                     android:text="Unmap All" />
 
                 <Button
-                    android:id="@+id/btnShineInterrupt"
+                    android:id="@+id/btn_interrupt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Interrupt" />
@@ -593,13 +576,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:text="Extra.Ad" />
-
-        <CheckBox
-            android:id="@+id/cbGetSetAdvState"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/btnAdvState"
-            android:text="Tick:set/Rest:get" />
 
     </RelativeLayout>
 
