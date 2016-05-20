@@ -3,6 +3,10 @@ package com.misfit.ble.shine.request;
 import com.misfit.ble.setting.speedo.ActivityType;
 import com.misfit.ble.shine.core.Constants;
 import com.misfit.ble.shine.core.MisfitProtocol;
+import com.misfit.ble.util.Convertor;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -55,5 +59,22 @@ public class GetActivityTypeRequest extends GetRequest {
         }
         mResponse = response;
         mIsCompleted = true;
+    }
+
+    @Override
+    public JSONObject getResponseDescriptionJSON() {
+        JSONObject json = super.getResponseDescriptionJSON();
+        if (json == null) {
+            json = new JSONObject();
+        }
+
+        try {
+            if (mResponse != null) {
+                json.put("activityType", mResponse.activityType.getValue());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 }

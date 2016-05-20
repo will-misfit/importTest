@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ActivityType {
-    public static final byte RUNNING = 0x01;
+    public final static byte RUNNING = 0x01;
     public final static byte CYCLING = 0x02;
     public final static byte SWIMMING = 0x03;
     public final static byte WALKING = 0x04;
