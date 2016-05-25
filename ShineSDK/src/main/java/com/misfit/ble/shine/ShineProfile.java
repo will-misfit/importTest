@@ -1464,9 +1464,18 @@ public final class ShineProfile {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         mConnectFailCode.setConnectPhase(ConnectPhase.MISFIT_HANDSHAKE);
                         mConnectFailCode.setHandshakePhase(HandshakePhase.DISCOVER_SERVICES);
-                        if (!mShineProfileCore.handshake()) {
-                            disconnect();
-                        }
+                        mConnectTimer.schedule(new IndexedTimerTask(mCurrentConnectIndex) {
+                            @Override
+                            public void run() {
+                                if (getIndex() == mCurrentConnectIndex
+                                        && mState == State.CONNECTING
+                                        && mInConnectAttempt) {
+                                    if (!mShineProfileCore.handshake()) {
+                                        disconnect();
+                                    }
+                                }
+                            }
+                        }, Constants.DISCOVERYSERVICES_DELAY);
                     } else { // for all the other non GATT_SUCCESS status
                         disconnect();
                     }

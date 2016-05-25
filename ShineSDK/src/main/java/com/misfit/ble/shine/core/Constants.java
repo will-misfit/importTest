@@ -263,6 +263,7 @@ public class Constants {
 	// BluetoothGatt connect management parameters
 	public static final int INTERVAL_BEFORE_CONNECT = 3000;  // in micro second
 	public static final int CONNECT_CALLBACK_TIMEOUT = 8000;    // in micro second
+	public static final int DISCOVERYSERVICES_DELAY = 500;    // in micro second
 	public static final int DISCONNECT_CALLBACK_TIMEOUT = 500;  // in micro second
 	public static final int EXTERNAL_CONNECT_TIMEOUT = 44000;   // currently Misfit app set 30 sec for connect timeout, so SDK promises to stop all internal attempts before it ticks
 	public static final int DUMMY_FILE_LIST_TIMEOUT = 1000;   // in milliseconds
