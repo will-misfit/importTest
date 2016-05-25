@@ -1,28 +1,21 @@
 package com.misfit.ble.shine;
 
+import com.misfit.ble.setting.lapCounting.LapCountingLicenseStatus;
+
 public class ShineLapCountingStatus {
-    private byte mLicenseStatus;
+    private LapCountingLicenseStatus mLicenseStatus;
     private byte mTrialCounter;
     private byte mLapCountingMode;
     private short mTimeout;
 
-    public void setLicenseStatus(byte mLicenseStatus) {
+    public ShineLapCountingStatus(LapCountingLicenseStatus mLicenseStatus, byte mTrialCounter, byte mLapCountingMode, short mTimeout) {
         this.mLicenseStatus = mLicenseStatus;
-    }
-
-    public void setTrialCounter(byte mTrialCounter) {
         this.mTrialCounter = mTrialCounter;
-    }
-
-    public void setLapCountingMode(byte mLapCountingMode) {
         this.mLapCountingMode = mLapCountingMode;
-    }
-
-    public void setTimeout(short mTimeout) {
         this.mTimeout = mTimeout;
     }
 
-    public byte getLicenseStatus() {
+    public LapCountingLicenseStatus getLicenseStatus() {
         return mLicenseStatus;
     }
 
