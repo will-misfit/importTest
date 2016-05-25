@@ -2,7 +2,7 @@ package com.misfit.ble.sample.utils;
 
 import android.util.Log;
 
-import com.misfit.ble.BuildConfig;
+import com.misfit.ble.sample.BuildConfig;
 
 import java.util.ArrayList;
 import java.util.List;

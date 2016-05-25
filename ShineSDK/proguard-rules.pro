@@ -123,6 +123,9 @@
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Sound { public *; }
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Color { public *; }
 
+# Speedo Settings
+-keep class com.misfit.ble.setting.speedo.ActivityType { public *; }
+
 # Log, ConnectionErrorCode enum
 -keep class com.misfit.ble.shine.log.ConnectFailCode { public *; }
 
