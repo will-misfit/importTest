@@ -80,7 +80,7 @@ uploadArchives {
         repository(url: repoUri)
 
         project.version
-        pom.groupId = "misfit.com"
+        pom.groupId = "com.misfit"
         pom.artifactId = "ShineSDK"
         pom.version = shineSDKVersionName
     }
