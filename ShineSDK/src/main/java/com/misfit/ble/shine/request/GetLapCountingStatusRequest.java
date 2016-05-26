@@ -1,5 +1,6 @@
 package com.misfit.ble.shine.request;
 
+import com.misfit.ble.setting.lapCounting.LapCountingLicenseStatus;
 import com.misfit.ble.shine.core.Constants;
 import com.misfit.ble.util.Convertor;
 
@@ -12,7 +13,7 @@ import java.nio.ByteOrder;
 public class GetLapCountingStatusRequest extends Request {
 
     public static class Response extends BaseResponse {
-        public byte licenseStatus;
+        public LapCountingLicenseStatus licenseStatus;
         public byte trialCounter;
         public byte lapCountingMode;
         public short timeout;
@@ -22,7 +23,7 @@ public class GetLapCountingStatusRequest extends Request {
 
     @Override
     public String getRequestName() {
-        return super.getRequestName();
+        return "GetLapCountingStatus";
     }
 
     public Response getResponse() {
@@ -50,7 +51,7 @@ public class GetLapCountingStatusRequest extends Request {
     }
 
     public void buildRequest() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         byteBuffer.put(0, getOperationId());
@@ -72,7 +73,7 @@ public class GetLapCountingStatusRequest extends Request {
                 ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
                 byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-                response.licenseStatus = byteBuffer.get(4);
+                response.licenseStatus = new LapCountingLicenseStatus(byteBuffer.get(4));
                 response.trialCounter = byteBuffer.get(5);
                 response.lapCountingMode = byteBuffer.get(6);
                 response.timeout = Convertor.unsignedByteToShort(byteBuffer.get(7));

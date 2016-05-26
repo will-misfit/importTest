@@ -16,7 +16,7 @@ public class SetLapCountingModeRequest extends Request {
 
     @Override
     public String getRequestName() {
-        return "SetLapCountingModeRequest";
+        return "SetLapCountingMode";
     }
 
     @Override

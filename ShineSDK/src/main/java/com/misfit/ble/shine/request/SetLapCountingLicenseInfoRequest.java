@@ -14,7 +14,7 @@ public class SetLapCountingLicenseInfoRequest extends Request {
 
     @Override
     public String getRequestName() {
-        return "SetLapCountingLicenseInfoRequest";
+        return "SetLapCountingLicenseInfo";
     }
 
     @Override

@@ -1,4 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+
+def shineSDKVersionName = "2.3.4"
 
 android {
     compileSdkVersion 22
@@ -10,8 +14,8 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 27
-        versionName "2.3.3"
+        versionCode 28
+        versionName shineSDKVersionName
     }
 
     sourceSets.main {
@@ -62,4 +66,22 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.+'
     testCompile 'junit:junit:4.12'
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        String repoPath = projectDir.absolutePath + "/mavenRepo";
+        File mavenRepoDir = new File(projectDir.absolutePath + "/mavenRepo")
+        if (!mavenRepoDir.isDirectory()) {
+            mavenRepoDir.mkdirs()
+        }
+
+        String repoUri = mavenRepoDir.toURI().toString();
+        repository(url: repoUri)
+
+        project.version
+        pom.groupId = "com.misfit"
+        pom.artifactId = "ShineSDK"
+        pom.version = shineSDKVersionName
+    }
 }

@@ -70,6 +70,7 @@
 -keep class com.misfit.ble.shine.ShineEventAnimationMapping { public *; }
 -keep class com.misfit.ble.shine.ShineLapCountingStatus { public *;}
 -keep class com.misfit.ble.setting.lapCounting.LapCountingMode { public *;}
+-keep class com.misfit.ble.setting.lapCounting.LapCountingLicenseStatus { public *;}
 
 -keep class com.misfit.ble.shine.ShineDevice { public *; }
 -keep class com.misfit.ble.shine.ShineDevice$ShineHIDConnectionCallback { public *; }
@@ -122,6 +123,9 @@
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Vibe { public *; }
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Sound { public *; }
 -keep class com.misfit.ble.setting.pluto.PlutoSequence$Color { public *; }
+
+# Speedo Settings
+-keep class com.misfit.ble.setting.speedo.ActivityType { public *; }
 
 # Log, ConnectionErrorCode enum
 -keep class com.misfit.ble.shine.log.ConnectFailCode { public *; }
