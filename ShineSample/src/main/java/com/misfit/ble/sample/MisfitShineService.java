@@ -242,7 +242,7 @@ public class MisfitShineService extends Service {
     };
 
     private void buildMessage(ActionID actionID, ShineProfile.ActionResult result, String content) {
-        onOperationCompleted(actionID + " " + result + ": " + content);
+        onOperationCompleted(actionID + " " + result + ":\n" + content);
     }
 
     private ShineProfile.ConfigurationCallback configurationCallback = new ShineProfile.ConfigurationCallback() {

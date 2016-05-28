@@ -1745,7 +1745,7 @@ public final class ShineProfile {
                 mCurrentRequestLogItem = newLogEventItem(request.getRequestName());
                 mCurrentRequestLogItem.mRequestStartedLog = new RequestStartedLog(request.getRequestDescriptionJSON());
                 if (BuildConfig.DEBUG) {
-                    Log.i(TAG, mCurrentRequestLogItem.getEventName() + " request start" + mCurrentRequestLogItem.mRequestStartedLog.toJSONObject().toString());
+                    Log.i(TAG, mCurrentRequestLogItem.getEventName() + " request start: " + mCurrentRequestLogItem.mRequestStartedLog.toJSONObject());
                 }
                 // TODO Check
                 if (FirmwareCompatibility.isSupportedRequest(mFirmwareVersion, mModelNumber, request) == false) {
