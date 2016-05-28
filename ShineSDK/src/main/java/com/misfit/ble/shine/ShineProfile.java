@@ -1373,9 +1373,6 @@ public final class ShineProfile {
         @Override
         public void onResponseReceivedResult(Request request, int result) {
             synchronized (ShineProfile.this.mShineProfileCore.lockObject) {
-                if (BuildConfig.DEBUG) {
-                    Log.i(TAG, "received=" + request.getRequestName() + ", result=" + result);
-                }
                 //for dummy file list request
                 if(mState==State.CONNECTING && request instanceof FileListRequest){
                     mCurrentRequestLogItem.mResponseFinishedLog = new ResponseFinishedLog(result, request.getResponseDescriptionJSON());
@@ -1389,6 +1386,9 @@ public final class ShineProfile {
                 LogEventItem requestLogEventItem = mCurrentRequestLogItem;
 
                 requestLogEventItem.mResponseFinishedLog = new ResponseFinishedLog(result, request.getResponseDescriptionJSON());
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, requestLogEventItem.getEventName()+ " response finish: " + requestLogEventItem.mResponseFinishedLog.toJSONObject());
+                }
                 mCurrentPhaseController.onResponseReceivedResult(request, result);
             }
         };
@@ -1396,9 +1396,6 @@ public final class ShineProfile {
         @Override
 		public void onRequestSentResult(Request request, int result) {
 			synchronized (ShineProfile.this.mShineProfileCore.lockObject) {
-                if (BuildConfig.DEBUG) {
-                    Log.i(TAG, "sent=" + request.getRequestName() + ", result=" + result);
-                }
                 //for dummy file list request
                 if (mState == State.CONNECTING && request instanceof FileListRequest) {
                     mCurrentRequestLogItem.mRequestFinishedLog = new RequestFinishedLog(result, request.getRequestDataJSON());
@@ -1414,6 +1411,9 @@ public final class ShineProfile {
                     return;
                 }
                 mCurrentRequestLogItem.mRequestFinishedLog = new RequestFinishedLog(result, request.getRequestDataJSON());
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, mCurrentRequestLogItem.getEventName() + " request finish: " + mCurrentRequestLogItem.mRequestFinishedLog.toJSONObject());
+                }
 				mCurrentPhaseController.onRequestSentResult(request, result);
 			}
 		}
@@ -1744,7 +1744,9 @@ public final class ShineProfile {
 
                 mCurrentRequestLogItem = newLogEventItem(request.getRequestName());
                 mCurrentRequestLogItem.mRequestStartedLog = new RequestStartedLog(request.getRequestDescriptionJSON());
-
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, mCurrentRequestLogItem.getEventName() + " request start" + mCurrentRequestLogItem.mRequestStartedLog.toJSONObject().toString());
+                }
                 // TODO Check
                 if (FirmwareCompatibility.isSupportedRequest(mFirmwareVersion, mModelNumber, request) == false) {
                     mCurrentRequestLogItem.mRequestFinishedLog = new RequestFinishedLog(ShineProfileCore.RESULT_UNSUPPORTED);
@@ -1913,6 +1915,9 @@ public final class ShineProfile {
                         e.printStackTrace();
                     }
                     mCurrentDataTransferringLogItem.mRequestFinishedLog = new RequestFinishedLog(mTransferringResult, json);
+                    if (BuildConfig.DEBUG) {
+                        Log.i(TAG, mCurrentDataTransferringLogItem.getEventName() + " request finish: " + mCurrentDataTransferringLogItem.mRequestFinishedLog.toJSONObject().toString());
+                    }
                 }
             }
         }
