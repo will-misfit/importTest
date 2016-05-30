@@ -49,7 +49,7 @@ public class SetLapCountingLicenseInfoRequest extends Request {
     }
 
     @Override
-    public JSONObject getResponseDescriptionJSON() {
+    public JSONObject getRequestDescriptionJSON() {
         JSONObject json = new JSONObject();
         try {
             json.put("LicenseInfo", mLicenseInfo);

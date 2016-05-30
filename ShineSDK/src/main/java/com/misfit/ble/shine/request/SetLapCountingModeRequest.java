@@ -53,7 +53,7 @@ public class SetLapCountingModeRequest extends Request {
     }
 
     @Override
-    public JSONObject getResponseDescriptionJSON() {
+    public JSONObject getRequestDescriptionJSON() {
         JSONObject json = new JSONObject();
         try {
             json.put("lapCountingMode", mLapCountingMode);
