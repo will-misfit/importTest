@@ -1,8 +1,5 @@
 package com.misfit.ble.setting.speedo;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class ActivityType {
     public final static byte RUNNING = 0x01;
     public final static byte CYCLING = 0x02;
@@ -24,12 +21,6 @@ public class ActivityType {
 
     @Override
     public String toString() {
-        JSONObject valueJSON = new JSONObject();
-        try {
-            valueJSON.put("value", mValue);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return valueJSON.toString();
+        return "type = " + mValue;
     }
 }

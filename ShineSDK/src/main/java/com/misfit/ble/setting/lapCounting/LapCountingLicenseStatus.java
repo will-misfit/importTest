@@ -1,8 +1,5 @@
 package com.misfit.ble.setting.lapCounting;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public final class LapCountingLicenseStatus {
     public static final byte NOT_REDAY = 0;
     public static final byte REDAY = 1;
@@ -19,12 +16,6 @@ public final class LapCountingLicenseStatus {
 
     @Override
     public String toString() {
-        JSONObject valueJSON = new JSONObject();
-        try {
-            valueJSON.put("status", mValue);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return valueJSON.toString();
+        return "status = " + mValue;
     }
 }
