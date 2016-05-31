@@ -1,6 +1,7 @@
 package com.misfit.ble.shine.request;
 
 import com.misfit.ble.shine.core.Constants;
+import com.misfit.ble.util.Convertor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +53,7 @@ public class SetLapCountingLicenseInfoRequest extends Request {
     public JSONObject getRequestDescriptionJSON() {
         JSONObject json = new JSONObject();
         try {
-            json.put("LicenseInfo", mLicenseInfo);
+            json.put("LicenseInfo", Convertor.bytesToString(mLicenseInfo));
         } catch (JSONException e) {
             e.printStackTrace();
         }
