@@ -18,6 +18,8 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_CONNECT = "connect";
 	public static final String EVENT_DISCONNECT = "disconnect";
 	public static final String EVENT_CLOSE = "close";
+	public static final String EVENT_CLOSE_BY_APP = "closeByApp";
+	public static final String EVENT_CLOS_BY_BT_OFF = "closeByBluetoothOff";
 	public static final String EVENT_RECONNECT_GATT = "reconnectGatt";
 	public static final String EVENT_CLOSE_GATT = "closeGatt";
 	

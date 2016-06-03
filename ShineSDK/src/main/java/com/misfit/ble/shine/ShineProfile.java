@@ -1023,6 +1023,8 @@ public final class ShineProfile {
         synchronized (mShineProfileCore.lockObject) {
             mInConnectAttempt = false; // exit internal retry connect operation
         }
+        LogEventItem item = newLogEventItem(LogEventItem.EVENT_CLOSE_BY_APP);
+        item.mRequestStartedLog = new RequestStartedLog(null);
 
         if (mState == State.DISCONNECTING) { // disconnect() working on
             return;
@@ -2078,6 +2080,8 @@ public final class ShineProfile {
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         if (mState != State.CLOSED) {
+                            LogEventItem item = newLogEventItem(LogEventItem.EVENT_CLOS_BY_BT_OFF);
+                            item.mRequestStartedLog = new RequestStartedLog(null);
                             close();
                         }
                     case BluetoothAdapter.STATE_TURNING_OFF:
