@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 
-def shineSDKVersionName = "2.3.4"
+def shineSDKVersionName = "2.3.5"
 
 android {
     compileSdkVersion 22
@@ -14,7 +14,7 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 28
+        versionCode 29
         versionName shineSDKVersionName
     }
 
