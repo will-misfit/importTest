@@ -97,14 +97,10 @@ public class Constants {
 
 	public class LapCounting {
         public static final byte PARAMETER_ID_LAP_COUNTING = 0x03;
-        public static final byte COMMAND_ID_LAP_COUNTING = 0x06;
+        public static final byte COMMAND_ID_LAP_COUNTING = 0x07;
         public static final byte SETTING_ID_LAP_COUNTING = 0x02;
 
-        public static final byte PARAMETER_ID_MODE = 0x0b;
-        public static final byte COMMAND_ID_MODE = 0x40;
-        public static final byte SETTING_ID_MODE = 0x0c;
-        public static final byte EXTRA_MODE = 0x10;
-
+        public static final byte COMMAND_ID_MODE = 0x08;
     }
 
 	// Algorithm Settings Id (Pluto)

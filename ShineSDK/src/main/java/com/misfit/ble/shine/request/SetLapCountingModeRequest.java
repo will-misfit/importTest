@@ -31,23 +31,19 @@ public class SetLapCountingModeRequest extends Request {
 
     public void buildRequest(LapCountingMode mode, short timeout) {
         byte operationId = Constants.DEVICE_CONFIG_OPERATION_SET;
-        byte parameterId = Constants.LapCounting.PARAMETER_ID_MODE;
+        byte parameterId = Constants.LapCounting.PARAMETER_ID_LAP_COUNTING;
         byte commandId = Constants.LapCounting.COMMAND_ID_MODE;
-        byte settingId = Constants.LapCounting.SETTING_ID_MODE;
-        byte extra = Constants.LapCounting.EXTRA_MODE;
 
         mLapCountingMode = mode.getMode();
         mLapCountingTimeout = Convertor.unsignedByteFromShort(timeout);
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(7);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(5);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         byteBuffer.put(0, operationId);
         byteBuffer.put(1, parameterId);
         byteBuffer.put(2, commandId);
-        byteBuffer.put(3, settingId);
-        byteBuffer.put(4, extra);
-        byteBuffer.put(5, mLapCountingMode);
-        byteBuffer.put(6, mLapCountingTimeout);
+        byteBuffer.put(3, mLapCountingMode);
+        byteBuffer.put(4, mLapCountingTimeout);
 
         mRequestData = byteBuffer.array();
     }
