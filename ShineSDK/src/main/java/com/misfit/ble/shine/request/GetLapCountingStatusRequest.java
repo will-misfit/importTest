@@ -17,6 +17,7 @@ public class GetLapCountingStatusRequest extends Request {
         public byte trialCounter;
         public byte lapCountingMode;
         public short timeout;
+        public byte maxTrialNumber;
     }
 
     private Response mResponse;
@@ -67,7 +68,7 @@ public class GetLapCountingStatusRequest extends Request {
         Response response = new Response();
         response.result = validateResponse(bytes, Constants.DEVICE_CONFIG_OPERATION_RESPONSE, getParameterId());
         if (response.result == Constants.RESPONSE_SUCCESS) {
-            if (bytes.length < 8) {
+            if (bytes.length < 9) {
                 response.result = Constants.RESPONSE_ERROR;
             } else {
                 ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
@@ -77,6 +78,7 @@ public class GetLapCountingStatusRequest extends Request {
                 response.trialCounter = byteBuffer.get(5);
                 response.lapCountingMode = byteBuffer.get(6);
                 response.timeout = Convertor.unsignedByteToShort(byteBuffer.get(7));
+                response.maxTrialNumber = byteBuffer.get(8);
             }
         }
         mResponse = response;
@@ -92,6 +94,7 @@ public class GetLapCountingStatusRequest extends Request {
                 json.put("trialCounter", mResponse.trialCounter);
                 json.put("lapCountingMode", mResponse.lapCountingMode);
                 json.put("timeout", mResponse.timeout);
+                json.put("maxTrialNumber", mResponse.maxTrialNumber);
             }
         } catch (JSONException e) {
             e.printStackTrace();

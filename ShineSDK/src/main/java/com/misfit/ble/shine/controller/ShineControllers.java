@@ -273,7 +273,7 @@ public class ShineControllers {
                         if (request instanceof GetLapCountingStatusRequest) {
                             GetLapCountingStatusRequest.Response response = ((GetLapCountingStatusRequest) request).getResponse();
                             ShineLapCountingStatus shineLapCountingStatus = new ShineLapCountingStatus(response.licenseStatus,
-									response.trialCounter, response.lapCountingMode, response.timeout);
+									response.trialCounter, response.lapCountingMode, response.timeout, response.maxTrialNumber);
                             objects = new Hashtable<>();
                             objects.put(ShineProperty.LAP_COUNTING_STATUS, shineLapCountingStatus);
                         }

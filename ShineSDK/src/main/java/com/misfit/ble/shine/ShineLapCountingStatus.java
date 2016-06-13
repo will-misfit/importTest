@@ -7,12 +7,15 @@ public class ShineLapCountingStatus {
     private byte mTrialCounter;
     private byte mLapCountingMode;
     private short mTimeout;
+    private byte mMaxTrialNumber;
 
-    public ShineLapCountingStatus(LapCountingLicenseStatus mLicenseStatus, byte mTrialCounter, byte mLapCountingMode, short mTimeout) {
+    public ShineLapCountingStatus(LapCountingLicenseStatus mLicenseStatus, byte mTrialCounter,
+                                  byte mLapCountingMode, short mTimeout, byte mMaxTrialNumber) {
         this.mLicenseStatus = mLicenseStatus;
         this.mTrialCounter = mTrialCounter;
         this.mLapCountingMode = mLapCountingMode;
         this.mTimeout = mTimeout;
+        this.mMaxTrialNumber = mMaxTrialNumber;
     }
 
     public LapCountingLicenseStatus getLicenseStatus() {
@@ -31,11 +34,15 @@ public class ShineLapCountingStatus {
         return mTimeout;
     }
 
+    public byte getMaxTrialNumber() {
+        return mMaxTrialNumber;
+    }
     @Override
     public String toString() {
         return  "\n" + "LicenseStatus: " + mLicenseStatus + "\n"
                 + "TrialCounter: " + mTrialCounter + "\n"
                 + "LapCountingMode: " + mLapCountingMode + "\n"
-                + "Timeout: " + mTimeout;
+                + "Timeout: " + mTimeout + "\n"
+                + "MaxTrialNumber " + mMaxTrialNumber ;
     }
 }
