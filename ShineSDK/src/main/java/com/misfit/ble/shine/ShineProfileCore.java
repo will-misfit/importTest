@@ -2,7 +2,10 @@ package com.misfit.ble.shine;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.misfit.ble.BuildConfig;
@@ -57,9 +60,12 @@ public class ShineProfileCore {
 	public static final int RESULT_TIMED_OUT = 2;
 	public static final int RESULT_UNSUPPORTED = 3;
 	public static final int RESULT_INSUFFICIENT_AUTHENTICATION = 4;
-	
+
+	public static final long DELAY_FOR_DATA_TRANSFER_RETRY = 40;
+
 	static final String TAG = ShineProfileCore.class.getName();
-	
+	static final String TAG_OTA_PUT = "ShineProfile";
+
 	// Characteristics
 	private ArrayList<IBluetoothGattCharacteristic> mToSubscribeCharacteristics;
 
@@ -535,6 +541,22 @@ public class ShineProfileCore {
 							mSequenceNumber += 1;
 							mTransferedLength += packageLength - 1;
 							result = true;
+						} else {
+							if (BuildConfig.DEBUG) {
+								Log.w(TAG_OTA_PUT, "retry once");
+							}
+							try {
+								Thread.sleep(DELAY_FOR_DATA_TRANSFER_RETRY);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+							if (writeCharacteristic(characteristic)) {
+								mSequenceNumber += 1;
+								mTransferedLength += packageLength - 1;
+								result = true;
+							} else if (BuildConfig.DEBUG) {
+								Log.e(TAG_OTA_PUT, "retry failed");
+							}
 						}
 					}
 					mCallback.onPackageTransferred(result ? RESULT_SUCCESS : RESULT_FAILURE, mTotalLength, mTransferedLength);
