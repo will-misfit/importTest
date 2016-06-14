@@ -46,6 +46,7 @@
     <string name="lap_counting_license_info_ready">lapCounting licenseInfo Ready</string>
     <string name="lap_counting_license_info_not_ready">lapCounting licenseInfo Not Ready</string>
     <string name="set_lap_counting_mode">set lapCounting mode</string>
+    <string name="mapping_type">Mapping Type</string>
 
     <string name="activate">Activate</string>
     <string name="stop_activating">Stop activating</string>

@@ -10,6 +10,11 @@ public class MisfitProtocol {
 
     public final class Algorithm {
         public final static byte PARAMETER_ID = 0x03;
-        public final static byte COMMAND_ACTIVIT_TYPE = 0x06;
+        public final static byte COMMAND_ACTIVITY_TYPE = 0x06;
+    }
+
+    public final class MappingType {
+        public final static byte PARAMETER_ID = 0x0b;
+        public final static byte COMMAND_ID = (byte)0xff;
     }
 }

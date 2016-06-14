@@ -54,7 +54,10 @@ public class LogEventItem extends LogItem {
 	public static final String EVENT_SET_FLASH_BUTTON_MODE = "setFlashButtonMode";
 
 	public static final String EVENT_GET_FLASH_BUTTON_MODE = "getFlashButtonMode";
-	
+
+	public static final String EVENT_GET_MAPPING_TYPE = "getMappingType";
+
+
 	// Venus
 	public static final String EVENT_ACTIVATE = "activate";
 	public static final String EVENT_GET_ACTIVATION_STATE = "getActivationState";

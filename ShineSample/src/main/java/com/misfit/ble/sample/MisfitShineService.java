@@ -670,6 +670,10 @@ public class MisfitShineService extends Service {
         mShineProfile.getActivityType(configurationCallback);
     }
 
+    public void getMappingType() {
+        mShineProfile.getMappingType(configurationCallback);
+    }
+
     public void startButtonAnimation(String paramsString) {
         if (paramsString != null) {
             String[] params = paramsString.split(",");

@@ -2290,6 +2290,18 @@ public final class ShineProfile {
         }
     }
 
+    public boolean getMappingType(ConfigurationCallback configurationCallback) {
+        synchronized (mShineProfileCore.lockObject) {
+            if (!isReady()) {
+                logUnexpectedEvent(LogEventItem.EVENT_GET_MAPPING_TYPE);
+                Log.d(TAG, "getMappingType() return false: is not ready");
+                return false;
+            }
+
+            return startPhaseController(mShineControllers.getMappingType(configurationCallback));
+        }
+    }
+
 	/**
 	 * Disable all BLE notifications
 	 *

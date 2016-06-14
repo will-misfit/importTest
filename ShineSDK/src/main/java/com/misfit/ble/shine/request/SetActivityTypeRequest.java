@@ -31,7 +31,7 @@ public class SetActivityTypeRequest extends SetRequest {
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         byteBuffer.put(0, MisfitProtocol.Operation.SET);
         byteBuffer.put(1, MisfitProtocol.Algorithm.PARAMETER_ID);
-        byteBuffer.put(2, MisfitProtocol.Algorithm.COMMAND_ACTIVIT_TYPE);
+        byteBuffer.put(2, MisfitProtocol.Algorithm.COMMAND_ACTIVITY_TYPE);
         byteBuffer.put(3, activityType.getValue());
 
         mRequestData = byteBuffer.array();

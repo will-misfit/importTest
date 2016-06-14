@@ -406,6 +406,12 @@ public class ShineActivity extends BaseActivity {
                 CustomModeEnum.AnimNumber.TRIPLE_PRESS_SUCCEEDED, CustomModeEnum.KeyCode.MEDIA_VOLUME_UP_OR_SELFIE, true);
     }
 
+    @OnClick(R.id.btn_get_mapping_type)
+    void getMappingType() {
+        setMessage("GET MAPPING TYPE");
+        mService.getMappingType();
+    }
+
     @OnClick(R.id.btn_get_lap_counting_status)
     void startGettingLapCountingStatus() {
         setMessage("GET LAP COUNTING STATUS");
@@ -567,6 +573,8 @@ public class ShineActivity extends BaseActivity {
             R.id.btnShineToPluto,
             R.id.btnPlutoToBolt,
             R.id.btn_bmw,
+            R.id.btn_activity_type,
+            R.id.btn_get_mapping_type,
             R.id.btn_get_lap_counting_status,
             R.id.btn_set_lap_counting_license_info_ready,
             R.id.btn_set_lap_counting_license_info_not_ready,

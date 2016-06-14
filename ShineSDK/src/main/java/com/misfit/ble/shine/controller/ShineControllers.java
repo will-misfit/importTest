@@ -24,6 +24,7 @@ import com.misfit.ble.shine.request.GetExtraAdvDataStateRequest;
 import com.misfit.ble.shine.request.GetFlashButtonModeRequest;
 import com.misfit.ble.shine.request.GetGoalRequest;
 import com.misfit.ble.shine.request.GetLapCountingStatusRequest;
+import com.misfit.ble.shine.request.GetMappingTypeRequest;
 import com.misfit.ble.shine.request.GetTimeRequest;
 import com.misfit.ble.shine.request.GetTripleTapEnableRequest;
 import com.misfit.ble.shine.request.Request;
@@ -352,6 +353,32 @@ public class ShineControllers {
 						if (req instanceof GetActivityTypeRequest) {
 							GetActivityTypeRequest.Response response = (GetActivityTypeRequest.Response) req.getResponse();
 							hashTable.put(ShineProperty.ACTIVITY_TYPE, response.activityType);
+						}
+					}
+				}
+				configurationCallback.onConfigCompleted(phaseController.getActionID(), resultCode, hashTable);
+			}
+		});
+
+	}
+
+	public PhaseController getMappingType(final ShineProfile.ConfigurationCallback configurationCallback) {
+		final GetMappingTypeRequest request = new GetMappingTypeRequest();
+		request.buildRequest();
+		Request[] requests = {request};
+
+		return new ControllerBuilder(ActionID.GET_MAPPING_TYPE,
+				LogEventItem.EVENT_GET_MAPPING_TYPE,
+				Arrays.asList(requests),
+				mPhaseControllerCallback, new ControllerBuilder.Callback() {
+			@Override
+			public void onCompleted(PhaseController phaseController, List<Request> requests, ShineProfile.ActionResult resultCode) {
+				Hashtable<ShineProperty, Object> hashTable = new Hashtable<>();
+				if (ShineProfile.ActionResult.SUCCEEDED == resultCode) {
+					for (Request req : requests) {
+						if (req instanceof GetMappingTypeRequest) {
+							GetMappingTypeRequest.Response response = (GetMappingTypeRequest.Response) req.getResponse();
+							hashTable.put(ShineProperty.MAPPING_TYPE, response.mappingType);
 						}
 					}
 				}
