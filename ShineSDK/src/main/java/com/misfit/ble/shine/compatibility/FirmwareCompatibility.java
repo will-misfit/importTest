@@ -47,6 +47,8 @@ public class FirmwareCompatibility {
 	        	minFirmwareVersion = "FL2.1.4r";
 	        } else if (firmwareVersion.startsWith("SV")) {
 				minFirmwareVersion = "SV0.1.11r";
+			} else if (firmwareVersion.startsWith("S2")) {
+				minFirmwareVersion = "S21.1.14r";
 			} else {
 	        	return false;
 	        }
