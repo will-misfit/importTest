@@ -197,19 +197,24 @@ public class SetConnectionParametersPhaseController extends PhaseController {
      * */
 	private Request buildSetConnectionParamsRequest() {
         double expectedInterval = mExpectedConnectionParameters.getConnectionInterval();
+		double delta = 0;
 
         if (!isConnectionIntervalAcceptable(expectedInterval, mCurrConnectionParameters.getConnectionInterval())) {
-            double delta = mNumOfSetActionAttempts * Constants.CONNECTION_INTERVAL_STEP;
-			mMinConnectionInterval = expectedInterval + delta;
-			mMaxConnectionInterval = mMinConnectionInterval +  Constants.CONNECTION_INTERVAL_STEP - 0.01f;
-        }
+            delta = mNumOfSetActionAttempts * Constants.CONNECTION_INTERVAL_STEP;
+		}
+		generateInterval(expectedInterval, delta);
 
 		SetConnectionParameterRequest setConnectionParameterRequest = new SetConnectionParameterRequest();
 		setConnectionParameterRequest.buildRequest(mMinConnectionInterval, mMaxConnectionInterval,
             mExpectedConnectionParameters.getConnectionLatency(), mExpectedConnectionParameters.getSupervisionTimeout());
 		return setConnectionParameterRequest;
 	}
-	
+
+	private void generateInterval(double expectedInterval, double delta) {
+		mMinConnectionInterval = expectedInterval + delta;
+		mMaxConnectionInterval = mMinConnectionInterval +  Constants.CONNECTION_INTERVAL_STEP - 0.01f;
+	}
+
 	@Override
 	public String getPhaseName() {
 		return "SetConnectionParametersPhase";
