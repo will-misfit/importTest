@@ -36,13 +36,25 @@ public class ScanLogSession {
 				LogManager.SESSION_NAME_COMPONENT_SEPARATOR,
 				System.identityHashCode(this));
 	}
-	
+
 	public void start(ShineScanCallback callback) {
 		mStartTime = System.currentTimeMillis();
 		
 		JSONObject json = new JSONObject();
 		try {
 			json.put("callback", Convertor.identity(callback));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		LogEventItem logEventItem = new LogEventItem(LogEventItem.EVENT_START_SCANNING);
+		logEventItem.mRequestStartedLog = new RequestStartedLog(json);
+		mLogItems.add(logEventItem);
+	}
+
+	public void startWithException(String exceptionMsg) {
+		JSONObject json = new JSONObject();
+		try {
+			json.put("ScanException", exceptionMsg);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

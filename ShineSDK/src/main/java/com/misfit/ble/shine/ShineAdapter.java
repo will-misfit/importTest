@@ -216,18 +216,20 @@ public final class ShineAdapter {
 
 	public boolean startScanning(final ShineScanCallback callback) throws IllegalStateException {
 		SDKSetting.validateSettings();
+		if (mScanLogSession == null) {
+			mScanLogSession = new ScanLogSession();
+		}
 		if (!isEnabled()) {
-			throw new IllegalStateException("Bluetooth is not enabled!");
+			mScanLogSession.startWithException("Bluetooth Disabled");
+			return false;
 		}
 
         if (mClientScanningOn.get()) {
+			mScanLogSession.startWithException("ClientScanningOn");
             return false;
         }
         mClientScanningOn.set(true);
 
-		if (mScanLogSession == null) {
-			mScanLogSession = new ScanLogSession();
-		}
 		mScanLogSession.start(callback);
 
 		LEScanCallbackWrapper wrapper = LEScanCallbackWrapper.getInstance(callback);
