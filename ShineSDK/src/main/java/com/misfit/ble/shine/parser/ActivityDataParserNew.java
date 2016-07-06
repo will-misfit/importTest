@@ -171,11 +171,20 @@ public class ActivityDataParserNew extends ActivityDataParser {
         mTapEventSummarys.add(new TapEventSummary(time, event, 1));
         return true;
     }
-	
+
+	/**
+	 * Get the length of specified entry.
+	 * @param entryType
+	 * @return the length of specified entry, include the entry type length
+     */
 	private int lengthOfEntry(short entryType) {
-		if (entryType < Constants.MIN_SPECIAL_ENTRY_CODE)
+		if (entryType < Constants.MIN_SPECIAL_ENTRY_CODE) {
 			return 2;
-		
+		}
+
+		if (mFileSpecialFieldsDataLength.get(entryType) == null) {
+			return 1;
+		}
 		return mFileSpecialFieldsDataLength.get(entryType) + 1;
 	}
 
