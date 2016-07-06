@@ -50,7 +50,7 @@ public class FirmwareCompatibility {
 			} else if (firmwareVersion.startsWith("S2")) {
 				minFirmwareVersion = "S21.1.14r";
 			} else if (firmwareVersion.startsWith("B0")) {
-				minFirmwareVersion = "B00.0.41r";
+				minFirmwareVersion = "B00.0.41";
 			} else {
 	        	return false;
 	        }
